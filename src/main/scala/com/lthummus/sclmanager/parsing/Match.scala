@@ -10,23 +10,33 @@ case class Match(replays: Iterable[Replay]) {
   val player1Score = orderedReplays.count(_.winnerName == player1)
   val player2Score = orderedReplays.count(_.winnerName == player2)
 
-  val groups = orderedReplays.grouped(2)
+
+  private def getSummaryForGroup(games: List[Replay]) = {
+    if (games.size == 1) {
+      val onlyGame = games.head
+      s"${onlyGame.winnerName} wins as ${onlyGame.winnerRole} on ${onlyGame.fullLevelName}"
+    } else {
+      val game1winner = games.head.winnerName
+      val game1winnerRole = games.head.winnerRole
+      val game2winner = games(1).winnerName
+      val game2winnerRole = games(1).winnerRole
+
+      (game1winner, game1winnerRole, game2winner, game2winnerRole) match {
+        case (_, "spy", _, "spy") => s"Spies win ${games.head.fullLevelName}"
+        case (_, "sniper", _, "sniper") => s"Snipers win ${games.head.fullLevelName}"
+        case _ => s"$game1winner sweeps ${games.head.fullLevelName}"
+      }
+    }
+
+  }
+
+  def getGameSummary = orderedReplays.grouped(2).map(getSummaryForGroup).toList
+
 
   println(s"Results for $player1 vs $player2")
   println()
 
-  for (levelRounds <- groups) {
-    if (levelRounds.size == 1) {
-      val onlyGame = levelRounds.head
-      println(s"${onlyGame.winnerName} wins as ${onlyGame.winnerRole} on ${onlyGame.fullLevelName}")
-    } else if (levelRounds(0).winnerName == levelRounds(1).winnerName) {
-      println(s"${levelRounds(0).winnerName} sweeps ${levelRounds(0).fullLevelName}")
-    } else if (levelRounds(0).spy == levelRounds(0).winnerName) {
-      println(s"Spies win ${levelRounds(0).fullLevelName}")
-    } else {
-      println(s"Snipers win ${levelRounds(0).fullLevelName}")
-    }
-  }
+  println(getGameSummary.mkString("\n"))
 
   println()
 

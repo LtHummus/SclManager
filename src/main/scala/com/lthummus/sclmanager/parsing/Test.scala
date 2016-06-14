@@ -19,7 +19,7 @@ object Test extends App {
     if (!entry.isDirectory) {
       val parsed = Replay.fromInputStream(new DataInputStream(zis))
       parsed match {
-        case -\/(_) => println("Could not parse replay: " + entry.getName)
+        case -\/(msg) => println("Could not parse replay: " + msg)
         case \/-(replay) => replays += replay
       }
     }
@@ -28,7 +28,8 @@ object Test extends App {
 
   zis.close()
 
-  Match(replays)
+  val m = Match(replays)
+
 
 
 }
