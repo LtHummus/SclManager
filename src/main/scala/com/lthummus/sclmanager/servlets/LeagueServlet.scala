@@ -4,7 +4,7 @@ import com.lthummus.sclmanager.SclManagerStack
 import com.lthummus.sclmanager.database.dao.LeagueDao
 import org.jooq.DSLContext
 import org.json4s.{DefaultFormats, Formats}
-import org.scalatra.Ok
+import org.scalatra.{NotFound, Ok}
 import org.scalatra.json.JacksonJsonSupport
 
 
@@ -17,5 +17,16 @@ class LeagueServlet(implicit dslContext: DSLContext) extends SclManagerStack wit
 
   get("/") {
     Ok(LeagueDao.all())
+  }
+
+  get("/:id") {
+    //TODO: error check the input
+    val league = LeagueDao.getById(params("id").toInt)
+
+    league match {
+      case None => NotFound(s"No league with id ${params("id")} found")
+      case Some(it) => Ok(it)
+    }
+
   }
 }
