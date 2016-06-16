@@ -1,16 +1,18 @@
 package com.lthummus.sclmanager
 
+import org.jooq.DSLContext
 import org.scalatra._
+import zzz.generated.Tables
 
-class SclManagerServlet extends SclManagerStack {
+class SclManagerServlet(implicit dslContext: DSLContext) extends SclManagerStack {
 
   get("/") {
-    <html>
-      <body>
-        <h1>Hello, world!</h1>
-        Say <a href="hello-scalate">hello to Scalate</a>.
-      </body>
-    </html>
+    val leagues = dslContext.selectFrom(Tables.LEAGUE).fetch()
+
+    leagues.size() match {
+      case 0 => NotFound("No leagues found")
+      case _ => Ok("First league is " + leagues.get(0).getName)
+    }
   }
 
 }

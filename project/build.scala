@@ -31,7 +31,16 @@ object SclManagerBuild extends Build {
         "org.eclipse.jetty" % "jetty-webapp" % "9.2.15.v20160210" % "container",
         "javax.servlet" % "javax.servlet-api" % "3.1.0" % "provided",
 
-        "org.scalaz" %% "scalaz-core" % "7.2.3"
+        // i am so functional right now
+        "org.scalaz" %% "scalaz-core" % "7.2.3",
+
+        // database bullshit
+        "org.jooq" % "jooq" % "3.8.2",
+        "mysql" % "mysql-connector-java" % "5.1.16",
+        "com.zaxxer" % "HikariCP" % "2.4.6",
+
+        // configuration
+        "com.typesafe" % "config" % "1.3.0"
 
       ),
       scalateTemplateConfig in Compile <<= (sourceDirectory in Compile){ base =>

@@ -32,20 +32,14 @@ case class Match(replays: Iterable[Replay]) {
 
   def getGameSummary = orderedReplays.grouped(2).map(getSummaryForGroup).toList
 
-
-  println(s"Results for $player1 vs $player2")
-  println()
-
-  println(getGameSummary.mkString("\n"))
-
-  println()
-
-  if (player1Score > player2Score) {
-    println(s"$player1 wins $player1Score-$player2Score")
-  } else if (player2Score > player1Score) {
-    println(s"$player2 wins $player2Score-$player1Score")
-  } else {
-    println("TieParty 4-4")
+  def getScoreLine = {
+    if (player1Score > player2Score) {
+      s"$player1 wins $player1Score-$player2Score"
+    } else if (player2Score > player1Score) {
+      s"$player2 wins $player2Score-$player1Score"
+    } else {
+      "TieParty 4-4"
+    }
   }
 
 }

@@ -30,6 +30,10 @@ object Test extends App {
 
   val m = Match(replays)
 
+  println(m.getScoreLine)
+
+  println()
+  println(m.getGameSummary mkString "\n")
 
 
 }
