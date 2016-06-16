@@ -28,6 +28,5 @@ class LeagueServlet(implicit dslContext: DSLContext) extends SclManagerStack wit
       case None => NotFound(s"No league with id ${params("id")} found")
       case Some(it) => Ok(Map("league" -> it, "players" -> players)) //TODO: combine JSON
     }
-
   }
 }

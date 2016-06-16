@@ -8,7 +8,7 @@ import scalaz.{-\/, \/-}
 
 object Test extends App {
 
-  val zipPath = "E:\\magic.zip"
+  val zipPath = "F:\\SpyPartyReplay-20160611-17-03-00-krazycaley-vs-magician1099-QFaOf6HZRFubm3LBicu27Q-v18.zip"
 
   val zis = new ZipInputStream(new FileInputStream(zipPath))
 

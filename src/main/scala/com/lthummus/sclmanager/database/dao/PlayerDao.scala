@@ -30,4 +30,17 @@ object PlayerDao {
       .map(Player.fromDatabaseRecord)
   }
 
+  def getPlayerByName(name: String)(implicit dslContext: DSLContext): Option[Player] = {
+    val res = dslContext
+      .selectFrom(Tables.PLAYER)
+      .where(Tables.PLAYER.NAME.eq(name.toLowerCase))
+      .fetch()
+      .toList
+
+    res.size match {
+      case 0 => None
+      case _ => Some(Player.fromDatabaseRecord(res.get(0)))
+    }
+  }
+
 }
