@@ -51,7 +51,19 @@ case class GameType(kind: GameLoadoutType, x: Int, y: Int) {
 }
 
 object GameType {
-  def fromInt(value: Int) = {
+  def fromString(value: String): String \/ GameType = {
+    val kind = value.charAt(0)
+    val x = value.charAt(1)
+
+    kind match {
+      case 'k' => GameType(GameLoadoutType.Known, x.toInt, 0).right
+      case 'a' => GameType(GameLoadoutType.Any, x.toInt, value.charAt(3)).right
+      case 'p' => GameType(GameLoadoutType.Pick, x.toInt, value.charAt(3)).right
+      case _ => "Unknown game type format".left
+    }
+  }
+
+  def fromInt(value: Int): String \/ GameType = {
     val mode = value >> 28
     val y = (value & 0x0FFFC000) >> 14
     val x = value & 0x00003FFF
@@ -59,7 +71,6 @@ object GameType {
     for {
       gameType <- GameLoadoutType.fromInt(mode)
     } yield GameType(gameType, x, y)
-
   }
 }
 

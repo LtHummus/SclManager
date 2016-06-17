@@ -28,7 +28,7 @@ object Test extends App {
 
   zis.close()
 
-  val m = Match(replays)
+  val m = Bout(replays)
 
   println(m.getScoreLine)
 

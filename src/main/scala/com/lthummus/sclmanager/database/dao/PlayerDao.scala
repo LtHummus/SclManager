@@ -43,4 +43,12 @@ object PlayerDao {
     }
   }
 
+  def getNumberOfMatchesPlayed(id: Int)(implicit dslContext: DSLContext): Int = {
+    dslContext
+      .selectCount()
+      .from(Tables.MATCH)
+      .where(Tables.MATCH.PLAYER1.eq(id))
+      .or(Tables.MATCH.PLAYER2.eq(id)).fetchOne(0, classOf[Int])
+  }
+
 }

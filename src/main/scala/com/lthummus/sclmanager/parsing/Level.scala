@@ -1,5 +1,8 @@
 package com.lthummus.sclmanager.parsing
 
+import scalaz._
+import Scalaz._
+
 /*
 0x3A30C326": //"Beginner v. Beginner High-Rise",
 0x5996FAAA": //"Beginner v. Beginner Ballroom",
@@ -38,4 +41,13 @@ object Level {
     Level("Modern", -0xC19EB9F),
     Level("Pub", 0x3B85FFF3)
   )
+
+  def getLevelByName(name: String): String \/ Level = {
+    val results = AllLevels.filter(_.name == name)
+    results.size match {
+      case 0 => s"No map found with the name $name".left
+      case 1 => results.head.right
+      case _ => s"Multiple maps found with the name $name".left
+    }
+  }
 }

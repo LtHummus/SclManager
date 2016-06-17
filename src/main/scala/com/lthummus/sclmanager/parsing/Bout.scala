@@ -1,7 +1,7 @@
 package com.lthummus.sclmanager.parsing
 
 
-case class Match(replays: Iterable[Replay]) {
+case class Bout(replays: Iterable[Replay]) {
   val orderedReplays = replays.filter(_.isCompleted).toList.sorted
 
   val player1 = orderedReplays.head.spy

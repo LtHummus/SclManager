@@ -9,7 +9,7 @@ import Scalaz._
 
 object SpyPartyZipParser {
 
-  def parseZipStream(is: InputStream): String \/ Match = {
+  def parseZipStream(is: InputStream): String \/ Bout = {
     val zis = new ZipInputStream(is)
 
     val replays = scala.collection.mutable.ListBuffer[Replay]()
@@ -28,6 +28,6 @@ object SpyPartyZipParser {
 
     zis.close()
 
-    Match(replays).right
+    Bout(replays).right
   }
 }
