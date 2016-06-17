@@ -4,6 +4,7 @@ import com.lthummus.sclmanager.database.data.Game
 import com.lthummus.sclmanager.parsing.Replay
 import org.jooq.DSLContext
 import zzz.generated.Tables
+import zzz.generated.tables.records.GameRecord
 
 import scala.collection.JavaConverters._
 import scalaz._
@@ -25,5 +26,9 @@ object GameDao {
     else
       "Could not decode all replays".left
 
+  }
+
+  def persistBatchRecords(records: List[GameRecord])(implicit dslContext: DSLContext) = {
+    dslContext.batchInsert(records.asJava).execute()
   }
 }

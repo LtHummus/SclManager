@@ -89,7 +89,7 @@ object Keys {
   private object ForeignKeys0 extends AbstractKeys {
     val FK_SPY : ForeignKey[GameRecord, PlayerRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_PLAYER_PRIMARY, Game.GAME, "fk_spy", Game.GAME.SPY)
     val FK_SNIPER : ForeignKey[GameRecord, PlayerRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_PLAYER_PRIMARY, Game.GAME, "fk_sniper", Game.GAME.SNIPER)
-    val FK_MATCH : ForeignKey[GameRecord, PlayerRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_PLAYER_PRIMARY, Game.GAME, "fk_match", Game.GAME.MATCH)
+    val FK_MATCH : ForeignKey[GameRecord, MatchRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_MATCH_PRIMARY, Game.GAME, "fk_match", Game.GAME.MATCH)
     val FK_LEAGUE : ForeignKey[MatchRecord, LeagueRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_LEAGUE_PRIMARY, Match.MATCH, "fk_league", Match.MATCH.LEAGUE)
     val FK_PLAYER1 : ForeignKey[MatchRecord, PlayerRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_PLAYER_PRIMARY, Match.MATCH, "fk_player1", Match.MATCH.PLAYER1)
     val FK_PLAYER2 : ForeignKey[MatchRecord, PlayerRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_PLAYER_PRIMARY, Match.MATCH, "fk_player2", Match.MATCH.PLAYER2)

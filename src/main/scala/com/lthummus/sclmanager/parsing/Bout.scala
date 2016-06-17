@@ -38,7 +38,7 @@ case class Bout(replays: Iterable[Replay]) {
     } else if (player2Score > player1Score) {
       s"$player2 wins $player2Score-$player1Score"
     } else {
-      "TieParty 4-4"
+      s"TieParty $player1Score-$player2Score"
     }
   }
 

@@ -88,12 +88,12 @@ class Game(alias : String, aliased : Table[GameRecord], parameters : Array[ Fiel
   /**
    * The column <code>scl.game.level</code>.
    */
-  val LEVEL : TableField[GameRecord, Integer] = createField("level", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), "")
+  val LEVEL : TableField[GameRecord, String] = createField("level", org.jooq.impl.SQLDataType.CLOB.nullable(false), "")
 
   /**
    * The column <code>scl.game.gameType</code>.
    */
-  val GAMETYPE : TableField[GameRecord, Integer] = createField("gameType", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), "")
+  val GAMETYPE : TableField[GameRecord, String] = createField("gameType", org.jooq.impl.SQLDataType.CLOB.nullable(false), "")
 
   /**
    * Create a <code>scl.game</code> table reference

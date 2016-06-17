@@ -48,7 +48,7 @@ object MatchDao {
     }
   }
 
-  private def buildNameDecoder(player1: Player, player2: Player) = {
+  private def buildNameDecoder(player1: Player, player2: Player): PartialFunction[Int, String] = {
     new PartialFunction[Int, String] {
       def apply(id: Int) = {
         if (id == player1.id)
@@ -63,9 +63,9 @@ object MatchDao {
 
   def getBoutData(matchId: Int)(implicit dslContext: DSLContext): String \/ Bout = {
     for {
-      matchData <- getById(matchId)
-      player1 <- PlayerDao.getByPlayerId(matchData.player1)
-      player2 <- PlayerDao.getByPlayerId(matchData.player2)
+      matchData <- getById(matchId).toRightDisjunction(s"No match found with id $matchId")
+      player1 <- PlayerDao.getByPlayerId(matchData.player1).toRightDisjunction(s"No player found with id ${matchData.player1}")
+      player2 <- PlayerDao.getByPlayerId(matchData.player2).toRightDisjunction(s"No player found with id ${matchData.player2}")
       gameList <- GameDao.getGamesByMatchId(matchId, buildNameDecoder(player1, player2))
     } yield Bout(gameList)
   }

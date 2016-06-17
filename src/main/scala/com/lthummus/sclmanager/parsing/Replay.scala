@@ -26,6 +26,17 @@ object GameResult extends Enumeration {
       case _ => s"Unknown game result type: $value".left
     }
   }
+
+  def toInt(value: GameResult) = {
+    value match {
+      case MissionWin => 0
+      case SpyTimeout => 1
+      case SpyShot => 2
+      case CivilianShot => 3
+      case InProgress => 4
+      case _ => ???
+    }
+  }
 }
 
 object GameLoadoutType extends Enumeration {
@@ -53,12 +64,12 @@ case class GameType(kind: GameLoadoutType, x: Int, y: Int) {
 object GameType {
   def fromString(value: String): String \/ GameType = {
     val kind = value.charAt(0)
-    val x = value.charAt(1)
+    val x = value.charAt(1) - 0x30
 
     kind match {
-      case 'k' => GameType(GameLoadoutType.Known, x.toInt, 0).right
-      case 'a' => GameType(GameLoadoutType.Any, x.toInt, value.charAt(3)).right
-      case 'p' => GameType(GameLoadoutType.Pick, x.toInt, value.charAt(3)).right
+      case 'k' => GameType(GameLoadoutType.Known, x, 0).right
+      case 'a' => GameType(GameLoadoutType.Any, x, value.charAt(3) - 0x30).right
+      case 'p' => GameType(GameLoadoutType.Pick, x, value.charAt(3) - 0x30).right
       case _ => "Unknown game type format".left
     }
   }
