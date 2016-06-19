@@ -1,26 +1,26 @@
 package com.lthummus.sclmanager.database.dao
 
-import com.lthummus.sclmanager.database.data.{Match, Player}
 import com.lthummus.sclmanager.parsing.Bout
 import org.jooq.DSLContext
 import zzz.generated.Tables
+import zzz.generated.tables.records.{MatchRecord, PlayerRecord}
 
 import scala.collection.JavaConversions._
 import scalaz._
 import Scalaz._
 
 object MatchDao {
-  def getById(id: Int)(implicit dslContext: DSLContext): Option[Match] = {
+  def getById(id: Int)(implicit dslContext: DSLContext): Option[MatchRecord] = {
     val res = dslContext.selectFrom(Tables.MATCH).where(Tables.MATCH.ID.eq(id)).fetch()
 
     res.size() match {
       case 0 => None
-      case _ => Some(Match.fromDatabaseObject(res.get(0)))
+      case _ => Some(res(0))
     }
   }
 
-  def getOutstandingMatchesFromLeague(id: Int)(implicit dslContext: DSLContext) = {
-    dslContext.selectFrom(Tables.MATCH).where(Tables.MATCH.STATUS.eq(0)).toList.map(Match.fromDatabaseObject)
+  def getOutstandingMatchesFromLeague(id: Int)(implicit dslContext: DSLContext): List[MatchRecord] = {
+    dslContext.selectFrom(Tables.MATCH).where(Tables.MATCH.STATUS.eq(0)).toList
   }
 
   def getNextToBePlayedByPlayers(player1: Int, player2: Int)(implicit dslContext: DSLContext) = {
@@ -44,20 +44,20 @@ object MatchDao {
 
     matchesFound.size match {
       case 0 => None
-      case _ => Some(matchesFound.map(Match.fromDatabaseObject).sorted.head)
+      case _ => Some(matchesFound.sortWith(_.getWeek < _.getWeek).head)
     }
   }
 
-  private def buildNameDecoder(player1: Player, player2: Player): PartialFunction[Int, String] = {
+  private def buildNameDecoder(player1: PlayerRecord, player2: PlayerRecord): PartialFunction[Int, String] = {
     new PartialFunction[Int, String] {
       def apply(id: Int) = {
-        if (id == player1.id)
-          player1.name
+        if (id == player1.getId)
+          player1.getName
         else
-          player2.name
+          player2.getName
       }
 
-      def isDefinedAt(id: Int) = id == player1.id || id == player2.id
+      def isDefinedAt(id: Int) = id == player1.getId || id == player2.getId
     }
   }
 

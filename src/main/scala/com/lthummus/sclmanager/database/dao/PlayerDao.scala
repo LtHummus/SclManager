@@ -1,36 +1,35 @@
 package com.lthummus.sclmanager.database.dao
 
-import com.lthummus.sclmanager.database.data.Player
 import org.jooq.DSLContext
 import zzz.generated.Tables
+import zzz.generated.tables.records.PlayerRecord
 
 import scala.collection.JavaConversions._
 
 object PlayerDao {
 
   def all()(implicit dslContext: DSLContext) = {
-    dslContext.selectFrom(Tables.PLAYER).fetch().toList.map(Player.fromDatabaseRecord)
+    dslContext.selectFrom(Tables.PLAYER).fetch().toList
   }
 
-  def getByPlayerId(id: Int)(implicit dslContext: DSLContext): Option[Player] = {
+  def getByPlayerId(id: Int)(implicit dslContext: DSLContext): Option[PlayerRecord] = {
     val res = dslContext.selectFrom(Tables.PLAYER).where(Tables.PLAYER.ID.eq(id)).fetch()
 
     res.size() match {
       case 0 => None
-      case _ => Some(Player.fromDatabaseRecord(res.get(0)))
+      case _ => Some(res.get(0))
     }
   }
 
-  def getByLeagueId(id: Int)(implicit dslContext: DSLContext): List[Player] = {
+  def getByLeagueId(id: Int)(implicit dslContext: DSLContext): List[PlayerRecord] = {
     dslContext
       .selectFrom(Tables.PLAYER)
       .where(Tables.PLAYER.LEAGUE.eq(id))
       .fetch()
       .toList
-      .map(Player.fromDatabaseRecord)
   }
 
-  def getPlayerByName(name: String)(implicit dslContext: DSLContext): Option[Player] = {
+  def getPlayerByName(name: String)(implicit dslContext: DSLContext): Option[PlayerRecord] = {
     val res = dslContext
       .selectFrom(Tables.PLAYER)
       .where(Tables.PLAYER.NAME.eq(name.toLowerCase))
@@ -39,7 +38,7 @@ object PlayerDao {
 
     res.size match {
       case 0 => None
-      case _ => Some(Player.fromDatabaseRecord(res.get(0)))
+      case _ => Some(res.get(0))
     }
   }
 
