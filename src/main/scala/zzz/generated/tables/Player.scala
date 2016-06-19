@@ -71,6 +71,26 @@ class Player(alias : String, aliased : Table[PlayerRecord], parameters : Array[ 
   val LEAGUE : TableField[PlayerRecord, Integer] = createField("league", org.jooq.impl.SQLDataType.INTEGER.nullable(false), "")
 
   /**
+   * The column <code>scl.player.wins</code>.
+   */
+  val WINS : TableField[PlayerRecord, Integer] = createField("wins", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), "")
+
+  /**
+   * The column <code>scl.player.draws</code>.
+   */
+  val DRAWS : TableField[PlayerRecord, Integer] = createField("draws", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), "")
+
+  /**
+   * The column <code>scl.player.losses</code>.
+   */
+  val LOSSES : TableField[PlayerRecord, Integer] = createField("losses", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), "")
+
+  /**
+   * The column <code>scl.player.matches_played</code>.
+   */
+  val MATCHES_PLAYED : TableField[PlayerRecord, Integer] = createField("matches_played", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), "")
+
+  /**
    * Create a <code>scl.player</code> table reference
    */
   def this() = {

@@ -86,6 +86,11 @@ class Match(alias : String, aliased : Table[MatchRecord], parameters : Array[ Fi
   val STATUS : TableField[MatchRecord, Integer] = createField("status", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), "")
 
   /**
+   * The column <code>scl.match.winner</code>.
+   */
+  val WINNER : TableField[MatchRecord, Integer] = createField("winner", org.jooq.impl.SQLDataType.INTEGER.nullable(false), "")
+
+  /**
    * Create a <code>scl.match</code> table reference
    */
   def this() = {
@@ -118,7 +123,7 @@ class Match(alias : String, aliased : Table[MatchRecord], parameters : Array[ Fi
   }
 
   override def getReferences : List[ ForeignKey[MatchRecord, _] ] = {
-    return Arrays.asList[ ForeignKey[MatchRecord, _] ](Keys.FK_LEAGUE, Keys.FK_PLAYER1, Keys.FK_PLAYER2)
+    return Arrays.asList[ ForeignKey[MatchRecord, _] ](Keys.FK_LEAGUE, Keys.FK_PLAYER1, Keys.FK_PLAYER2, Keys.FK_WINNER)
   }
 
   override def as(alias : String) : Match = {
