@@ -21,6 +21,13 @@ object GameDao {
     }
   }
 
+  implicit class ConvertableFromReplay(replay: Replay) {
+    def toDatabase(matchId: Int, idResolver: PartialFunction[String, Int]) = {
+      new GameRecord(null, idResolver(replay.spy), idResolver(replay.sniper), matchId, GameResult.toInt(replay.result),replay.sequence, replay.level.name, replay.loadoutType.toString)
+    }
+  }
+
+
   def getGamesByMatchId(matchId: Int, nameDecoder: PartialFunction[Int, String])(implicit dslContext: DSLContext): String \/ List[Replay] = {
     val res = dslContext
       .selectFrom(Tables.GAME)

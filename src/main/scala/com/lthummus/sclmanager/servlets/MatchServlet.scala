@@ -2,13 +2,15 @@ package com.lthummus.sclmanager.servlets
 
 import com.lthummus.sclmanager.SclManagerStack
 import com.lthummus.sclmanager.database.dao.{GameDao, MatchDao, PlayerDao}
-import com.lthummus.sclmanager.database.data.{Game, Player}
 import com.lthummus.sclmanager.parsing.{Bout, SpyPartyZipParser}
 import org.jooq.DSLContext
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.{BadRequest, NotFound, Ok}
 import org.scalatra.json.JacksonJsonSupport
 import org.scalatra.servlet.{FileUploadSupport, MultipartConfig}
+import zzz.generated.tables.records.PlayerRecord
+
+import com.lthummus.sclmanager.database.dao.GameDao._
 
 import scalaz._
 import Scalaz._
@@ -23,14 +25,17 @@ class MatchServlet(implicit dslContext: DSLContext) extends SclManagerStack with
     contentType = formats("json")
   }
 
-  private def generateIdResolver(player1: Player, player2: Player) = {
+  private def generateIdResolver(player1: PlayerRecord, player2: PlayerRecord) = {
     new PartialFunction[String, Int] {
-      override def isDefinedAt(x: String): Boolean = x == player1.name || x == player2.name
+      val player1Name = player1.getName
+      val player2Name = player2.getName
+
+      override def isDefinedAt(x: String): Boolean = x == player1.getName || x == player2.getName
 
       override def apply(x: String): Int = {
         x match {
-          case player1.name => player1.id
-          case player2.name => player2.id
+          case `player1Name` => player1.getId
+          case `player2Name` => player2.getId
           case _ => ???
         }
       }
@@ -42,8 +47,8 @@ class MatchServlet(implicit dslContext: DSLContext) extends SclManagerStack with
       player1 <- PlayerDao.getPlayerByName(bout.player1).toRightDisjunction(s"No player found with name ${bout.player1}")
       player2 <- PlayerDao.getPlayerByName(bout.player2).toRightDisjunction(s"No player found with name ${bout.player2}")
       resolver = generateIdResolver(player1, player2)
-      matchObj <- MatchDao.getNextToBePlayedByPlayers(player1.id, player2.id).toRightDisjunction(s"No match found between these players")
-    } yield bout.orderedReplays.map(Game.toDb(_, matchObj.id, resolver))
+      matchObj <- MatchDao.getNextToBePlayedByPlayers(player1.getId, player2.getId).toRightDisjunction(s"No match found between these players")
+    } yield bout.orderedReplays.map(_.toDatabase(matchObj.getId, resolver))
 
     records match {
       case -\/(error) => BadRequest(error)
@@ -70,7 +75,7 @@ class MatchServlet(implicit dslContext: DSLContext) extends SclManagerStack with
     val result = for {
       player1Obj <- PlayerDao.getPlayerByName(player1)
       player2Obj <- PlayerDao.getPlayerByName(player2)
-      matchObj <- MatchDao.getNextToBePlayedByPlayers(player1Obj.id, player2Obj.id)
+      matchObj <- MatchDao.getNextToBePlayedByPlayers(player1Obj.getId, player2Obj.getId)
     } yield matchObj
 
 

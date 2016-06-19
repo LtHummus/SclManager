@@ -1,5 +1,12 @@
 package com.lthummus.sclmanager.util
 
+import com.lthummus.sclmanager.database.DatabaseConfigurator
+import com.lthummus.sclmanager.database.dao.{LeagueDao, PlayerDao}
+import org.jooq.DSLContext
+import zzz.generated.tables.records.{LeagueRecord, MatchRecord, PlayerRecord}
+import zzz.generated.Tables
+
+import scala.collection.JavaConverters._
 
 object LeagueGenerator extends App {
   type PlayerName = String
@@ -14,6 +21,8 @@ object LeagueGenerator extends App {
   )
   val NumberOfTimesEveryonePlaysEachOther = 2
 
+  implicit val Db: DSLContext = DatabaseConfigurator.getDslContext
+
   def generatePairs(players: Seq[PlayerName]) = {
     players.ensuring(_.length == 6)
     List((players(0),players(5)),
@@ -24,16 +33,18 @@ object LeagueGenerator extends App {
   private def rotate(xs: Seq[PlayerName], amount: Int) = xs.drop(amount) ++ xs.take(amount)
 
   def generateWeeklySchedule(players: Seq[PlayerName]) = {
-    val anchor = Seq(players.head)
-    val everyoneElse = players.tail
+    val shuffledPlayers = scala.util.Random.shuffle(players)
 
-    for (x <- 0 until players.length - 1) yield
+    val anchor = Seq(shuffledPlayers.head)
+    val everyoneElse = shuffledPlayers.tail
+
+    for (x <- 0 until shuffledPlayers.length - 1) yield
       generatePairs(anchor ++ rotate(everyoneElse, x))
 
   }
 
   def generateMatches(leagues: Seq[League]) = {
-    leagues.map(it => (it, generateWeeklySchedule(it.players)))
+    leagues.map(it => (it, generateWeeklySchedule(it.players) ++ generateWeeklySchedule(it.players)))
   }
 
   def populateWeekMatches(league: League, week: Int, matches: Iterable[(PlayerName, PlayerName)]) = {
@@ -43,13 +54,33 @@ object LeagueGenerator extends App {
     }
   }
 
+  def persistLeagueData(league: League, matches: Seq[List[(String, String)]]) = {
+    //step 1: create the league
+
+    val leagueRecord = new LeagueRecord(null, league.name)
+    Db.executeInsert(leagueRecord)
+
+    val leagueId = Db.selectFrom(Tables.LEAGUE).where(Tables.LEAGUE.NAME.eq(league.name)).fetch().asScala.head.getId
+
+    //step 2: insert the players
+    val playerRecords = league.players.map(new PlayerRecord(null, _, leagueId, 0, 0, 0, 0))
+    Db.batchInsert(playerRecords.asJava).execute()
+
+    val playerMap = PlayerDao.getByLeagueId(leagueId).map(it => (it.getName, it.getId)).toMap
+
+    //step 3: insert all the matches
+    for (week <- matches.indices) {
+      val thisWeek = matches(week)
+      val matchRecords = thisWeek.map(it => new MatchRecord(null, week + 1, leagueId, playerMap(it._1), playerMap(it._2), 0, null))
+      Db.batchInsert(matchRecords.asJava).execute()
+    }
+  }
+
   val allLeaguesXMatches = generateMatches(Leagues)
 
 
   for {(league, matches) <- allLeaguesXMatches} {
-    for (week <- matches.indices) {
-      populateWeekMatches(league, week + 1, matches(week))
-    }
+    persistLeagueData(league, matches)
   }
 
 }
