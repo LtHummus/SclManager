@@ -10,6 +10,17 @@ case class Bout(replays: Iterable[Replay]) {
   val player1Score = orderedReplays.count(_.winnerName == player1)
   val player2Score = orderedReplays.count(_.winnerName == player2)
 
+  def pointsForPlayer(playerName: String): Int = {
+    val ourScore = if (player1 == playerName) player1Score else player2Score
+    val theirScore = if (player1 == playerName) player2Score else player1Score
+
+    (ourScore, theirScore) match {
+      //TODO: read this from config
+      case (x, y) if x == y => 1
+      case (x, y) if x > y => 2
+      case _ => 0
+    }
+  }
 
   private def getSummaryForGroup(games: List[Replay]) = {
     if (games.size == 1) {

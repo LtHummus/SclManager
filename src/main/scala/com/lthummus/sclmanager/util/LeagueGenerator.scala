@@ -23,11 +23,11 @@ object LeagueGenerator extends App {
 
   implicit val Db: DSLContext = DatabaseConfigurator.getDslContext
 
-  def generatePairs(players: Seq[PlayerName]) = {
-    players.ensuring(_.length == 6)
-    List((players(0),players(5)),
-      (players(1), players(4)),
-      (players(2), players(3)))
+  def generatePairs(players: Seq[PlayerName]): List[(PlayerName, PlayerName)] = {
+    players.ensuring(_.length % 2 == 0)
+    val reversedPlayers = players.reverse
+    for (x <- 0 until players.length / 2)
+      yield (players(x), reversedPlayers(x))
   }
 
   private def rotate(xs: Seq[PlayerName], amount: Int) = xs.drop(amount) ++ xs.take(amount)
