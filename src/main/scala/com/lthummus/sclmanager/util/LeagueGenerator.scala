@@ -26,8 +26,8 @@ object LeagueGenerator extends App {
   def generatePairs(players: Seq[PlayerName]): List[(PlayerName, PlayerName)] = {
     players.ensuring(_.length % 2 == 0)
     val reversedPlayers = players.reverse
-    for (x <- 0 until players.length / 2)
-      yield (players(x), reversedPlayers(x))
+    (for (x <- 0 until players.length / 2)
+      yield (players(x), reversedPlayers(x))).toList
   }
 
   private def rotate(xs: Seq[PlayerName], amount: Int) = xs.drop(amount) ++ xs.take(amount)
@@ -63,7 +63,7 @@ object LeagueGenerator extends App {
     val leagueId = Db.selectFrom(Tables.LEAGUE).where(Tables.LEAGUE.NAME.eq(league.name)).fetch().asScala.head.getId
 
     //step 2: insert the players
-    val playerRecords = league.players.map(new PlayerRecord(null, _, leagueId, 0, 0, 0, 0))
+    val playerRecords = league.players.map(new PlayerRecord(null, _, leagueId, 0, 0, 0))
     Db.batchInsert(playerRecords.asJava).execute()
 
     val playerMap = PlayerDao.getByLeagueId(leagueId).map(it => (it.getName, it.getId)).toMap

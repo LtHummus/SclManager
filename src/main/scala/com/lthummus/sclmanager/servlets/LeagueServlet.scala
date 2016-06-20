@@ -2,6 +2,7 @@ package com.lthummus.sclmanager.servlets
 
 import com.lthummus.sclmanager.SclManagerStack
 import com.lthummus.sclmanager.database.dao.{LeagueDao, PlayerDao}
+import com.lthummus.sclmanager.servlets.dto.{League, LeagueList}
 import org.jooq.DSLContext
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.{NotFound, Ok}
@@ -16,7 +17,7 @@ class LeagueServlet(implicit dslContext: DSLContext) extends SclManagerStack wit
   }
 
   get("/") {
-    Ok(LeagueDao.all())
+    Ok(LeagueList(LeagueDao.all().map(League.fromDatabaseRecord)))
   }
 
   get("/:id") {
@@ -26,7 +27,7 @@ class LeagueServlet(implicit dslContext: DSLContext) extends SclManagerStack wit
 
     league match {
       case None => NotFound(s"No league with id ${params("id")} found")
-      case Some(it) => Ok(Map("league" -> it, "players" -> players)) //TODO: combine JSON
+      case Some(it) => Ok(League.fromDatabaseRecord(it, players))
     }
   }
 }

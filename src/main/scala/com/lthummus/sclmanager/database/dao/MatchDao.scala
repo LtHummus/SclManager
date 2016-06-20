@@ -63,9 +63,9 @@ object MatchDao {
 
   def getBoutData(matchId: Int)(implicit dslContext: DSLContext): String \/ Bout = {
     for {
-      matchData <- getById(matchId).toRightDisjunction(s"No match found with id $matchId")
-      player1 <- PlayerDao.getByPlayerId(matchData.getPlayer1).toRightDisjunction(s"No player found with id ${matchData.getPlayer1}")
-      player2 <- PlayerDao.getByPlayerId(matchData.getPlayer2).toRightDisjunction(s"No player found with id ${matchData.getPlayer2}")
+      matchData <- getById(matchId) \/> s"No match found with id $matchId"
+      player1 <- PlayerDao.getByPlayerId(matchData.getPlayer1) \/> s"No player found with id ${matchData.getPlayer1}"
+      player2 <- PlayerDao.getByPlayerId(matchData.getPlayer2) \/> s"No player found with id ${matchData.getPlayer2}"
       gameList <- GameDao.getGamesByMatchId(matchId, buildNameDecoder(player1, player2))
     } yield Bout(gameList)
   }

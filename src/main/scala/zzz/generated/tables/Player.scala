@@ -86,11 +86,6 @@ class Player(alias : String, aliased : Table[PlayerRecord], parameters : Array[ 
   val LOSSES : TableField[PlayerRecord, Integer] = createField("losses", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), "")
 
   /**
-   * The column <code>scl.player.matches_played</code>.
-   */
-  val MATCHES_PLAYED : TableField[PlayerRecord, Integer] = createField("matches_played", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), "")
-
-  /**
    * Create a <code>scl.player</code> table reference
    */
   def this() = {

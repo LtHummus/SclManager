@@ -1,5 +1,7 @@
 package com.lthummus.sclmanager.parsing
 
+import com.typesafe.config.ConfigFactory
+
 
 case class Bout(replays: Iterable[Replay]) {
   val orderedReplays = replays.filter(_.isCompleted).toList.sorted
@@ -15,10 +17,9 @@ case class Bout(replays: Iterable[Replay]) {
     val theirScore = if (player1 == playerName) player2Score else player1Score
 
     (ourScore, theirScore) match {
-      //TODO: read this from config
-      case (x, y) if x == y => 1
-      case (x, y) if x > y => 2
-      case _ => 0
+      case (x, y) if x == y => Bout.PointsForDraw
+      case (x, y) if x > y => Bout.PointsForWin
+      case _ => Bout.PointsForLoss
     }
   }
 
@@ -52,5 +53,12 @@ case class Bout(replays: Iterable[Replay]) {
       s"TieParty $player1Score-$player2Score"
     }
   }
+}
 
+object Bout {
+  val Config = ConfigFactory.load()
+
+  val PointsForWin = Config.getInt("tournament.pointsPerWin")
+  val PointsForDraw = Config.getInt("tournament.pointsPerDraw")
+  val PointsForLoss = Config.getInt("tournament.pointsPerLoss")
 }

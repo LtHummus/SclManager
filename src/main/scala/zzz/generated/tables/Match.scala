@@ -88,7 +88,7 @@ class Match(alias : String, aliased : Table[MatchRecord], parameters : Array[ Fi
   /**
    * The column <code>scl.match.winner</code>.
    */
-  val WINNER : TableField[MatchRecord, Integer] = createField("winner", org.jooq.impl.SQLDataType.INTEGER.nullable(false), "")
+  val WINNER : TableField[MatchRecord, Integer] = createField("winner", org.jooq.impl.SQLDataType.INTEGER, "")
 
   /**
    * Create a <code>scl.match</code> table reference

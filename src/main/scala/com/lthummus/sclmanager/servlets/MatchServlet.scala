@@ -9,8 +9,8 @@ import org.scalatra.{BadRequest, NotFound, Ok}
 import org.scalatra.json.JacksonJsonSupport
 import org.scalatra.servlet.{FileUploadSupport, MultipartConfig}
 import zzz.generated.tables.records.PlayerRecord
-
 import com.lthummus.sclmanager.database.dao.GameDao._
+import com.lthummus.sclmanager.servlets.dto.Match
 
 import scalaz._
 import Scalaz._
@@ -69,19 +69,26 @@ class MatchServlet(implicit dslContext: DSLContext) extends SclManagerStack with
   }
 
   get("/next/:player1/:player2") {
-    val player1 = params("player1")
-    val player2 = params("player2")
+    val player1Param = params("player1")
+    val player2Param = params("player2")
+
+    val player1Res = PlayerDao.getPlayerByName(player1Param)
+    val player2Res = PlayerDao.getPlayerByName(player2Param)
 
     val result = for {
-      player1Obj <- PlayerDao.getPlayerByName(player1)
-      player2Obj <- PlayerDao.getPlayerByName(player2)
+      player1Obj <- player1Res
+      player2Obj <- player2Res
       matchObj <- MatchDao.getNextToBePlayedByPlayers(player1Obj.getId, player2Obj.getId)
-    } yield matchObj
-
+    } yield (matchObj, player1Obj, player2Obj)
 
     result match {
       case None => NotFound("No match found")
-      case Some(it) => Ok(it)
+      case Some(it) =>
+        val m = it._1
+        val p1 = it._2
+        val p2 = it._3
+        val playerMap = Map(p1.getId -> p1, p2.getId -> p2)
+        Ok(Match.fromDatabaseRecordWithGames(m, None, playerMap))
     }
   }
 
