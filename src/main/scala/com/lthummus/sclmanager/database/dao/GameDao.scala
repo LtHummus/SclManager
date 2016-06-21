@@ -44,7 +44,11 @@ object GameDao {
 
   }
 
-  def persistBatchRecords(records: List[GameRecord])(implicit dslContext: DSLContext) = {
-    dslContext.batchInsert(records.asJava).execute()
+  def persistBatchRecords(records: List[GameRecord])(implicit dslContext: DSLContext): String \/ Array[Int] = {
+    try {
+      dslContext.batchInsert(records.asJava).execute().right
+    } catch {
+      case e: Throwable => e.getMessage.left
+    }
   }
 }

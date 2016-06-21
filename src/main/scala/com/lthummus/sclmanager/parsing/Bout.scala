@@ -2,8 +2,8 @@ package com.lthummus.sclmanager.parsing
 
 import com.typesafe.config.ConfigFactory
 
-
 case class Bout(replays: Iterable[Replay]) {
+
   val orderedReplays = replays.filter(_.isCompleted).toList.sorted
 
   val player1 = orderedReplays.head.spy
@@ -22,6 +22,19 @@ case class Bout(replays: Iterable[Replay]) {
       case _ => Bout.PointsForLoss
     }
   }
+
+  def result(playerName: String): String = {
+    val ourScore = if (player1 == playerName) player1Score else player2Score
+    val theirScore = if (player1 == playerName) player2Score else player1Score
+
+    (ourScore, theirScore) match {
+      case (x, y) if x == y => "draw"
+      case (x, y) if x > y => "win"
+      case _ => "loss"
+    }
+  }
+
+  def isTie = player1Score == player2Score
 
   private def getSummaryForGroup(games: List[Replay]) = {
     if (games.size == 1) {

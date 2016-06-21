@@ -69,4 +69,19 @@ object MatchDao {
       gameList <- GameDao.getGamesByMatchId(matchId, buildNameDecoder(player1, player2))
     } yield Bout(gameList)
   }
+
+  def markMatchAsPlayed(matchId: Int)(implicit dslContext: DSLContext): String \/ Int = {
+    val matchOption = getById(matchId)
+    try {
+      if (matchOption.isEmpty) {
+        s"No match found with id $matchId".left
+      } else {
+        val theMatch = matchOption.get
+        theMatch.setStatus(1)
+        theMatch.update().right
+      }
+    } catch {
+      case e: Throwable => e.getMessage.left
+    }
+  }
 }

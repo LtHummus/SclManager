@@ -5,10 +5,10 @@ import com.lthummus.sclmanager.database.dao.{GameDao, MatchDao, PlayerDao}
 import com.lthummus.sclmanager.parsing.{Bout, SpyPartyZipParser}
 import org.jooq.DSLContext
 import org.json4s.{DefaultFormats, Formats}
-import org.scalatra.{BadRequest, NotFound, Ok}
+import org.scalatra._
 import org.scalatra.json.JacksonJsonSupport
 import org.scalatra.servlet.{FileUploadSupport, MultipartConfig}
-import zzz.generated.tables.records.PlayerRecord
+import zzz.generated.tables.records.{GameRecord, PlayerRecord}
 import com.lthummus.sclmanager.database.dao.GameDao._
 import com.lthummus.sclmanager.servlets.dto.Match
 
@@ -42,7 +42,25 @@ class MatchServlet(implicit dslContext: DSLContext) extends SclManagerStack with
     }
   }
 
-  private def persistBout(bout: Bout) = {
+  private def updateScores(bout: Bout, games: List[GameRecord]): ActionResult = {
+    val player1Res = bout.result(bout.player1)
+    val player2Res = bout.result(bout.player2)
+
+    val fullUpdate = for {
+      player1Update <- PlayerDao.postResult(bout.player1, player1Res)
+      player2Update <- PlayerDao.postResult(bout.player2, player2Res)
+      boutPersist <- GameDao.persistBatchRecords(games)
+      markMatch <- MatchDao.markMatchAsPlayed(games.head.getMatch)
+    } yield markMatch
+
+
+    fullUpdate match {
+      case -\/(error) => InternalServerError(error)
+      case \/-(res) => Ok("match data posted successfully")
+    }
+  }
+
+  private def persistBout(bout: Bout): ActionResult = {
     val records = for {
       player1 <- PlayerDao.getPlayerByName(bout.player1).toRightDisjunction(s"No player found with name ${bout.player1}")
       player2 <- PlayerDao.getPlayerByName(bout.player2).toRightDisjunction(s"No player found with name ${bout.player2}")
@@ -52,7 +70,7 @@ class MatchServlet(implicit dslContext: DSLContext) extends SclManagerStack with
 
     records match {
       case -\/(error) => BadRequest(error)
-      case \/-(it) => Ok(GameDao.persistBatchRecords(it))
+      case \/-(it) => updateScores(bout, it)
     }
   }
 

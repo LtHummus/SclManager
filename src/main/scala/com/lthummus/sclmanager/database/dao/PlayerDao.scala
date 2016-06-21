@@ -6,6 +6,9 @@ import zzz.generated.tables.records.PlayerRecord
 
 import scala.collection.JavaConversions._
 
+import scalaz._
+import Scalaz._
+
 object PlayerDao {
 
   def all()(implicit dslContext: DSLContext) = {
@@ -48,6 +51,27 @@ object PlayerDao {
       .from(Tables.MATCH)
       .where(Tables.MATCH.PLAYER1.eq(id))
       .or(Tables.MATCH.PLAYER2.eq(id)).fetchOne(0, classOf[Int])
+  }
+
+  def postResult(name: String, result: String)(implicit dslContext: DSLContext): String \/ PlayerRecord = {
+
+    val player = getPlayerByName(name)
+
+    //TODO: update this from config
+    if (player.isEmpty) {
+      s"No player found with name $name".left
+    } else {
+      val unwrappedPlayer = player.get
+      result match {
+        case "win" => unwrappedPlayer.setWins(unwrappedPlayer.getWins + 1)
+        case "draw" => unwrappedPlayer.setDraws(unwrappedPlayer.getDraws + 1)
+        case "loss" => unwrappedPlayer.setLosses(unwrappedPlayer.getLosses + 1)
+      }
+
+      unwrappedPlayer.store()
+      unwrappedPlayer.right
+    }
+
   }
 
 }
