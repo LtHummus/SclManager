@@ -111,11 +111,11 @@ class MatchServlet(implicit dslContext: DSLContext) extends SclManagerStack with
   }
 
   get("/:id") {
-    val bout = MatchDao.getBoutData(params("id").toInt)
+    val bout = MatchDao.getFullMatchRecords(params("id").toInt)
 
     bout match {
       case -\/(error) => BadRequest(error)
-      case \/-(it) => Ok(Map("score_line" -> it.getScoreLine, "summary" -> it.getGameSummary))
+      case \/-(it) => Match.fromDatabaseRecordWithGames(it.record, it.games, it.playerMap)
     }
   }
 }

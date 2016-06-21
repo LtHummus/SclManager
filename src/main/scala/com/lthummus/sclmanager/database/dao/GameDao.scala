@@ -27,6 +27,13 @@ object GameDao {
     }
   }
 
+  def getGameRecordsByMatchId(matchId: Int)(implicit dslContext: DSLContext): List[GameRecord] = {
+    dslContext
+      .selectFrom(Tables.GAME)
+      .where(Tables.GAME.MATCH.eq(matchId))
+      .orderBy(Tables.GAME.SEQUENCE)
+      .fetch().asScala.toList
+  }
 
   def getGamesByMatchId(matchId: Int, nameDecoder: PartialFunction[Int, String])(implicit dslContext: DSLContext): String \/ List[Replay] = {
     val res = dslContext

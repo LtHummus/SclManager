@@ -1,6 +1,6 @@
 package com.lthummus.sclmanager.servlets.dto
 
-import com.lthummus.sclmanager.parsing.GameResult
+import com.lthummus.sclmanager.parsing.{Bout, GameResult}
 import zzz.generated.tables.records.{GameRecord, MatchRecord, PlayerRecord}
 
 import scalaz._
@@ -11,6 +11,7 @@ case class Match(id: Int, week: Int, league: Int, player1: Player, player2: Play
 case class Game(id: Int, spy: Player, sniper: Player, matchId: Int, result: String, level: String, gameType: String)
 
 object Match {
+
   def fromDatabaseRecordWithGames(record: MatchRecord, games: Option[List[GameRecord]], playerMap: Map[Integer, PlayerRecord]) = {
     val gameList = games.map(x => x.map(Game.fromDatabaseRecord(_, playerMap)))
     val winner = if (record.getWinner == null) None else Some(Player.fromDatabaseRecord(playerMap(record.getWinner)))

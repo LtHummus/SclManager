@@ -3,11 +3,14 @@ package com.lthummus.sclmanager.database.dao
 import com.lthummus.sclmanager.parsing.Bout
 import org.jooq.DSLContext
 import zzz.generated.Tables
-import zzz.generated.tables.records.{MatchRecord, PlayerRecord}
+import zzz.generated.tables.records.{GameRecord, MatchRecord, PlayerRecord}
 
 import scala.collection.JavaConversions._
 import scalaz._
 import Scalaz._
+
+
+case class FullMatchRecords(record: MatchRecord, games: Option[List[GameRecord]], playerMap: Map[Integer, PlayerRecord])
 
 object MatchDao {
   def getById(id: Int)(implicit dslContext: DSLContext): Option[MatchRecord] = {
@@ -68,6 +71,15 @@ object MatchDao {
       player2 <- PlayerDao.getByPlayerId(matchData.getPlayer2) \/> s"No player found with id ${matchData.getPlayer2}"
       gameList <- GameDao.getGamesByMatchId(matchId, buildNameDecoder(player1, player2))
     } yield Bout(gameList)
+  }
+
+  def getFullMatchRecords(matchId: Int)(implicit dslContext: DSLContext): String \/ FullMatchRecords = {
+    for {
+      matchData <- getById(matchId) \/> s"No match found with id $matchId"
+      player1 <- PlayerDao.getByPlayerId(matchData.getPlayer1) \/> s"No player found with id ${matchData.getPlayer1}"
+      player2 <- PlayerDao.getByPlayerId(matchData.getPlayer2) \/> s"No player found with id ${matchData.getPlayer2}"
+      gameList = GameDao.getGameRecordsByMatchId(matchId)
+    } yield FullMatchRecords(matchData, Some(gameList), Map(player1.getId -> player1, player2.getId -> player2))
   }
 
   def markMatchAsPlayed(matchId: Int)(implicit dslContext: DSLContext): String \/ Int = {
