@@ -91,6 +91,11 @@ class Match(alias : String, aliased : Table[MatchRecord], parameters : Array[ Fi
   val WINNER : TableField[MatchRecord, Integer] = createField("winner", org.jooq.impl.SQLDataType.INTEGER, "")
 
   /**
+   * The column <code>scl.match.match_url</code>.
+   */
+  val MATCH_URL : TableField[MatchRecord, String] = createField("match_url", org.jooq.impl.SQLDataType.CLOB, "")
+
+  /**
    * Create a <code>scl.match</code> table reference
    */
   def this() = {

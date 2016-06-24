@@ -82,7 +82,7 @@ object MatchDao {
     } yield FullMatchRecords(matchData, Some(gameList), Map(player1.getId -> player1, player2.getId -> player2))
   }
 
-  def markMatchAsPlayed(matchId: Int)(implicit dslContext: DSLContext): String \/ Int = {
+  def markMatchAsPlayed(matchId: Int, url: String)(implicit dslContext: DSLContext): String \/ Int = {
     val matchOption = getById(matchId)
     try {
       if (matchOption.isEmpty) {
@@ -90,6 +90,7 @@ object MatchDao {
       } else {
         val theMatch = matchOption.get
         theMatch.setStatus(1)
+        theMatch.setMatchUrl(url)
         theMatch.update().right
       }
     } catch {

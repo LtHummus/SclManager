@@ -1,6 +1,6 @@
 package com.lthummus.sclmanager.parsing
 
-import java.io.{DataInputStream, InputStream}
+import java.io.{ByteArrayInputStream, DataInputStream, InputStream}
 import java.util.zip.{ZipEntry, ZipInputStream}
 
 import scalaz._
@@ -9,8 +9,8 @@ import Scalaz._
 
 object SpyPartyZipParser {
 
-  def parseZipStream(is: InputStream): String \/ Bout = {
-    val zis = new ZipInputStream(is)
+  def parseZipStream(bytes: Array[Byte]): String \/ Bout = {
+    val zis = new ZipInputStream(new ByteArrayInputStream(bytes))
 
     val replays = scala.collection.mutable.ListBuffer[Replay]()
     var entry: ZipEntry = zis.getNextEntry

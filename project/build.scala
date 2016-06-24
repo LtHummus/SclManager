@@ -44,7 +44,11 @@ object SclManagerBuild extends Build {
         "com.zaxxer" % "HikariCP" % "2.4.6",
 
         // configuration
-        "com.typesafe" % "config" % "1.3.0"
+        "com.typesafe" % "config" % "1.3.0",
+
+
+        //s3
+        "com.github.seratch" %% "awscala" % "0.3.+"
 
       ),
       scalateTemplateConfig in Compile <<= (sourceDirectory in Compile){ base =>
