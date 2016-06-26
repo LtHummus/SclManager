@@ -26,6 +26,16 @@ object MatchDao {
     dslContext.selectFrom(Tables.MATCH).where(Tables.MATCH.STATUS.eq(0)).toList
   }
 
+  def getMatchesForPlayer(playerId: Int)(implicit dslContext: DSLContext): List[MatchRecord] = {
+    dslContext
+      .selectFrom(Tables.MATCH)
+      .where(Tables.MATCH.PLAYER1.eq(playerId))
+      .or(Tables.MATCH.PLAYER2.eq(playerId))
+      .orderBy(Tables.MATCH.WEEK)
+      .fetch()
+      .toList
+  }
+
   def getNextToBePlayedByPlayers(player1: Int, player2: Int)(implicit dslContext: DSLContext) = {
     val res1 = dslContext
       .selectFrom(Tables.MATCH)

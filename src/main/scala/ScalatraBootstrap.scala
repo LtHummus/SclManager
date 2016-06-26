@@ -3,7 +3,7 @@ import org.scalatra._
 import javax.servlet.ServletContext
 
 import com.lthummus.sclmanager.database.DatabaseConfigurator
-import com.lthummus.sclmanager.servlets.{LeagueServlet, MatchServlet}
+import com.lthummus.sclmanager.servlets.{LeagueServlet, MatchServlet, PlayerServlet}
 import org.jooq.DSLContext
 
 class ScalatraBootstrap extends LifeCycle {
@@ -14,5 +14,6 @@ class ScalatraBootstrap extends LifeCycle {
     context.mount(new SclManagerServlet, "/*")
     context.mount(new LeagueServlet, "/league/*")
     context.mount(new MatchServlet, "/match/*")
+    context.mount(new PlayerServlet, "/player/*")
   }
 }

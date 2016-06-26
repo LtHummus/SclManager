@@ -48,7 +48,8 @@ object SclManagerBuild extends Build {
 
 
         //s3
-        "com.github.seratch" %% "awscala" % "0.3.+"
+        "com.github.seratch" %% "awscala" % "0.3.+",
+        "jp.co.bizreach" %% "aws-dynamodb-scala" % "0.0.3"
 
       ),
       scalateTemplateConfig in Compile <<= (sourceDirectory in Compile){ base =>

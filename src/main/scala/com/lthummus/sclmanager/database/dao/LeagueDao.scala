@@ -20,4 +20,8 @@ object LeagueDao {
       case _ => Some(res(0))
     }
   }
+
+  def getPlayersInLeague(id: Int)(implicit dslContext: DSLContext) = {
+    dslContext.selectFrom(Tables.PLAYER).where(Tables.PLAYER.LEAGUE.eq(id)).fetch().toList
+  }
 }
