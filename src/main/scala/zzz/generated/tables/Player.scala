@@ -14,7 +14,6 @@ import javax.annotation.Generated
 
 import org.jooq.Field
 import org.jooq.ForeignKey
-import org.jooq.Identity
 import org.jooq.Schema
 import org.jooq.Table
 import org.jooq.TableField
@@ -56,19 +55,14 @@ class Player(alias : String, aliased : Table[PlayerRecord], parameters : Array[ 
   }
 
   /**
-   * The column <code>scl.player.id</code>.
-   */
-  val ID : TableField[PlayerRecord, Integer] = createField("id", org.jooq.impl.SQLDataType.INTEGER.nullable(false), "")
-
-  /**
    * The column <code>scl.player.name</code>.
    */
-  val NAME : TableField[PlayerRecord, String] = createField("name", org.jooq.impl.SQLDataType.CLOB.nullable(false), "")
+  val NAME : TableField[PlayerRecord, String] = createField("name", org.jooq.impl.SQLDataType.VARCHAR.length(50).nullable(false), "")
 
   /**
-   * The column <code>scl.player.league</code>.
+   * The column <code>scl.player.division</code>.
    */
-  val LEAGUE : TableField[PlayerRecord, Integer] = createField("league", org.jooq.impl.SQLDataType.INTEGER.nullable(false), "")
+  val DIVISION : TableField[PlayerRecord, String] = createField("division", org.jooq.impl.SQLDataType.VARCHAR.length(50).nullable(false), "")
 
   /**
    * The column <code>scl.player.wins</code>.
@@ -105,10 +99,6 @@ class Player(alias : String, aliased : Table[PlayerRecord], parameters : Array[ 
 
   override def getSchema : Schema = Scl.SCL
 
-  override def getIdentity : Identity[PlayerRecord, Integer] = {
-    Keys.IDENTITY_PLAYER
-  }
-
   override def getPrimaryKey : UniqueKey[PlayerRecord] = {
     Keys.KEY_PLAYER_PRIMARY
   }
@@ -118,7 +108,7 @@ class Player(alias : String, aliased : Table[PlayerRecord], parameters : Array[ 
   }
 
   override def getReferences : List[ ForeignKey[PlayerRecord, _] ] = {
-    return Arrays.asList[ ForeignKey[PlayerRecord, _] ](Keys.LEAGUE)
+    return Arrays.asList[ ForeignKey[PlayerRecord, _] ](Keys.FK_LEAGUE)
   }
 
   override def as(alias : String) : Player = {

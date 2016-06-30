@@ -8,9 +8,9 @@ import javax.annotation.Generated
 
 import scala.Array
 
+import zzz.generated.tables.Bout
+import zzz.generated.tables.Division
 import zzz.generated.tables.Game
-import zzz.generated.tables.League
-import zzz.generated.tables.Match
 import zzz.generated.tables.Player
 
 
@@ -27,19 +27,19 @@ import zzz.generated.tables.Player
 object Tables {
 
   /**
+   * The table <code>scl.bout</code>.
+   */
+  val BOUT = zzz.generated.tables.Bout.BOUT
+
+  /**
+   * The table <code>scl.division</code>.
+   */
+  val DIVISION = zzz.generated.tables.Division.DIVISION
+
+  /**
    * The table <code>scl.game</code>.
    */
   val GAME = zzz.generated.tables.Game.GAME
-
-  /**
-   * The table <code>scl.league</code>.
-   */
-  val LEAGUE = zzz.generated.tables.League.LEAGUE
-
-  /**
-   * The table <code>scl.match</code>.
-   */
-  val MATCH = zzz.generated.tables.Match.MATCH
 
   /**
    * The table <code>scl.player</code>.

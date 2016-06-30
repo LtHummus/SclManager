@@ -15,8 +15,8 @@ object PlayerDao {
     dslContext.selectFrom(Tables.PLAYER).fetch().toList
   }
 
-  def getByPlayerId(id: Int)(implicit dslContext: DSLContext): Option[PlayerRecord] = {
-    val res = dslContext.selectFrom(Tables.PLAYER).where(Tables.PLAYER.ID.eq(id)).fetch()
+  def getByPlayerName(name: String)(implicit dslContext: DSLContext): Option[PlayerRecord] = {
+    val res = dslContext.selectFrom(Tables.PLAYER).where(Tables.PLAYER.NAME.eq(name)).fetch()
 
     res.size() match {
       case 0 => None
@@ -24,38 +24,16 @@ object PlayerDao {
     }
   }
 
-  def getByLeagueId(id: Int)(implicit dslContext: DSLContext): List[PlayerRecord] = {
-    dslContext
-      .selectFrom(Tables.PLAYER)
-      .where(Tables.PLAYER.LEAGUE.eq(id))
-      .fetch()
-      .toList
-  }
-
-  def getPlayerByName(name: String)(implicit dslContext: DSLContext): Option[PlayerRecord] = {
-    val res = dslContext
-      .selectFrom(Tables.PLAYER)
-      .where(Tables.PLAYER.NAME.eq(name.toLowerCase))
-      .fetch()
-      .toList
-
-    res.size match {
-      case 0 => None
-      case _ => Some(res.get(0))
-    }
-  }
-
-  def getNumberOfMatchesPlayed(id: Int)(implicit dslContext: DSLContext): Int = {
+  def getNumberOfBoutsPlayed(name: String)(implicit dslContext: DSLContext): Int = {
     dslContext
       .selectCount()
-      .from(Tables.MATCH)
-      .where(Tables.MATCH.PLAYER1.eq(id))
-      .or(Tables.MATCH.PLAYER2.eq(id)).fetchOne(0, classOf[Int])
+      .from(Tables.BOUT)
+      .where(Tables.BOUT.PLAYER1.eq(name))
+      .or(Tables.BOUT.PLAYER2.eq(name)).fetchOne(0, classOf[Int])
   }
 
   def postResult(name: String, result: String)(implicit dslContext: DSLContext): String \/ PlayerRecord = {
-
-    val player = getPlayerByName(name)
+    val player = getByPlayerName(name)
 
     //TODO: update this from config
     if (player.isEmpty) {

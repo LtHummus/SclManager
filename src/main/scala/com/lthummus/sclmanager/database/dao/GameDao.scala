@@ -15,34 +15,34 @@ object GameDao {
     def asReplay(spy: String, sniper: String): String \/ Replay = {
       for {
         resultValue <- GameResult.fromInt(record.getResult)
-        level <- Level.getLevelByName(record.getLevel)
+        level <- Level.getLevelByName(record.getVenue)
         decodedGameType <- GameType.fromString(record.getGametype)
       } yield Replay(spy, sniper, record.getSequence, resultValue, level, decodedGameType)
     }
   }
 
   implicit class ConvertableFromReplay(replay: Replay) {
-    def toDatabase(matchId: Int, idResolver: PartialFunction[String, Int]) = {
-      new GameRecord(null, idResolver(replay.spy), idResolver(replay.sniper), matchId, GameResult.toInt(replay.result),replay.sequence, replay.level.name, replay.loadoutType.toString)
+    def toDatabase(matchId: Int) = {
+      new GameRecord(null, replay.spy, replay.sniper, matchId, GameResult.toInt(replay.result), replay.sequence, replay.level.name, replay.loadoutType.toString)
     }
   }
 
-  def getGameRecordsByMatchId(matchId: Int)(implicit dslContext: DSLContext): List[GameRecord] = {
+  def getGameRecordsByBoutId(matchId: Int)(implicit dslContext: DSLContext): List[GameRecord] = {
     dslContext
       .selectFrom(Tables.GAME)
-      .where(Tables.GAME.MATCH.eq(matchId))
+      .where(Tables.GAME.BOUT.eq(matchId))
       .orderBy(Tables.GAME.SEQUENCE)
       .fetch().asScala.toList
   }
 
-  def getGamesByMatchId(matchId: Int, nameDecoder: PartialFunction[Int, String])(implicit dslContext: DSLContext): String \/ List[Replay] = {
+  def getGamesByBoutId(boutId: Int)(implicit dslContext: DSLContext): String \/ List[Replay] = {
     val res = dslContext
       .selectFrom(Tables.GAME)
-      .where(Tables.GAME.MATCH.eq(matchId))
+      .where(Tables.GAME.BOUT.eq(boutId))
       .orderBy(Tables.GAME.SEQUENCE)
       .fetch()
 
-    val replays = res.asScala.map(it => it.asReplay(nameDecoder(it.getSpy), nameDecoder(it.getSniper))).collect{ case \/-(it) => it}.toList
+    val replays = res.asScala.map(it => it.asReplay(it.getSpy, it.getSniper)).collect{ case \/-(it) => it}.toList
 
     if (res.size() == replays.size)
       replays.right

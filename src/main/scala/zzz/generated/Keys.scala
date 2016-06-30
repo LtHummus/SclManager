@@ -15,13 +15,13 @@ import org.jooq.impl.AbstractKeys
 
 import scala.Array
 
+import zzz.generated.tables.Bout
+import zzz.generated.tables.Division
 import zzz.generated.tables.Game
-import zzz.generated.tables.League
-import zzz.generated.tables.Match
 import zzz.generated.tables.Player
+import zzz.generated.tables.records.BoutRecord
+import zzz.generated.tables.records.DivisionRecord
 import zzz.generated.tables.records.GameRecord
-import zzz.generated.tables.records.LeagueRecord
-import zzz.generated.tables.records.MatchRecord
 import zzz.generated.tables.records.PlayerRecord
 
 
@@ -42,59 +42,55 @@ object Keys {
   // IDENTITY definitions
   // -------------------------------------------------------------------------
 
+  val IDENTITY_BOUT = Identities0.IDENTITY_BOUT
   val IDENTITY_GAME = Identities0.IDENTITY_GAME
-  val IDENTITY_LEAGUE = Identities0.IDENTITY_LEAGUE
-  val IDENTITY_MATCH = Identities0.IDENTITY_MATCH
-  val IDENTITY_PLAYER = Identities0.IDENTITY_PLAYER
 
   // -------------------------------------------------------------------------
   // UNIQUE and PRIMARY KEY definitions
   // -------------------------------------------------------------------------
 
+  val KEY_BOUT_PRIMARY = UniqueKeys0.KEY_BOUT_PRIMARY
+  val KEY_DIVISION_PRIMARY = UniqueKeys0.KEY_DIVISION_PRIMARY
   val KEY_GAME_PRIMARY = UniqueKeys0.KEY_GAME_PRIMARY
-  val KEY_LEAGUE_PRIMARY = UniqueKeys0.KEY_LEAGUE_PRIMARY
-  val KEY_MATCH_PRIMARY = UniqueKeys0.KEY_MATCH_PRIMARY
   val KEY_PLAYER_PRIMARY = UniqueKeys0.KEY_PLAYER_PRIMARY
 
   // -------------------------------------------------------------------------
   // FOREIGN KEY definitions
   // -------------------------------------------------------------------------
 
+  val FK_DIVISON = ForeignKeys0.FK_DIVISON
+  val FK_PLAYER1 = ForeignKeys0.FK_PLAYER1
+  val FK_PLAYER2 = ForeignKeys0.FK_PLAYER2
+  val FK_WINNER = ForeignKeys0.FK_WINNER
   val FK_SPY = ForeignKeys0.FK_SPY
   val FK_SNIPER = ForeignKeys0.FK_SNIPER
   val FK_MATCH = ForeignKeys0.FK_MATCH
   val FK_LEAGUE = ForeignKeys0.FK_LEAGUE
-  val FK_PLAYER1 = ForeignKeys0.FK_PLAYER1
-  val FK_PLAYER2 = ForeignKeys0.FK_PLAYER2
-  val FK_WINNER = ForeignKeys0.FK_WINNER
-  val LEAGUE = ForeignKeys0.LEAGUE
 
   // -------------------------------------------------------------------------
   // [#1459] distribute members to avoid static initialisers > 64kb
   // -------------------------------------------------------------------------
 
   private object Identities0 extends AbstractKeys {
+    val IDENTITY_BOUT : Identity[BoutRecord, Integer] = AbstractKeys.createIdentity(Bout.BOUT, Bout.BOUT.ID)
     val IDENTITY_GAME : Identity[GameRecord, Integer] = AbstractKeys.createIdentity(Game.GAME, Game.GAME.ID)
-    val IDENTITY_LEAGUE : Identity[LeagueRecord, Integer] = AbstractKeys.createIdentity(League.LEAGUE, League.LEAGUE.ID)
-    val IDENTITY_MATCH : Identity[MatchRecord, Integer] = AbstractKeys.createIdentity(Match.MATCH, Match.MATCH.ID)
-    val IDENTITY_PLAYER : Identity[PlayerRecord, Integer] = AbstractKeys.createIdentity(Player.PLAYER, Player.PLAYER.ID)
   }
 
   private object UniqueKeys0 extends AbstractKeys {
+    val KEY_BOUT_PRIMARY : UniqueKey[BoutRecord] = AbstractKeys.createUniqueKey(Bout.BOUT, "KEY_bout_PRIMARY", Bout.BOUT.ID)
+    val KEY_DIVISION_PRIMARY : UniqueKey[DivisionRecord] = AbstractKeys.createUniqueKey(Division.DIVISION, "KEY_division_PRIMARY", Division.DIVISION.NAME)
     val KEY_GAME_PRIMARY : UniqueKey[GameRecord] = AbstractKeys.createUniqueKey(Game.GAME, "KEY_game_PRIMARY", Game.GAME.ID)
-    val KEY_LEAGUE_PRIMARY : UniqueKey[LeagueRecord] = AbstractKeys.createUniqueKey(League.LEAGUE, "KEY_league_PRIMARY", League.LEAGUE.ID)
-    val KEY_MATCH_PRIMARY : UniqueKey[MatchRecord] = AbstractKeys.createUniqueKey(Match.MATCH, "KEY_match_PRIMARY", Match.MATCH.ID)
-    val KEY_PLAYER_PRIMARY : UniqueKey[PlayerRecord] = AbstractKeys.createUniqueKey(Player.PLAYER, "KEY_player_PRIMARY", Player.PLAYER.ID)
+    val KEY_PLAYER_PRIMARY : UniqueKey[PlayerRecord] = AbstractKeys.createUniqueKey(Player.PLAYER, "KEY_player_PRIMARY", Player.PLAYER.NAME)
   }
 
   private object ForeignKeys0 extends AbstractKeys {
+    val FK_DIVISON : ForeignKey[BoutRecord, DivisionRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_DIVISION_PRIMARY, Bout.BOUT, "fk_divison", Bout.BOUT.DIVISION)
+    val FK_PLAYER1 : ForeignKey[BoutRecord, PlayerRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_PLAYER_PRIMARY, Bout.BOUT, "fk_player1", Bout.BOUT.PLAYER1)
+    val FK_PLAYER2 : ForeignKey[BoutRecord, PlayerRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_PLAYER_PRIMARY, Bout.BOUT, "fk_player2", Bout.BOUT.PLAYER2)
+    val FK_WINNER : ForeignKey[BoutRecord, PlayerRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_PLAYER_PRIMARY, Bout.BOUT, "fk_winner", Bout.BOUT.WINNER)
     val FK_SPY : ForeignKey[GameRecord, PlayerRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_PLAYER_PRIMARY, Game.GAME, "fk_spy", Game.GAME.SPY)
     val FK_SNIPER : ForeignKey[GameRecord, PlayerRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_PLAYER_PRIMARY, Game.GAME, "fk_sniper", Game.GAME.SNIPER)
-    val FK_MATCH : ForeignKey[GameRecord, MatchRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_MATCH_PRIMARY, Game.GAME, "fk_match", Game.GAME.MATCH)
-    val FK_LEAGUE : ForeignKey[MatchRecord, LeagueRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_LEAGUE_PRIMARY, Match.MATCH, "fk_league", Match.MATCH.LEAGUE)
-    val FK_PLAYER1 : ForeignKey[MatchRecord, PlayerRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_PLAYER_PRIMARY, Match.MATCH, "fk_player1", Match.MATCH.PLAYER1)
-    val FK_PLAYER2 : ForeignKey[MatchRecord, PlayerRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_PLAYER_PRIMARY, Match.MATCH, "fk_player2", Match.MATCH.PLAYER2)
-    val FK_WINNER : ForeignKey[MatchRecord, PlayerRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_PLAYER_PRIMARY, Match.MATCH, "fk_winner", Match.MATCH.WINNER)
-    val LEAGUE : ForeignKey[PlayerRecord, LeagueRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_LEAGUE_PRIMARY, Player.PLAYER, "league", Player.PLAYER.LEAGUE)
+    val FK_MATCH : ForeignKey[GameRecord, BoutRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_BOUT_PRIMARY, Game.GAME, "fk_match", Game.GAME.BOUT)
+    val FK_LEAGUE : ForeignKey[PlayerRecord, DivisionRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_DIVISION_PRIMARY, Player.PLAYER, "fk_league", Player.PLAYER.DIVISION)
   }
 }

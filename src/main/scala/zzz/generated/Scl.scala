@@ -16,9 +16,9 @@ import org.jooq.impl.SchemaImpl
 
 import scala.Array
 
+import zzz.generated.tables.Bout
+import zzz.generated.tables.Division
 import zzz.generated.tables.Game
-import zzz.generated.tables.League
-import zzz.generated.tables.Match
 import zzz.generated.tables.Player
 
 
@@ -52,9 +52,9 @@ class Scl extends SchemaImpl("scl", DefaultCatalog.DEFAULT_CATALOG) {
 
   private def getTables0() : List[Table[_]] = {
     return Arrays.asList[Table[_]](
+      Bout.BOUT,
+      Division.DIVISION,
       Game.GAME,
-      League.LEAGUE,
-      Match.MATCH,
       Player.PLAYER)
   }
 }

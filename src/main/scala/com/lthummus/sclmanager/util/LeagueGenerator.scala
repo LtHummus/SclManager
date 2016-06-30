@@ -1,7 +1,7 @@
 package com.lthummus.sclmanager.util
 
 import com.lthummus.sclmanager.database.DatabaseConfigurator
-import com.lthummus.sclmanager.database.dao.{LeagueDao, PlayerDao}
+import com.lthummus.sclmanager.database.dao.PlayerDao
 import org.jooq.DSLContext
 import zzz.generated.tables.records.{LeagueRecord, MatchRecord, PlayerRecord}
 import zzz.generated.Tables

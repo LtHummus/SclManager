@@ -1,7 +1,7 @@
 package com.lthummus.sclmanager.servlets
 
 import com.lthummus.sclmanager.SclManagerStack
-import com.lthummus.sclmanager.database.dao.{LeagueDao, PlayerDao}
+import com.lthummus.sclmanager.database.dao.PlayerDao
 import com.lthummus.sclmanager.servlets.dto.{League, LeagueList}
 import org.jooq.DSLContext
 import org.json4s.{DefaultFormats, Formats}

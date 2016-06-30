@@ -2,7 +2,7 @@ package com.lthummus.sclmanager.parsing
 
 import com.typesafe.config.ConfigFactory
 
-case class Bout(replays: Iterable[Replay]) {
+case class Bout(replays: List[Replay]) {
 
   val orderedReplays = replays.filter(_.isCompleted).toList.sorted
 

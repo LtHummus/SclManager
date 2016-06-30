@@ -63,17 +63,17 @@ class Game(alias : String, aliased : Table[GameRecord], parameters : Array[ Fiel
   /**
    * The column <code>scl.game.spy</code>.
    */
-  val SPY : TableField[GameRecord, Integer] = createField("spy", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), "")
+  val SPY : TableField[GameRecord, String] = createField("spy", org.jooq.impl.SQLDataType.VARCHAR.length(50).nullable(false).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.VARCHAR)), "")
 
   /**
    * The column <code>scl.game.sniper</code>.
    */
-  val SNIPER : TableField[GameRecord, Integer] = createField("sniper", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), "")
+  val SNIPER : TableField[GameRecord, String] = createField("sniper", org.jooq.impl.SQLDataType.VARCHAR.length(50).nullable(false).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.VARCHAR)), "")
 
   /**
-   * The column <code>scl.game.match</code>.
+   * The column <code>scl.game.bout</code>.
    */
-  val MATCH : TableField[GameRecord, Integer] = createField("match", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), "")
+  val BOUT : TableField[GameRecord, Integer] = createField("bout", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), "")
 
   /**
    * The column <code>scl.game.result</code>.
@@ -86,14 +86,14 @@ class Game(alias : String, aliased : Table[GameRecord], parameters : Array[ Fiel
   val SEQUENCE : TableField[GameRecord, Integer] = createField("sequence", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), "")
 
   /**
-   * The column <code>scl.game.level</code>.
+   * The column <code>scl.game.venue</code>.
    */
-  val LEVEL : TableField[GameRecord, String] = createField("level", org.jooq.impl.SQLDataType.CLOB.nullable(false), "")
+  val VENUE : TableField[GameRecord, String] = createField("venue", org.jooq.impl.SQLDataType.CLOB.nullable(false), "")
 
   /**
-   * The column <code>scl.game.gameType</code>.
+   * The column <code>scl.game.gametype</code>.
    */
-  val GAMETYPE : TableField[GameRecord, String] = createField("gameType", org.jooq.impl.SQLDataType.CLOB.nullable(false), "")
+  val GAMETYPE : TableField[GameRecord, String] = createField("gametype", org.jooq.impl.SQLDataType.CLOB.nullable(false), "")
 
   /**
    * Create a <code>scl.game</code> table reference
