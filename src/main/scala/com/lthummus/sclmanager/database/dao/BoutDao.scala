@@ -3,14 +3,14 @@ package com.lthummus.sclmanager.database.dao
 import com.lthummus.sclmanager.parsing.Bout
 import org.jooq.DSLContext
 import zzz.generated.Tables
-import zzz.generated.tables.records.{BoutRecord, GameRecord}
+import zzz.generated.tables.records.{BoutRecord, GameRecord, PlayerRecord}
 
 import scala.collection.JavaConversions._
 import scalaz._
 import Scalaz._
 
 
-case class FullBoutRecord(bout: BoutRecord, games: List[GameRecord])
+case class FullBoutRecord(bout: BoutRecord, games: List[GameRecord], playerMap: Map[String, PlayerRecord])
 
 object BoutDao {
   def getById(id: Int)(implicit dslContext: DSLContext): Option[BoutRecord] = {
@@ -61,6 +61,15 @@ object BoutDao {
     }
   }
 
+  def getFullBoutRecords(boutId: Int)(implicit dslContext: DSLContext): String \/ FullBoutRecord = {
+    for {
+      matchData <- getById(boutId) \/> s"No match found with id $boutId"
+      player1 <- PlayerDao.getByPlayerName(matchData.getPlayer1) \/> s"No player found with id ${matchData.getPlayer1}"
+      player2 <- PlayerDao.getByPlayerName(matchData.getPlayer2) \/> s"No player found with id ${matchData.getPlayer2}"
+      gameList = GameDao.getGameRecordsByBoutId(boutId)
+    } yield FullBoutRecord(matchData, gameList, Map(player1.getName -> player1, player2.getName -> player2))
+  }
+
   def getBoutData(boutId: Int)(implicit dslContext: DSLContext): String \/ Bout = {
     for {
       matchData <- getById(boutId) \/> s"No match found with id $boutId"
@@ -69,5 +78,23 @@ object BoutDao {
       gameList <- GameDao.getGamesByBoutId(boutId)
     } yield Bout(gameList)
   }
+
+
+  def markBoutAsPlayed(boutId: Int, url: String)(implicit dslContext: DSLContext): String \/ Int = {
+    val matchOption = getById(boutId)
+    try {
+      if (matchOption.isEmpty) {
+        s"No match found with id $boutId".left
+      } else {
+        val theMatch = matchOption.get
+        theMatch.setStatus(1)
+        theMatch.setMatchUrl(url)
+        theMatch.update().right
+      }
+    } catch {
+      case e: Throwable => e.getMessage.left
+    }
+  }
+
 
 }

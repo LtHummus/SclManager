@@ -5,6 +5,7 @@ package zzz.generated.tables
 
 
 import java.lang.Class
+import java.lang.Integer
 import java.lang.String
 import java.util.Arrays
 import java.util.List
@@ -56,6 +57,11 @@ class Division(alias : String, aliased : Table[DivisionRecord], parameters : Arr
    * The column <code>scl.division.name</code>.
    */
   val NAME : TableField[DivisionRecord, String] = createField("name", org.jooq.impl.SQLDataType.VARCHAR.length(32).nullable(false), "")
+
+  /**
+   * The column <code>scl.division.precedence</code>.
+   */
+  val PRECEDENCE : TableField[DivisionRecord, Integer] = createField("precedence", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), "")
 
   /**
    * Create a <code>scl.division</code> table reference

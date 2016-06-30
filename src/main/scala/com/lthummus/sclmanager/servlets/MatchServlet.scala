@@ -2,7 +2,7 @@ package com.lthummus.sclmanager.servlets
 
 import com.amazonaws.util.IOUtils
 import com.lthummus.sclmanager.SclManagerStack
-import com.lthummus.sclmanager.database.dao.{GameDao, MatchDao, PlayerDao}
+import com.lthummus.sclmanager.database.dao.{BoutDao, GameDao, PlayerDao}
 import com.lthummus.sclmanager.parsing.{Bout, SpyPartyZipParser}
 import org.jooq.DSLContext
 import org.json4s.{DefaultFormats, Formats}
@@ -31,23 +31,6 @@ class MatchServlet(implicit dslContext: DSLContext) extends SclManagerStack with
     contentType = formats("json")
   }
 
-  private def generateIdResolver(player1: PlayerRecord, player2: PlayerRecord) = {
-    new PartialFunction[String, Int] {
-      val player1Name = player1.getName
-      val player2Name = player2.getName
-
-      override def isDefinedAt(x: String): Boolean = x == player1.getName || x == player2.getName
-
-      override def apply(x: String): Int = {
-        x match {
-          case `player1Name` => player1.getId
-          case `player2Name` => player2.getId
-          case _ => ???
-        }
-      }
-    }
-  }
-
   private def updateScores(bout: Bout, games: List[GameRecord], url: String): String \/ Int = {
     val player1Res = bout.result(bout.player1)
     val player2Res = bout.result(bout.player2)
@@ -56,17 +39,16 @@ class MatchServlet(implicit dslContext: DSLContext) extends SclManagerStack with
       player1Update <- PlayerDao.postResult(bout.player1, player1Res)
       player2Update <- PlayerDao.postResult(bout.player2, player2Res)
       boutPersist <- GameDao.persistBatchRecords(games)
-      markMatch <- MatchDao.markMatchAsPlayed(games.head.getMatch, url)
+      markMatch <- BoutDao.markBoutAsPlayed(games.head.getBout, url)
     } yield markMatch
   }
 
   private def persistBout(bout: Bout, url: String) = {
     for {
-      player1 <- PlayerDao.getPlayerByName(bout.player1).toRightDisjunction(s"No player found with name ${bout.player1}")
-      player2 <- PlayerDao.getPlayerByName(bout.player2).toRightDisjunction(s"No player found with name ${bout.player2}")
-      resolver = generateIdResolver(player1, player2)
-      matchObj <- MatchDao.getNextToBePlayedByPlayers(player1.getId, player2.getId).toRightDisjunction(s"No match found between these players")
-      updateRes <- updateScores(bout, bout.orderedReplays.map(_.toDatabase(matchObj.getId, resolver)), url)
+      player1 <- PlayerDao.getByPlayerName(bout.player1) \/> s"No player found with name ${bout.player1}"
+      player2 <- PlayerDao.getByPlayerName(bout.player2) \/> s"No player found with name ${bout.player2}"
+      boutObj <- BoutDao.getNextToBePlayedByPlayers(player1.getName, player2.getName) \/> s"No match found between these players"
+      updateRes <- updateScores(bout, bout.orderedReplays.map(_.toDatabase(boutObj.getId)), url)
     } yield updateRes
   }
 
@@ -99,13 +81,13 @@ class MatchServlet(implicit dslContext: DSLContext) extends SclManagerStack with
     val player1Param = params("player1")
     val player2Param = params("player2")
 
-    val player1Res = PlayerDao.getPlayerByName(player1Param)
-    val player2Res = PlayerDao.getPlayerByName(player2Param)
+    val player1Res = PlayerDao.getByPlayerName(player1Param)
+    val player2Res = PlayerDao.getByPlayerName(player2Param)
 
     val result = for {
       player1Obj <- player1Res
       player2Obj <- player2Res
-      matchObj <- MatchDao.getNextToBePlayedByPlayers(player1Obj.getId, player2Obj.getId)
+      matchObj <- BoutDao.getNextToBePlayedByPlayers(player1Obj.getName, player2Obj.getName)
     } yield (matchObj, player1Obj, player2Obj)
 
     result match {
@@ -114,17 +96,17 @@ class MatchServlet(implicit dslContext: DSLContext) extends SclManagerStack with
         val m = it._1
         val p1 = it._2
         val p2 = it._3
-        val playerMap = Map(p1.getId -> p1, p2.getId -> p2)
+        val playerMap = Map(p1.getName -> p1, p2.getName -> p2)
         Ok(Match.fromDatabaseRecordWithGames(m, None, playerMap))
     }
   }
 
   get("/:id") {
-    val bout = MatchDao.getFullMatchRecords(params("id").toInt)
+    val bout = BoutDao.getFullBoutRecords(params("id").toInt)
 
     bout match {
       case -\/(error) => BadRequest(error)
-      case \/-(it) => Match.fromDatabaseRecordWithGames(it.record, it.games, it.playerMap)
+      case \/-(it) => Match.fromDatabaseRecordWithGames(it.bout, Some(it.games), it.playerMap)
     }
   }
 }

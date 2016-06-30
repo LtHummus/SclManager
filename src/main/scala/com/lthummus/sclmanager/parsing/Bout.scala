@@ -4,7 +4,7 @@ import com.typesafe.config.ConfigFactory
 
 case class Bout(replays: List[Replay]) {
 
-  val orderedReplays = replays.filter(_.isCompleted).toList.sorted
+  val orderedReplays = replays.filter(_.isCompleted).sorted
 
   val player1 = orderedReplays.head.spy
   val player2 = orderedReplays.head.sniper

@@ -1,9 +1,9 @@
 package com.lthummus.sclmanager.util
 
 import com.lthummus.sclmanager.database.DatabaseConfigurator
-import com.lthummus.sclmanager.database.dao.PlayerDao
+import com.lthummus.sclmanager.database.dao.{DivisionDao, PlayerDao}
 import org.jooq.DSLContext
-import zzz.generated.tables.records.{LeagueRecord, MatchRecord, PlayerRecord}
+import zzz.generated.tables.records._
 import zzz.generated.Tables
 
 import scala.collection.JavaConverters._
@@ -57,21 +57,17 @@ object LeagueGenerator extends App {
   def persistLeagueData(league: League, matches: Seq[List[(String, String)]]) = {
     //step 1: create the league
 
-    val leagueRecord = new LeagueRecord(null, league.name)
+    val leagueRecord = new DivisionRecord(league.name, league.order)
     Db.executeInsert(leagueRecord)
 
-    val leagueId = Db.selectFrom(Tables.LEAGUE).where(Tables.LEAGUE.NAME.eq(league.name)).fetch().asScala.head.getId
-
     //step 2: insert the players
-    val playerRecords = league.players.map(new PlayerRecord(null, _, leagueId, 0, 0, 0))
+    val playerRecords = league.players.map(new PlayerRecord(_, league.name, 0, 0, 0))
     Db.batchInsert(playerRecords.asJava).execute()
-
-    val playerMap = PlayerDao.getByLeagueId(leagueId).map(it => (it.getName, it.getId)).toMap
 
     //step 3: insert all the matches
     for (week <- matches.indices) {
       val thisWeek = matches(week)
-      val matchRecords = thisWeek.map(it => new MatchRecord(null, week + 1, leagueId, playerMap(it._1), playerMap(it._2), 0, null, null))
+      val matchRecords = thisWeek.map(it => new BoutRecord(null, week + 1, league.name, it._1, it._2, 0, null, null))
       Db.batchInsert(matchRecords.asJava).execute()
     }
   }

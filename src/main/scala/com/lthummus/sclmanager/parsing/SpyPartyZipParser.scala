@@ -28,6 +28,6 @@ object SpyPartyZipParser {
 
     zis.close()
 
-    Bout(replays).right
+    Bout(replays.toList).right
   }
 }
