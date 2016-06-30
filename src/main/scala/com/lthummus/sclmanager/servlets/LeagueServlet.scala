@@ -1,7 +1,7 @@
 package com.lthummus.sclmanager.servlets
 
 import com.lthummus.sclmanager.SclManagerStack
-import com.lthummus.sclmanager.database.dao.PlayerDao
+import com.lthummus.sclmanager.database.dao.{DivisionDao, PlayerDao}
 import com.lthummus.sclmanager.servlets.dto.{League, LeagueList}
 import org.jooq.DSLContext
 import org.json4s.{DefaultFormats, Formats}
@@ -17,13 +17,13 @@ class LeagueServlet(implicit dslContext: DSLContext) extends SclManagerStack wit
   }
 
   get("/") {
-    Ok(LeagueList(LeagueDao.all().map(League.fromDatabaseRecord)))
+    Ok(LeagueList(DivisionDao.all().map(League.fromDatabaseRecord)))
   }
 
-  get("/:id") {
+  get("/:name") {
     //TODO: error check the input
-    val league = LeagueDao.getById(params("id").toInt)
-    val players = PlayerDao.getByLeagueId(params("id").toInt)
+    val league = DivisionDao.getByName(params("name"))
+    val players = DivisionDao.getPlayersInLeague(params("name"))
 
     league match {
       case None => NotFound(s"No league with id ${params("id")} found")
