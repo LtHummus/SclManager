@@ -53,8 +53,7 @@ class MatchServlet(implicit dslContext: DSLContext) extends SclManagerStack with
   }
 
   private def uploadToS3(name: String, contents: Array[Byte]) = {
-    //MatchServlet.Uploader.putReplay(name, contents)
-    "None".right
+    MatchServlet.Uploader.putReplay(name, contents)
   }
 
   // TODO: pull upload from body?

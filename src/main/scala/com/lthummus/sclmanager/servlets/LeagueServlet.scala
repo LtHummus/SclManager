@@ -2,7 +2,7 @@ package com.lthummus.sclmanager.servlets
 
 import com.lthummus.sclmanager.SclManagerStack
 import com.lthummus.sclmanager.database.dao.{DivisionDao, PlayerDao}
-import com.lthummus.sclmanager.servlets.dto.{League, LeagueList}
+import com.lthummus.sclmanager.servlets.dto.{League, LeagueList, LeagueOverview}
 import org.jooq.DSLContext
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.{NotFound, Ok}
@@ -17,7 +17,12 @@ class LeagueServlet(implicit dslContext: DSLContext) extends SclManagerStack wit
   }
 
   get("/") {
-    Ok(LeagueList(DivisionDao.all().map(League.fromDatabaseRecord)))
+    val leagueDatabaseRecords = DivisionDao.all()
+    val playerDatabaseRecords = PlayerDao.all()
+
+    val leagues = leagueDatabaseRecords.map(l => League.fromDatabaseRecord(l, playerDatabaseRecords.filter(_.getDivision == l.getName)))
+
+    Ok(LeagueOverview(LeagueList(leagues)))
   }
 
   get("/:name") {

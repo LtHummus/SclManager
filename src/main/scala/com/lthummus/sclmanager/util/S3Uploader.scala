@@ -1,16 +1,21 @@
 package com.lthummus.sclmanager.util
 
+import awscala.CredentialsLoader
 import awscala.s3.{Bucket, S3}
+import com.amazonaws.auth.{AWSCredentials, AWSCredentialsProvider}
 import com.amazonaws.services.s3.model.ObjectMetadata
 import com.typesafe.config.ConfigFactory
 
 import scalaz._
 import Scalaz._
 
+import awscala._
+
 class S3Uploader {
   val config = ConfigFactory.load()
 
-  implicit val s3 = S3()
+  implicit val region = Region.default()
+  implicit val s3 = S3("", "")
 
   lazy val ourBucket = s3.bucket(config.getString("s3.bucketName"))
 

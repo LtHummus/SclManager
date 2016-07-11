@@ -13,3 +13,5 @@ object League {
   }
 }
 
+case class LeagueOverview(list: LeagueList)
+
