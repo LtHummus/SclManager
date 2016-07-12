@@ -62,8 +62,6 @@ class MatchServlet(implicit dslContext: DSLContext) extends SclManagerStack with
 
     val zipContents = IOUtils.toByteArray(file.getInputStream)
 
-    println("read contents")
-
     val result = for {
       parseResult <- SpyPartyZipParser.parseZipStream(zipContents)
       url <- uploadToS3(file.name, zipContents)
