@@ -10,10 +10,13 @@ class ScalatraBootstrap extends LifeCycle {
 
   implicit val dslContext = DatabaseConfigurator.getDslContext
 
+  implicit val swagger = new SclSwagger
+
   override def init(context: ServletContext) {
     context.mount(new SclManagerServlet, "/*")
-    context.mount(new LeagueServlet, "/league/*")
+    context.mount(new LeagueServlet, "/league/*", "league")
     context.mount(new MatchServlet, "/match/*")
     context.mount(new PlayerServlet, "/player/*")
+    context.mount(new ResourcesApp, "/api-docs")
   }
 }

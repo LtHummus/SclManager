@@ -7,16 +7,24 @@ import org.jooq.DSLContext
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.{NotFound, Ok}
 import org.scalatra.json.JacksonJsonSupport
+import org.scalatra.swagger._
 
 
-class LeagueServlet(implicit dslContext: DSLContext) extends SclManagerStack with JacksonJsonSupport {
+class LeagueServlet(implicit dslContext: DSLContext, val swagger: Swagger) extends SclManagerStack with JacksonJsonSupport with SwaggerSupport {
   protected implicit lazy val jsonFormats: Formats = DefaultFormats
+
+  protected val applicationDescription = "Gets league information"
 
   before() {
     contentType = formats("json")
   }
 
-  get("/") {
+  val getAll = (apiOperation[LeagueOverview]("getAll")
+    summary "Get league overview"
+    notes "Returns nice summary data and a current snapshot of the league"
+    )
+
+  get("/", operation(getAll)) {
     val leagueDatabaseRecords = DivisionDao.all()
     val playerDatabaseRecords = PlayerDao.all()
 
