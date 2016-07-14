@@ -33,13 +33,20 @@ class LeagueServlet(implicit dslContext: DSLContext, val swagger: Swagger) exten
     Ok(LeagueOverview(LeagueList(leagues)))
   }
 
-  get("/:name") {
+  val getByName = (apiOperation[League]("getByName")
+    summary "Get league data by a league's name"
+    notes "Name must match exactly"
+    parameter pathParam[String]("name").description("the name of the league to look up"))
+
+  get("/:name", operation(getByName)) {
     //TODO: error check the input
-    val league = DivisionDao.getByName(params("name"))
-    val players = DivisionDao.getPlayersInLeague(params("name"))
+    val name = params("name")
+
+    val league = DivisionDao.getByName(name)
+    val players = DivisionDao.getPlayersInLeague(name)
 
     league match {
-      case None => NotFound(s"No league with id ${params("id")} found")
+      case None => NotFound(s"No league with id $name found")
       case Some(it) => Ok(League.fromDatabaseRecord(it, players))
     }
   }
