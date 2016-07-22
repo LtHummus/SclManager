@@ -2,14 +2,14 @@ package com.lthummus.sclmanager.servlets
 
 import com.amazonaws.util.IOUtils
 import com.lthummus.sclmanager.SclManagerStack
-import com.lthummus.sclmanager.database.dao.{BoutDao, GameDao, PlayerDao}
+import com.lthummus.sclmanager.database.dao.{BoutDao, DraftDao, GameDao, PlayerDao}
 import com.lthummus.sclmanager.parsing.{Bout, SpyPartyZipParser}
 import org.jooq.DSLContext
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra._
 import org.scalatra.json.JacksonJsonSupport
 import org.scalatra.servlet.{FileUploadSupport, MultipartConfig}
-import zzz.generated.tables.records.{GameRecord, PlayerRecord}
+import zzz.generated.tables.records.{DraftRecord, GameRecord, PlayerRecord}
 import com.lthummus.sclmanager.database.dao.GameDao._
 import com.lthummus.sclmanager.servlets.dto.Match
 import com.lthummus.sclmanager.util.S3Uploader
@@ -31,7 +31,7 @@ class MatchServlet(implicit dslContext: DSLContext) extends SclManagerStack with
     contentType = formats("json")
   }
 
-  private def updateScores(bout: Bout, games: List[GameRecord], url: String): String \/ Int = {
+  private def updateScores(bout: Bout, games: List[GameRecord], url: String, draft: Option[DraftRecord]): String \/ Int = {
     val player1Res = bout.result(bout.player1)
     val player2Res = bout.result(bout.player2)
 
@@ -48,7 +48,8 @@ class MatchServlet(implicit dslContext: DSLContext) extends SclManagerStack with
       player1 <- PlayerDao.getByPlayerName(bout.player1) \/> s"No player found with name ${bout.player1}"
       player2 <- PlayerDao.getByPlayerName(bout.player2) \/> s"No player found with name ${bout.player2}"
       boutObj <- BoutDao.getNextToBePlayedByPlayers(player1.getName, player2.getName) \/> s"No match found between these players"
-      updateRes <- updateScores(bout, bout.orderedReplays.map(_.toDatabase(boutObj.getId)), url)
+      draft = DraftDao.getLatestUnusedDraftForPlayer(Seq(player1.getName, player2.getName))
+      updateRes <- updateScores(bout, bout.orderedReplays.map(_.toDatabase(boutObj.getId)), url, draft)
     } yield updateRes
   }
 

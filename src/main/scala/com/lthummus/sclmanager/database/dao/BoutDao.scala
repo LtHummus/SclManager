@@ -81,7 +81,7 @@ object BoutDao {
   }
 
 
-  def markBoutAsPlayed(boutId: Int, url: String)(implicit dslContext: DSLContext): String \/ Int = {
+  def markBoutAsPlayed(boutId: Int, url: String, draft: Option[DraftRecord])(implicit dslContext: DSLContext): String \/ Int = {
     val matchOption = getById(boutId)
     try {
       if (matchOption.isEmpty) {
@@ -90,6 +90,8 @@ object BoutDao {
         val theMatch = matchOption.get
         theMatch.setStatus(1)
         theMatch.setMatchUrl(url)
+        if (draft.isDefined)
+          theMatch.setDraft(draft.get.getId)
         theMatch.update().right
       }
     } catch {
