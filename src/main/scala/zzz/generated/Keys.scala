@@ -17,10 +17,12 @@ import scala.Array
 
 import zzz.generated.tables.Bout
 import zzz.generated.tables.Division
+import zzz.generated.tables.Draft
 import zzz.generated.tables.Game
 import zzz.generated.tables.Player
 import zzz.generated.tables.records.BoutRecord
 import zzz.generated.tables.records.DivisionRecord
+import zzz.generated.tables.records.DraftRecord
 import zzz.generated.tables.records.GameRecord
 import zzz.generated.tables.records.PlayerRecord
 
@@ -43,6 +45,7 @@ object Keys {
   // -------------------------------------------------------------------------
 
   val IDENTITY_BOUT = Identities0.IDENTITY_BOUT
+  val IDENTITY_DRAFT = Identities0.IDENTITY_DRAFT
   val IDENTITY_GAME = Identities0.IDENTITY_GAME
 
   // -------------------------------------------------------------------------
@@ -51,6 +54,7 @@ object Keys {
 
   val KEY_BOUT_PRIMARY = UniqueKeys0.KEY_BOUT_PRIMARY
   val KEY_DIVISION_PRIMARY = UniqueKeys0.KEY_DIVISION_PRIMARY
+  val KEY_DRAFT_PRIMARY = UniqueKeys0.KEY_DRAFT_PRIMARY
   val KEY_GAME_PRIMARY = UniqueKeys0.KEY_GAME_PRIMARY
   val KEY_PLAYER_PRIMARY = UniqueKeys0.KEY_PLAYER_PRIMARY
 
@@ -62,6 +66,7 @@ object Keys {
   val FK_PLAYER1 = ForeignKeys0.FK_PLAYER1
   val FK_PLAYER2 = ForeignKeys0.FK_PLAYER2
   val FK_WINNER = ForeignKeys0.FK_WINNER
+  val FK_DRAFT = ForeignKeys0.FK_DRAFT
   val FK_SPY = ForeignKeys0.FK_SPY
   val FK_SNIPER = ForeignKeys0.FK_SNIPER
   val FK_MATCH = ForeignKeys0.FK_MATCH
@@ -73,12 +78,14 @@ object Keys {
 
   private object Identities0 extends AbstractKeys {
     val IDENTITY_BOUT : Identity[BoutRecord, Integer] = AbstractKeys.createIdentity(Bout.BOUT, Bout.BOUT.ID)
+    val IDENTITY_DRAFT : Identity[DraftRecord, Integer] = AbstractKeys.createIdentity(Draft.DRAFT, Draft.DRAFT.ID)
     val IDENTITY_GAME : Identity[GameRecord, Integer] = AbstractKeys.createIdentity(Game.GAME, Game.GAME.ID)
   }
 
   private object UniqueKeys0 extends AbstractKeys {
     val KEY_BOUT_PRIMARY : UniqueKey[BoutRecord] = AbstractKeys.createUniqueKey(Bout.BOUT, "KEY_bout_PRIMARY", Bout.BOUT.ID)
     val KEY_DIVISION_PRIMARY : UniqueKey[DivisionRecord] = AbstractKeys.createUniqueKey(Division.DIVISION, "KEY_division_PRIMARY", Division.DIVISION.NAME)
+    val KEY_DRAFT_PRIMARY : UniqueKey[DraftRecord] = AbstractKeys.createUniqueKey(Draft.DRAFT, "KEY_draft_PRIMARY", Draft.DRAFT.ID)
     val KEY_GAME_PRIMARY : UniqueKey[GameRecord] = AbstractKeys.createUniqueKey(Game.GAME, "KEY_game_PRIMARY", Game.GAME.ID)
     val KEY_PLAYER_PRIMARY : UniqueKey[PlayerRecord] = AbstractKeys.createUniqueKey(Player.PLAYER, "KEY_player_PRIMARY", Player.PLAYER.NAME)
   }
@@ -88,6 +95,7 @@ object Keys {
     val FK_PLAYER1 : ForeignKey[BoutRecord, PlayerRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_PLAYER_PRIMARY, Bout.BOUT, "fk_player1", Bout.BOUT.PLAYER1)
     val FK_PLAYER2 : ForeignKey[BoutRecord, PlayerRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_PLAYER_PRIMARY, Bout.BOUT, "fk_player2", Bout.BOUT.PLAYER2)
     val FK_WINNER : ForeignKey[BoutRecord, PlayerRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_PLAYER_PRIMARY, Bout.BOUT, "fk_winner", Bout.BOUT.WINNER)
+    val FK_DRAFT : ForeignKey[BoutRecord, DraftRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_DRAFT_PRIMARY, Bout.BOUT, "fk_draft", Bout.BOUT.DRAFT)
     val FK_SPY : ForeignKey[GameRecord, PlayerRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_PLAYER_PRIMARY, Game.GAME, "fk_spy", Game.GAME.SPY)
     val FK_SNIPER : ForeignKey[GameRecord, PlayerRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_PLAYER_PRIMARY, Game.GAME, "fk_sniper", Game.GAME.SNIPER)
     val FK_MATCH : ForeignKey[GameRecord, BoutRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_BOUT_PRIMARY, Game.GAME, "fk_match", Game.GAME.BOUT)

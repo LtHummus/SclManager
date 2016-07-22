@@ -3,14 +3,14 @@ package com.lthummus.sclmanager.database.dao
 import com.lthummus.sclmanager.parsing.Bout
 import org.jooq.DSLContext
 import zzz.generated.Tables
-import zzz.generated.tables.records.{BoutRecord, GameRecord, PlayerRecord}
+import zzz.generated.tables.records.{BoutRecord, DraftRecord, GameRecord, PlayerRecord}
 
 import scala.collection.JavaConversions._
 import scalaz._
 import Scalaz._
 
 
-case class FullBoutRecord(bout: BoutRecord, games: List[GameRecord], playerMap: Map[String, PlayerRecord])
+case class FullBoutRecord(bout: BoutRecord, games: List[GameRecord], playerMap: Map[String, PlayerRecord], draft: Option[DraftRecord])
 
 object BoutDao {
   def getById(id: Int)(implicit dslContext: DSLContext): Option[BoutRecord] = {
@@ -67,7 +67,8 @@ object BoutDao {
       player1 <- PlayerDao.getByPlayerName(matchData.getPlayer1) \/> s"No player found with id ${matchData.getPlayer1}"
       player2 <- PlayerDao.getByPlayerName(matchData.getPlayer2) \/> s"No player found with id ${matchData.getPlayer2}"
       gameList = GameDao.getGameRecordsByBoutId(boutId)
-    } yield FullBoutRecord(matchData, gameList, Map(player1.getName -> player1, player2.getName -> player2))
+      draft = DraftDao.getById(matchData.getDraft)
+    } yield FullBoutRecord(matchData, gameList, Map(player1.getName -> player1, player2.getName -> player2), draft)
   }
 
   def getBoutData(boutId: Int)(implicit dslContext: DSLContext): String \/ Bout = {

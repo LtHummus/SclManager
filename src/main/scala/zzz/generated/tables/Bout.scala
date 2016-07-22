@@ -96,6 +96,11 @@ class Bout(alias : String, aliased : Table[BoutRecord], parameters : Array[ Fiel
   val MATCH_URL : TableField[BoutRecord, String] = createField("match_url", org.jooq.impl.SQLDataType.CLOB, "")
 
   /**
+   * The column <code>scl.bout.draft</code>.
+   */
+  val DRAFT : TableField[BoutRecord, Integer] = createField("draft", org.jooq.impl.SQLDataType.INTEGER, "")
+
+  /**
    * Create a <code>scl.bout</code> table reference
    */
   def this() = {
@@ -128,7 +133,7 @@ class Bout(alias : String, aliased : Table[BoutRecord], parameters : Array[ Fiel
   }
 
   override def getReferences : List[ ForeignKey[BoutRecord, _] ] = {
-    return Arrays.asList[ ForeignKey[BoutRecord, _] ](Keys.FK_DIVISON, Keys.FK_PLAYER1, Keys.FK_PLAYER2, Keys.FK_WINNER)
+    return Arrays.asList[ ForeignKey[BoutRecord, _] ](Keys.FK_DIVISON, Keys.FK_PLAYER1, Keys.FK_PLAYER2, Keys.FK_WINNER, Keys.FK_DRAFT)
   }
 
   override def as(alias : String) : Bout = {

@@ -48,7 +48,7 @@ class PlayerServlet(implicit dslContext: DSLContext, val swagger: Swagger) exten
       leaguePlayers = DivisionDao.getPlayersInLeague(player.getDivision)
       playerMap = leaguePlayers.map(it => (it.getName, it)).toMap
       matchRecords = BoutDao.getMatchesForPlayer(player.getName)
-      matches = matchRecords.map(Match.fromDatabaseRecordWithGames(_, None, playerMap))
+      matches = matchRecords.map(Match.fromDatabaseRecordWithGames(_, None, playerMap, None))
     } yield Player.fromDatabaseRecord(player, Some(matches))
 
     decoded match {

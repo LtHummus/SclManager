@@ -10,6 +10,7 @@ import scala.Array
 
 import zzz.generated.tables.Bout
 import zzz.generated.tables.Division
+import zzz.generated.tables.Draft
 import zzz.generated.tables.Game
 import zzz.generated.tables.Player
 
@@ -35,6 +36,11 @@ object Tables {
    * The table <code>scl.division</code>.
    */
   val DIVISION = zzz.generated.tables.Division.DIVISION
+
+  /**
+   * The table <code>scl.draft</code>.
+   */
+  val DRAFT = zzz.generated.tables.Draft.DRAFT
 
   /**
    * The table <code>scl.game</code>.

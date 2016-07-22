@@ -95,7 +95,7 @@ class MatchServlet(implicit dslContext: DSLContext) extends SclManagerStack with
         val p1 = it._2
         val p2 = it._3
         val playerMap = Map(p1.getName -> p1, p2.getName -> p2)
-        Ok(Match.fromDatabaseRecordWithGames(m, None, playerMap))
+        Ok(Match.fromDatabaseRecordWithGames(m, None, playerMap, None))
     }
   }
 
@@ -104,7 +104,7 @@ class MatchServlet(implicit dslContext: DSLContext) extends SclManagerStack with
 
     bout match {
       case -\/(error) => BadRequest(error)
-      case \/-(it) => Match.fromDatabaseRecordWithGames(it.bout, Some(it.games), it.playerMap)
+      case \/-(it) => Match.fromDatabaseRecordWithGames(it.bout, Some(it.games), it.playerMap, it.draft)
     }
   }
 }

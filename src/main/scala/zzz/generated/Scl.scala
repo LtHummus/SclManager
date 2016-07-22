@@ -18,6 +18,7 @@ import scala.Array
 
 import zzz.generated.tables.Bout
 import zzz.generated.tables.Division
+import zzz.generated.tables.Draft
 import zzz.generated.tables.Game
 import zzz.generated.tables.Player
 
@@ -54,6 +55,7 @@ class Scl extends SchemaImpl("scl", DefaultCatalog.DEFAULT_CATALOG) {
     return Arrays.asList[Table[_]](
       Bout.BOUT,
       Division.DIVISION,
+      Draft.DRAFT,
       Game.GAME,
       Player.PLAYER)
   }

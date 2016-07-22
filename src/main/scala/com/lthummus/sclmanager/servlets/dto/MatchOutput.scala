@@ -1,18 +1,18 @@
 package com.lthummus.sclmanager.servlets.dto
 
 import com.lthummus.sclmanager.parsing.{Bout, GameResult}
-import zzz.generated.tables.records.{GameRecord, BoutRecord, PlayerRecord}
+import zzz.generated.tables.records.{BoutRecord, DraftRecord, GameRecord, PlayerRecord}
 
 import scalaz._
 import Scalaz._
 
-case class Match(id: Int, week: Int, league: String, player1: Player, player2: Player, status: Int, winner: Option[Player], games: Option[List[Game]], matchUrl: Option[String])
+case class Match(id: Int, week: Int, league: String, player1: Player, player2: Player, status: Int, winner: Option[Player], games: Option[List[Game]], matchUrl: Option[String], draft: Option[Draft])
 
 case class Game(id: Int, spy: Player, sniper: Player, matchId: Int, result: String, level: String, gameType: String)
 
 object Match {
 
-  def fromDatabaseRecordWithGames(record: BoutRecord, games: Option[List[GameRecord]], playerMap: Map[String, PlayerRecord]) = {
+  def fromDatabaseRecordWithGames(record: BoutRecord, games: Option[List[GameRecord]], playerMap: Map[String, PlayerRecord], draft: Option[DraftRecord]) = {
     val gameList = games.map(x => x.map(Game.fromDatabaseRecord(_, playerMap)))
     val winner = if (record.getWinner == null) None else Some(Player.fromDatabaseRecord(playerMap(record.getWinner)))
     val packagedMatchUrl = Option(record.getMatchUrl)
@@ -24,7 +24,8 @@ object Match {
       record.getStatus,
       winner,
       gameList,
-      packagedMatchUrl)
+      packagedMatchUrl,
+      draft.map(Draft.fromDatabaseRecord))
   }
 }
 
