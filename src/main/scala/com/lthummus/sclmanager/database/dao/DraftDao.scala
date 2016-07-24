@@ -1,5 +1,6 @@
 package com.lthummus.sclmanager.database.dao
 
+import com.lthummus.sclmanager.servlets.dto.DraftInput
 import org.jooq.DSLContext
 import zzz.generated.Tables
 import zzz.generated.tables.records.DraftRecord
@@ -10,6 +11,18 @@ object DraftDao {
 
   def all()(implicit dslContext: DSLContext) = {
     dslContext.selectFrom(Tables.DRAFT).fetch().toList
+  }
+
+  def persist(input: DraftInput)(implicit dslContext: DSLContext) = {
+    val players = Seq(input.player1, input.player2).sorted
+    val record = dslContext.newRecord(Tables.DRAFT)
+
+    record.setPlayer1(players.head)
+    record.setPlayer2(players(1))
+    record.setRoomCode(input.roomCode)
+    record.setPayload(input.payload)
+
+    record.insert()
   }
 
   def getById(id: Int)(implicit dslContext: DSLContext) = {
@@ -43,7 +56,7 @@ object DraftDao {
     dslContext.selectFrom(Tables.BOUT).where(Tables.BOUT.DRAFT.eq(id)).fetch().size() != 0
 
 
-  private def killUsedDraft(draft: DraftRecord) = {
+  private def killUsedDraft(draft: DraftRecord)(implicit dslContext: DSLContext) = {
     if (isDraftUsed(draft.getId))
       None
     else

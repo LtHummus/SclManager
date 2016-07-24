@@ -67,7 +67,7 @@ object BoutDao {
       player1 <- PlayerDao.getByPlayerName(matchData.getPlayer1) \/> s"No player found with id ${matchData.getPlayer1}"
       player2 <- PlayerDao.getByPlayerName(matchData.getPlayer2) \/> s"No player found with id ${matchData.getPlayer2}"
       gameList = GameDao.getGameRecordsByBoutId(boutId)
-      draft = DraftDao.getById(matchData.getDraft)
+      draft = if (matchData.getDraft != null) DraftDao.getById(matchData.getDraft) else None
     } yield FullBoutRecord(matchData, gameList, Map(player1.getName -> player1, player2.getName -> player2), draft)
   }
 
