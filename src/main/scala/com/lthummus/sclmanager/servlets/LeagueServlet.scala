@@ -2,7 +2,7 @@ package com.lthummus.sclmanager.servlets
 
 import com.lthummus.sclmanager.SclManagerStack
 import com.lthummus.sclmanager.database.dao.{DivisionDao, PlayerDao}
-import com.lthummus.sclmanager.servlets.dto.{League, LeagueList, LeagueOverview}
+import com.lthummus.sclmanager.servlets.dto.{ErrorMessage, League, LeagueList, LeagueOverview}
 import org.jooq.DSLContext
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.{NotFound, Ok}
@@ -46,7 +46,7 @@ class LeagueServlet(implicit dslContext: DSLContext, val swagger: Swagger) exten
     val players = DivisionDao.getPlayersInLeague(name)
 
     league match {
-      case None => NotFound(s"No league with id $name found")
+      case None => NotFound(ErrorMessage(s"No league with id $name found"))
       case Some(it) => Ok(League.fromDatabaseRecord(it, players))
     }
   }

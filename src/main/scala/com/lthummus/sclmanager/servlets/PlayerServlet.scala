@@ -2,7 +2,7 @@ package com.lthummus.sclmanager.servlets
 
 import com.lthummus.sclmanager.SclManagerStack
 import com.lthummus.sclmanager.database.dao.{BoutDao, DivisionDao, PlayerDao}
-import com.lthummus.sclmanager.servlets.dto.{Match, Player}
+import com.lthummus.sclmanager.servlets.dto.{ErrorMessage, Match, Player}
 import org.jooq.DSLContext
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.{NotFound, Ok}
@@ -27,7 +27,7 @@ class PlayerServlet(implicit dslContext: DSLContext, val swagger: Swagger) exten
     val name = params("name")
 
     PlayerDao.getByPlayerName(name) match {
-      case None => NotFound(s"No player with name $name found")
+      case None => NotFound(ErrorMessage(s"No player with name $name found"))
       case Some(player) => Ok(Player.fromDatabaseRecord(player))
     }
   }
@@ -52,7 +52,7 @@ class PlayerServlet(implicit dslContext: DSLContext, val swagger: Swagger) exten
     } yield Player.fromDatabaseRecord(player, Some(matches))
 
     decoded match {
-      case None => NotFound(s"No player with id $name found")
+      case None => NotFound(ErrorMessage(s"No player with id $name found"))
       case Some(player) => Ok(player)
     }
   }

@@ -13,6 +13,9 @@ import Scalaz._
 case class FullBoutRecord(bout: BoutRecord, games: List[GameRecord], playerMap: Map[String, PlayerRecord], draft: Option[DraftRecord])
 
 object BoutDao {
+
+  def getAll()(implicit dslContext: DSLContext) = dslContext.selectFrom(Tables.BOUT).fetch().toList
+
   def getById(id: Int)(implicit dslContext: DSLContext): Option[BoutRecord] = {
     val res = dslContext.selectFrom(Tables.BOUT).where(Tables.BOUT.ID.eq(id)).fetch()
 

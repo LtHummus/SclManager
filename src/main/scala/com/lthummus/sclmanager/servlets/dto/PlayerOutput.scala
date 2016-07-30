@@ -3,13 +3,16 @@ package com.lthummus.sclmanager.servlets.dto
 import zzz.generated.tables.records.PlayerRecord
 
 
-case class Player(divisionName: String, name: String, country: String, wins: Int, draws: Int, losses: Int, matches: Option[List[Match]]) {
-  val matchesPlayed = wins + draws + losses
-}
+case class Player(divisionName: String, name: String, country: String, wins: Int, draws: Int, losses: Int, matchesPlayed: Int, score: Int, matches: Option[List[Match]])
 
-case class PlayerList(players: List[Player])
+
 
 object Player {
+  implicit class RichPlayer(player: PlayerRecord) {
+    def getScore = 2 * player.getWins + player.getDraws
+    def matchesPlayed = player.getWins + player.getDraws + player.getLosses
+  }
+
   def fromDatabaseRecord(record: PlayerRecord, matches: Option[List[Match]] = None) =
     Player(record.getDivision,
       record.getName,
@@ -17,5 +20,7 @@ object Player {
       record.getWins,
       record.getDraws,
       record.getLosses,
+      record.matchesPlayed,
+      record.getScore,
       matches)
 }

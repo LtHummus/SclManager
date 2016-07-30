@@ -8,10 +8,11 @@ import Scalaz._
 
 case class Match(id: Int, week: Int, league: String, player1: Player, player2: Player, status: Int, winner: Option[Player], games: Option[List[Game]], matchUrl: Option[String], draft: Option[Draft])
 
-case class Game(id: Int, spy: Player, sniper: Player, matchId: Int, result: String, level: String, gameType: String)
+case class Game(id: Int, spy: String, sniper: String, matchId: Int, result: String, level: String, gameType: String)
+
+case class MatchList(matches: Seq[Match])
 
 object Match {
-
   def fromDatabaseRecordWithGames(record: BoutRecord, games: Option[List[GameRecord]], playerMap: Map[String, PlayerRecord], draft: Option[DraftRecord]) = {
     val gameList = games.map(x => x.map(Game.fromDatabaseRecord(_, playerMap)))
     val winner = if (record.getWinner == null) None else Some(Player.fromDatabaseRecord(playerMap(record.getWinner)))
@@ -36,8 +37,8 @@ object Game {
       case \/-(res) => res.toString
     }
     Game(record.getId,
-      Player.fromDatabaseRecord(playerMap(record.getSpy)),
-      Player.fromDatabaseRecord(playerMap(record.getSniper)),
+      record.getSpy,
+      record.getSniper,
       record.getBout,
       gameResult,
       record.getVenue,

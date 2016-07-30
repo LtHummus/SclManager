@@ -11,7 +11,7 @@ import org.scalatra.json.JacksonJsonSupport
 import org.scalatra.servlet.{FileUploadSupport, MultipartConfig}
 import zzz.generated.tables.records.{DraftRecord, GameRecord, PlayerRecord}
 import com.lthummus.sclmanager.database.dao.GameDao._
-import com.lthummus.sclmanager.servlets.dto.Match
+import com.lthummus.sclmanager.servlets.dto.{ErrorMessage, Match}
 import com.lthummus.sclmanager.util.S3Uploader
 
 import scalaz._
@@ -71,7 +71,7 @@ class MatchServlet(implicit dslContext: DSLContext) extends SclManagerStack with
     } yield result
 
     result match {
-      case -\/(error) => BadRequest(error)
+      case -\/(error) => BadRequest(ErrorMessage(error))
       case \/-(_) => Ok("match persisted ok")
     }
 
@@ -91,7 +91,7 @@ class MatchServlet(implicit dslContext: DSLContext) extends SclManagerStack with
     } yield (matchObj, player1Obj, player2Obj)
 
     result match {
-      case None => NotFound("No match found")
+      case None => NotFound(ErrorMessage("No match found"))
       case Some(it) =>
         val m = it._1
         val p1 = it._2
@@ -105,8 +105,13 @@ class MatchServlet(implicit dslContext: DSLContext) extends SclManagerStack with
     val bout = BoutDao.getFullBoutRecords(params("id").toInt)
 
     bout match {
-      case -\/(error) => BadRequest(error)
-      case \/-(it) => Match.fromDatabaseRecordWithGames(it.bout, Some(it.games), it.playerMap, it.draft)
+      case -\/(error) => BadRequest(ErrorMessage(error))
+      case \/-(it) => Ok(Match.fromDatabaseRecordWithGames(it.bout, Some(it.games), it.playerMap, it.draft))
     }
+  }
+
+  get("/all") {
+    val players = PlayerDao.all()
+    Ok(BoutDao.getAll().map(Match.fromDatabaseRecordWithGames(_, None, players.map(it => (it.getName, it)).toMap, None)))
   }
 }
