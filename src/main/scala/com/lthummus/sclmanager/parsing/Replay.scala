@@ -8,6 +8,7 @@ import java.util.Date
 
 import com.lthummus.sclmanager.parsing.GameLoadoutType.GameLoadoutType
 import com.lthummus.sclmanager.parsing.GameResult.GameResult
+import org.joda.time.DateTime
 
 import scalaz._
 import Scalaz._
@@ -87,11 +88,11 @@ object GameType {
 
 case class Replay(spy: String,
                   sniper: String,
-                  sequence: Int,
+                  startTime: DateTime,
                   result: GameResult,
                   level: Level,
                   loadoutType: GameType) extends Ordered[Replay] {
-  override def compare(that: Replay): Int = this.sequence - that.sequence
+  override def compare(that: Replay): Int = if (this.startTime.isBefore(that.startTime.toInstant)) -1 else 1
 
   def isCompleted = result != GameResult.InProgress
   def spyWon = result == GameResult.CivilianShot || result == GameResult.MissionWin
@@ -134,8 +135,14 @@ object Replay {
     } yield gameResult
   }
 
-  private def extractSequenceNumber(headerData: Array[Byte]) = {
-    headerData(0x2C).toInt.right
+  private def extractStartTime(headerData: Array[Byte]) = {
+    val timeBytes = headerData.slice(0x28, 0x2C)
+    println(util.Arrays.toString(timeBytes))
+    val buffer = ByteBuffer.wrap(timeBytes)
+    buffer.order(ByteOrder.LITTLE_ENDIAN)
+    val res = buffer.getInt() & 0xFFFFFFFFL
+
+    new DateTime(res * 1000).right
   }
 
   private def extractSpyName(headerData: Array[Byte], spyNameLength: Int) = {
@@ -171,11 +178,11 @@ object Replay {
       spyNameLength <- extractSpyNameLength(headerData)
       sniperNameLength <- extractSniperNameLength(headerData)
       gameResult <- extractGameResult(headerData)
-      sequenceNumber <- extractSequenceNumber(headerData)
+      startTime <- extractStartTime(headerData)
       spy <- extractSpyName(headerData, spyNameLength)
       sniper <- extractSniperName(headerData, spyNameLength, sniperNameLength)
       gameType <- GameType.fromInt(extractInt(headerData, 0x34))
       level <- extractLevel(headerData)
-    } yield Replay(spy, sniper, sequenceNumber, gameResult, level, gameType)
+    } yield Replay(spy, sniper, startTime, gameResult, level, gameType)
   }
 }

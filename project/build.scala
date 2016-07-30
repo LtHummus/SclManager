@@ -49,7 +49,11 @@ object SclManagerBuild extends Build {
 
 
         //s3
-        "com.github.seratch" %% "awscala" % "0.3.+"
+        "com.github.seratch" %% "awscala" % "0.3.+",
+
+
+        //dates are garbage
+        "com.github.nscala-time" %% "nscala-time" % "2.12.0"
       ),
       scalateTemplateConfig in Compile <<= (sourceDirectory in Compile){ base =>
         Seq(
