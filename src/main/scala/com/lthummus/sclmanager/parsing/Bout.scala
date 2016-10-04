@@ -69,14 +69,6 @@ case class Bout(replays: List[Replay]) {
 
   def getForumPost = {
     s"""
-      |Results for $player1 v. $player2
-      |
-      |Bans:
-      |    (GO HERE)
-      |Picks:
-      |     (GO HERE)
-      |
-      |
       |Results:
       |[results]
       |${getGameSummary.mkString("\n")}

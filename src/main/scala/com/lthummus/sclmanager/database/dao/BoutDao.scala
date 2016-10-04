@@ -1,6 +1,7 @@
 package com.lthummus.sclmanager.database.dao
 
 import com.lthummus.sclmanager.parsing.Bout
+import com.lthummus.sclmanager.servlets.dto.Draft
 import org.jooq.DSLContext
 import zzz.generated.Tables
 import zzz.generated.tables.records.{BoutRecord, DraftRecord, GameRecord, PlayerRecord}
@@ -10,7 +11,7 @@ import scalaz._
 import Scalaz._
 
 
-case class FullBoutRecord(bout: BoutRecord, games: List[GameRecord], playerMap: Map[String, PlayerRecord], draft: Option[DraftRecord])
+case class FullBoutRecord(bout: BoutRecord, games: List[GameRecord], playerMap: Map[String, PlayerRecord], draft: Option[Draft])
 
 object BoutDao {
 

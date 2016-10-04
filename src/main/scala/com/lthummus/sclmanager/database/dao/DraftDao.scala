@@ -1,13 +1,19 @@
 package com.lthummus.sclmanager.database.dao
 
-import com.lthummus.sclmanager.servlets.dto.DraftInput
+import com.lthummus.sclmanager.servlets.dto.{Draft, DraftInput, DraftPayload}
 import org.jooq.DSLContext
 import zzz.generated.Tables
 import zzz.generated.tables.records.DraftRecord
+import org.json4s._
+import org.json4s.jackson.JsonMethods._
+import org.json4s.jackson.Serialization
+import org.json4s.jackson.Serialization._
 
 import scala.collection.JavaConversions._
 
 object DraftDao {
+
+  implicit val formats = Serialization.formats(NoTypeHints)
 
   def all()(implicit dslContext: DSLContext) = {
     dslContext.selectFrom(Tables.DRAFT).fetch().toList
@@ -20,7 +26,7 @@ object DraftDao {
     record.setPlayer1(players.head)
     record.setPlayer2(players(1))
     record.setRoomCode(input.roomCode)
-    record.setPayload(input.payload)
+    record.setPayload(write(input.payload))
 
     record.insert()
   }
@@ -30,7 +36,7 @@ object DraftDao {
 
     res.size() match {
       case 0 => None
-      case 1 => Some(res.get(0))
+      case 1 => Some(Draft.fromDatabaseRecord(res(0)))
       case _ => ???
     }
   }

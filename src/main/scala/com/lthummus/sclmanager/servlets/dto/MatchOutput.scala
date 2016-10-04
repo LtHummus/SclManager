@@ -45,12 +45,23 @@ case class Game(id: Int,
 case class MatchList(matches: Seq[Match])
 
 object Match {
-  def fromDatabaseRecordWithGames(record: BoutRecord, games: Option[List[GameRecord]], playerMap: Map[String, PlayerRecord], draft: Option[DraftRecord]) = {
+  def fromDatabaseRecordWithGames(record: BoutRecord, games: Option[List[GameRecord]], playerMap: Map[String, PlayerRecord], draft: Option[Draft]) = {
     val gameList = games.map(x => x.map(Game.fromDatabaseRecord(_, playerMap)))
     val winner = if (record.getWinner == null) None else Some(Player.fromDatabaseRecord(playerMap(record.getWinner)))
     val packagedMatchUrl = Option(record.getMatchUrl)
 
-    val bout = gameList.map(_.map(_.asReplay)).map(Bout(_).getForumPost)
+    val summary = for {
+      boutSummary <- gameList.map(_.map(_.asReplay)).map(Bout(_))
+      draftSummary <- draft.map(_.asForumPost)
+    } yield {
+      s"""
+        |Results for ${boutSummary.player1} v. ${boutSummary.player2}
+        |
+        |$draftSummary
+        |
+        |${boutSummary.getForumPost}
+      """.stripMargin
+    }
 
     Match(record.getId,
       record.getWeek,
@@ -61,8 +72,8 @@ object Match {
       winner,
       gameList,
       packagedMatchUrl,
-      draft.map(Draft.fromDatabaseRecord),
-      bout)
+      draft,
+      summary)
   }
 }
 
