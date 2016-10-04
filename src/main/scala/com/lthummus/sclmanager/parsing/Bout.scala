@@ -66,6 +66,25 @@ case class Bout(replays: List[Replay]) {
       s"TieParty $player1Score-$player2Score"
     }
   }
+
+  def getForumPost = {
+    s"""
+      |Results for $player1 v. $player2
+      |
+      |Bans:
+      |    (GO HERE)
+      |Picks:
+      |     (GO HERE)
+      |
+      |
+      |Results:
+      |[results]
+      |${getGameSummary.mkString("\n")}
+      |
+      |$getScoreLine
+      |[/results]
+    """.stripMargin
+  }
 }
 
 object Bout {

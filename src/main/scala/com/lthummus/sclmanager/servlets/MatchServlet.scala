@@ -13,6 +13,7 @@ import zzz.generated.tables.records.{DraftRecord, GameRecord, PlayerRecord}
 import com.lthummus.sclmanager.database.dao.GameDao._
 import com.lthummus.sclmanager.servlets.dto.{ErrorMessage, Match}
 import com.lthummus.sclmanager.util.S3Uploader
+import org.scalatra.swagger.{Swagger, SwaggerEngine, SwaggerSupport}
 
 import scalaz._
 import Scalaz._
@@ -21,9 +22,12 @@ object MatchServlet {
   val Uploader = new S3Uploader()
 }
 
-class MatchServlet(implicit dslContext: DSLContext) extends SclManagerStack with JacksonJsonSupport
-                                                                            with FileUploadSupport {
+class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extends SclManagerStack with JacksonJsonSupport
+                                                                            with FileUploadSupport
+                                                                            with SwaggerSupport {
   protected implicit lazy val jsonFormats: Formats = DefaultFormats
+
+  protected val applicationDescription = "Gets match information"
 
   configureMultipartHandling(MultipartConfig(maxFileSize = Some(3 * 1024 * 1024))) // 3 megabytes
 
@@ -114,4 +118,5 @@ class MatchServlet(implicit dslContext: DSLContext) extends SclManagerStack with
     val players = PlayerDao.all()
     Ok(BoutDao.getAll().map(Match.fromDatabaseRecordWithGames(_, None, players.map(it => (it.getName, it)).toMap, None)))
   }
+
 }

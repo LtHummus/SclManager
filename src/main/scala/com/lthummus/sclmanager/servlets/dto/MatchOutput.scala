@@ -1,14 +1,46 @@
 package com.lthummus.sclmanager.servlets.dto
 
-import com.lthummus.sclmanager.parsing.{Bout, GameResult}
+import com.lthummus.sclmanager.parsing._
+import org.joda.time.DateTime
 import zzz.generated.tables.records.{BoutRecord, DraftRecord, GameRecord, PlayerRecord}
 
 import scalaz._
 import Scalaz._
 
-case class Match(id: Int, week: Int, league: String, player1: Player, player2: Player, status: Int, winner: Option[Player], games: Option[List[Game]], matchUrl: Option[String], draft: Option[Draft])
+case class Match(id: Int,
+                 week: Int,
+                 league: String,
+                 player1: Player,
+                 player2: Player,
+                 status: Int,
+                 winner: Option[Player],
+                 games: Option[List[Game]],
+                 matchUrl: Option[String],
+                 draft: Option[Draft],
+                 summary: Option[String]) {
 
-case class Game(id: Int, spy: String, sniper: String, matchId: Int, result: String, level: String, gameType: String)
+}
+
+case class Game(id: Int,
+                spy: String,
+                sniper: String,
+                matchId: Int,
+                result: String,
+                level: String,
+                gameType: String) {
+  def asReplay: Replay = {
+    val disjointReplay = for {
+      parsedResult <- GameResult.fromString(result)
+      parsedLevel <- Level.getLevelByName(level)
+      parsedGameType <- GameType.fromString(gameType)
+    } yield Replay(spy, sniper, new DateTime(id * 1000L), parsedResult, parsedLevel, parsedGameType)
+
+    disjointReplay match {
+      case -\/(error) => ???
+      case \/-(replay) => replay
+    }
+  }
+}
 
 case class MatchList(matches: Seq[Match])
 
@@ -17,6 +49,9 @@ object Match {
     val gameList = games.map(x => x.map(Game.fromDatabaseRecord(_, playerMap)))
     val winner = if (record.getWinner == null) None else Some(Player.fromDatabaseRecord(playerMap(record.getWinner)))
     val packagedMatchUrl = Option(record.getMatchUrl)
+
+    val bout = gameList.map(_.map(_.asReplay)).map(Bout(_).getForumPost)
+
     Match(record.getId,
       record.getWeek,
       record.getDivision,
@@ -26,7 +61,8 @@ object Match {
       winner,
       gameList,
       packagedMatchUrl,
-      draft.map(Draft.fromDatabaseRecord))
+      draft.map(Draft.fromDatabaseRecord),
+      bout)
   }
 }
 

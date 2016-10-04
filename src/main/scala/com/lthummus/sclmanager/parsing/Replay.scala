@@ -17,6 +17,17 @@ object GameResult extends Enumeration {
   type GameResult = Value
   val MissionWin, SpyTimeout, SpyShot, CivilianShot, InProgress = Value
 
+  def fromString(value: String) = {
+    value match {
+      case "MissionWin"   => MissionWin.right
+      case "SpyTimeout"   => SpyTimeout.right
+      case "SpyShot"      => SpyShot.right
+      case "CivilianShot" => CivilianShot.right
+      case "InProgress"   => InProgress.right
+      case _              => s"Unknown game result type: $value".left
+    }
+  }
+
   def fromInt(value: Int) = {
     value match {
       case 0 => MissionWin.right
@@ -44,7 +55,7 @@ object GameLoadoutType extends Enumeration {
   type GameLoadoutType = Value
   val Known, Any, Pick = Value
 
-  def fromInt(value: Int) = {
+  def fromInt(value: Int): String \/ GameLoadoutType = {
     value match {
       case 0 => Known.right
       case 1 => Pick.right
