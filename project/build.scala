@@ -47,10 +47,8 @@ object SclManagerBuild extends Build {
         // configuration
         "com.typesafe" % "config" % "1.3.0",
 
-
-        //s3
-        "com.github.seratch" %% "awscala" % "0.3.+",
-
+        //aws
+        "com.amazonaws" % "aws-java-sdk" % "1.11.39",
 
         //dates are garbage
         "com.github.nscala-time" %% "nscala-time" % "2.12.0"

@@ -13,13 +13,12 @@ import Scalaz._
 object GameDao {
 
   implicit class ConvertableToReplay(record: GameRecord) {
-    def asReplay(spy: String, sniper: String): String \/ Replay = {
+    def asReplay: String \/ Replay = {
       for {
         resultValue <- GameResult.fromInt(record.getResult)
         level <- Level.getLevelByName(record.getVenue)
         decodedGameType <- GameType.fromString(record.getGametype)
-        /* XXX: FIX ME */
-      } yield Replay(spy, sniper, new DateTime(), resultValue, level, decodedGameType)
+      } yield Replay(record.getSpy, record.getSniper, new DateTime(), resultValue, level, decodedGameType)
     }
   }
 
@@ -27,6 +26,12 @@ object GameDao {
     def toDatabase(matchId: Int) = {
       new GameRecord(null, replay.spy, replay.sniper, matchId, GameResult.toInt(replay.result), 2, replay.level.name, replay.loadoutType.toString)
     }
+  }
+
+  def all(implicit dslContext: DSLContext) = {
+    dslContext
+      .selectFrom(Tables.GAME)
+      .fetch().asScala.toList
   }
 
   def getGameRecordsByBoutId(matchId: Int)(implicit dslContext: DSLContext): List[GameRecord] = {
@@ -44,7 +49,7 @@ object GameDao {
       .orderBy(Tables.GAME.SEQUENCE)
       .fetch()
 
-    val replays = res.asScala.map(it => it.asReplay(it.getSpy, it.getSniper)).collect{ case \/-(it) => it}.toList
+    val replays = res.asScala.map(it => it.asReplay).collect{ case \/-(it) => it}.toList
 
     if (res.size() == replays.size)
       replays.right

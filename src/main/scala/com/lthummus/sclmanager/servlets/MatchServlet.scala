@@ -58,8 +58,7 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
   }
 
   private def uploadToS3(name: String, contents: Array[Byte]) = {
-    "We did ok".right
-    //MatchServlet.Uploader.putReplay(name, contents)
+    MatchServlet.Uploader.putReplay(name, contents)
   }
 
   // TODO: pull upload from body?
