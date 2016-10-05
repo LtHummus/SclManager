@@ -31,17 +31,17 @@ object DraftDao {
     record.insert()
   }
 
-  def getById(id: Int)(implicit dslContext: DSLContext) = {
+  def getById(id: Int)(implicit dslContext: DSLContext): Option[DraftRecord] = {
     val res = dslContext.selectFrom(Tables.DRAFT).where(Tables.DRAFT.ID.eq(id)).fetch
 
     res.size() match {
       case 0 => None
-      case 1 => Some(Draft.fromDatabaseRecord(res(0)))
+      case 1 => Some(res(0))
       case _ => ???
     }
   }
 
-  def getLatestForPlayers(players: Seq[String])(implicit dslContext: DSLContext) = {
+  def getLatestForPlayers(players: Seq[String])(implicit dslContext: DSLContext): Option[DraftRecord] = {
     players.ensuring(players.length == 2)
 
     val sortedPlayers = players.sorted
@@ -58,7 +58,7 @@ object DraftDao {
     }
   }
 
-  def isDraftUsed(id: Int)(implicit dslContext: DSLContext) =
+  def isDraftUsed(id: Int)(implicit dslContext: DSLContext): Boolean =
     dslContext.selectFrom(Tables.BOUT).where(Tables.BOUT.DRAFT.eq(id)).fetch().size() != 0
 
 
