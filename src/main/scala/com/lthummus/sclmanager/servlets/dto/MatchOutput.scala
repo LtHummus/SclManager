@@ -63,6 +63,7 @@ object Match {
       """.stripMargin
     }
 
+
     Match(record.getId,
       record.getWeek,
       record.getDivision,

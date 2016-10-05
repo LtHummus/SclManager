@@ -26,6 +26,10 @@ object BoutDao {
     }
   }
 
+  def getByWeek(week: Int)(implicit dslContext: DSLContext): List[BoutRecord] = {
+    dslContext.selectFrom(Tables.BOUT).where(Tables.BOUT.WEEK.eq(week)).toList
+  }
+
   def getOutstandingBoutFromLeague(id: Int)(implicit dslContext: DSLContext): List[BoutRecord] = {
     dslContext.selectFrom(Tables.BOUT).where(Tables.BOUT.STATUS.eq(0)).toList
   }

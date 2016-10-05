@@ -81,6 +81,12 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
 
   }
 
+  get("/week/:week") {
+    val week = params("week").toInt
+    val players = PlayerDao.all()
+    Ok(BoutDao.getByWeek(week).map(Match.fromDatabaseRecordWithGames(_, None, players.map(it => (it.getName, it)).toMap, None)))
+  }
+
   get("/next/:player1/:player2") {
     val player1Param = params("player1")
     val player2Param = params("player2")
