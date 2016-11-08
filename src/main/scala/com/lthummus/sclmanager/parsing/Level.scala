@@ -32,14 +32,15 @@ object Level {
     Level("Gallery", 0x28B3AA5E),
     Level("Courtyard 2", 0x290A0C75),
     Level("Panopticon", 0x3695F583),
-    Level("Veranda", -0x57415F6F),
+    Level("Old Art Veranda", -0x57415F6F),
     Level("Balcony", -0x4776E044),
     Level("Crowded Pub", 0xD027340),
     Level("Old Ballroom", 0x9C2E7B0),
     Level("Courtyard 1", -0x4B309795),
     Level("Double Modern", 0x7076E38F),
     Level("Modern", -0xC19EB9F),
-    Level("Pub", 0x3B85FFF3)
+    Level("Pub", 0x3B85FFF3),
+    Level("Veranda", 1870767448)
   )
 
   def getLevelByName(name: String): String \/ Level = {

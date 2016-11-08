@@ -61,7 +61,6 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
     MatchServlet.Uploader.putReplay(name, contents)
   }
 
-  // TODO: pull upload from body?
   post("/parse") {
     val file = fileParams("file")
 

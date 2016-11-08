@@ -148,7 +148,6 @@ object Replay {
 
   private def extractStartTime(headerData: Array[Byte]) = {
     val timeBytes = headerData.slice(0x28, 0x2C)
-    println(util.Arrays.toString(timeBytes))
     val buffer = ByteBuffer.wrap(timeBytes)
     buffer.order(ByteOrder.LITTLE_ENDIAN)
     val res = buffer.getInt() & 0xFFFFFFFFL
