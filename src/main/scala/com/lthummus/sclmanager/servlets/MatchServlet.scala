@@ -79,6 +79,16 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
 
   }
 
+  get("/upload/test") {
+    val path = "/tmp/foo"
+
+    val bytes = scala.io.Source.fromFile(path, "ISO-8859-1").map(_.toByte).toArray
+
+    new S3Uploader().putReplay("aaaa.zip", bytes)
+
+    Ok("maybe?")
+  }
+
   get("/week/:week") {
     val week = params("week").toInt
     val players = PlayerDao.all()

@@ -6,17 +6,24 @@ import com.earldouglas.xwp.JettyPlugin
 import com.mojolly.scalate.ScalatePlugin._
 import ScalateKeys._
 
+import org.scalatra.sbt.DistPlugin._
+
 object SclManagerBuild extends Build {
   val Organization = "com.lthummus"
-  val Name = "SCL Manager"
+  val Name = "sclmanager"
   val Version = "0.1.0-SNAPSHOT"
   val ScalaVersion = "2.11.8"
   val ScalatraVersion = "2.4.1"
 
+  val myDistSettings = DistPlugin.distSettings ++ Seq(
+    mainClass in Dist := Some("JettyLauncher")
+  )
+
   lazy val project = Project (
     "scl-manager",
     file("."),
-    settings = ScalatraPlugin.scalatraSettings ++ scalateSettings ++ Seq(
+    settings = ScalatraPlugin.scalatraSettings ++ scalateSettings ++ myDistSettings ++
+      Seq(
       organization := Organization,
       name := Name,
       version := Version,
@@ -29,7 +36,7 @@ object SclManagerBuild extends Build {
         "org.scalatra" %% "scalatra-specs2" % ScalatraVersion % "test",
         "org.scalatra" %% "scalatra-swagger" % ScalatraVersion,
         "ch.qos.logback" % "logback-classic" % "1.1.5" % "runtime",
-        "org.eclipse.jetty" % "jetty-webapp" % "9.2.15.v20160210" % "container",
+        "org.eclipse.jetty" % "jetty-webapp" % "9.4.0.v20161208" % "container;compile",
         "javax.servlet" % "javax.servlet-api" % "3.1.0" % "provided",
 
         // json support
