@@ -30,6 +30,8 @@ object SclManagerBuild extends Build {
       scalaVersion := ScalaVersion,
       resolvers += Classpaths.typesafeReleases,
       resolvers += "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases",
+      javaOptions ++= Seq("-Xdebug",
+        "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"),
       libraryDependencies ++= Seq(
         "org.scalatra" %% "scalatra" % ScalatraVersion,
         "org.scalatra" %% "scalatra-scalate" % ScalatraVersion,

@@ -17,7 +17,8 @@ case class Match(id: Int,
                  games: Option[List[Game]],
                  matchUrl: Option[String],
                  draft: Option[Draft],
-                 summary: Option[String]) {
+                 summary: String = "",
+                 forumPost: String = "") {
 
 }
 
@@ -50,18 +51,34 @@ object Match {
     val winner = if (record.getWinner == null) None else Some(Player.fromDatabaseRecord(playerMap(record.getWinner)))
     val packagedMatchUrl = Option(record.getMatchUrl)
 
-    val summary = for {
-      boutSummary <- gameList.map(_.map(_.asReplay)).map(Bout(_))
-      draftSummary <- draft.map(_.asForumPost)
-    } yield {
+    val maybeBout = gameList.map(_.map(_.asReplay)).map(Bout(_))
+    val p1Text = maybeBout.map(_.player1).getOrElse("Player 1")
+    val p2Text = maybeBout.map(_.player2).getOrElse("Player 2")
+    val summaryText = maybeBout.map(_.getGameSummary).getOrElse(List()).mkString("\n")
+    val draftSummary = draft.map(_.asForumPost).getOrElse("")
+
+    val forumPost =
       s"""
-        |Results for ${boutSummary.player1} v. ${boutSummary.player2}
+        |Results for $p1Text v. $p2Text
         |
         |$draftSummary
         |
-        |${boutSummary.getForumPost}
+        |[results]
+        |$summaryText
+        |[/results]
+        |
+        |Game link: ${record.getMatchUrl}
       """.stripMargin
-    }
+
+    val summary =
+      s"""
+        |Results for $p1Text v. $p2Text
+        |
+        |$draftSummary
+        |
+        |$summaryText
+      """.stripMargin
+
 
 
     Match(record.getId,
@@ -74,17 +91,21 @@ object Match {
       gameList,
       packagedMatchUrl,
       draft,
-      summary)
+      summary,
+      forumPost)
   }
 }
 
 object Game {
-  def fromDatabaseRecord(record: GameRecord, playerMap: Map[String, PlayerRecord]) = {
+  def fromDatabaseRecord(record: GameRecord, playerMap: Map[String, PlayerRecord]): Game = {
     val gameResult = GameResult.fromInt(record.getResult) match {
       case -\/(error) => error
       case \/-(res) => res.toString
     }
-    Game(record.getId,
+
+    val recordId = if (record.getId == null) new Integer(-1) else record.getId
+
+    Game(recordId,
       record.getSpy,
       record.getSniper,
       record.getBout,

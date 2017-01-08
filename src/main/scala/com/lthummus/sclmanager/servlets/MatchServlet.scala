@@ -11,7 +11,7 @@ import org.scalatra.json.JacksonJsonSupport
 import org.scalatra.servlet.{FileUploadSupport, MultipartConfig}
 import zzz.generated.tables.records.{DraftRecord, GameRecord, PlayerRecord}
 import com.lthummus.sclmanager.database.dao.GameDao._
-import com.lthummus.sclmanager.servlets.dto.{ErrorMessage, Match}
+import com.lthummus.sclmanager.servlets.dto.{BoutParseResults, ErrorMessage, Match}
 import com.lthummus.sclmanager.util.S3Uploader
 import org.scalatra.swagger.{Swagger, SwaggerEngine, SwaggerSupport}
 
@@ -44,7 +44,7 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
       player2Update <- PlayerDao.postResult(bout.player2, player2Res)
       boutPersist <- GameDao.persistBatchRecords(games)
       markMatch <- BoutDao.markBoutAsPlayed(games.head.getBout, url, draft)
-    } yield markMatch
+    } yield games.head.getBout
   }
 
   private def persistBout(bout: Bout, url: String) = {
@@ -74,19 +74,9 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
 
     result match {
       case -\/(error) => BadRequest(ErrorMessage(error))
-      case \/-(_) => Ok("match persisted ok")
+      case \/-(bout) => redirect(s"/match/$bout")
     }
 
-  }
-
-  get("/upload/test") {
-    val path = "/tmp/foo"
-
-    val bytes = scala.io.Source.fromFile(path, "ISO-8859-1").map(_.toByte).toArray
-
-    new S3Uploader().putReplay("aaaa.zip", bytes)
-
-    Ok("maybe?")
   }
 
   get("/week/:week") {

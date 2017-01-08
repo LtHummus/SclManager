@@ -18,15 +18,16 @@ class S3Uploader {
   val BucketName = config.getString("s3.bucketName")
 
   def putReplay(name: String, input: Array[Byte]): String \/ String = {
-    val metadata = new ObjectMetadata()
-    metadata.setContentLength(input.length)
-
-    try {
-      S3.putObject(BucketName, name, new ByteArrayInputStream(input), metadata)
-      s"https://s3-us-west-2.amazonaws.com/$BucketName/$name".right
-    } catch {
-      case e: Exception => e.getMessage.left
-    }
+    "good".right
+//    val metadata = new ObjectMetadata()
+//    metadata.setContentLength(input.length)
+//
+//    try {
+//      S3.putObject(BucketName, name, new ByteArrayInputStream(input), metadata)
+//      s"https://s3-us-west-2.amazonaws.com/$BucketName/$name".right
+//    } catch {
+//      case e: Exception => e.getMessage.left
+//    }
   }
 }
 
