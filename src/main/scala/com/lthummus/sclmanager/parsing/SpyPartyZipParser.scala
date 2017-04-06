@@ -5,6 +5,7 @@ import java.util.zip.{ZipEntry, ZipInputStream}
 
 import scalaz._
 import Scalaz._
+import scala.util.Try
 
 
 object SpyPartyZipParser {
@@ -28,6 +29,10 @@ object SpyPartyZipParser {
 
     zis.close()
 
-    Bout(replays.toList).right
+    try {
+      Bout(replays.toList).right
+    } catch {
+      case e: Exception => e.getMessage.left
+    }
   }
 }

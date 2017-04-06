@@ -82,7 +82,7 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
   get("/week/:week") {
     val week = params("week").toInt
     val players = PlayerDao.all()
-    Ok(BoutDao.getByWeek(week).map(Match.fromDatabaseRecordWithGames(_, None, players.map(it => (it.getName, it)).toMap, None)))
+    Ok(BoutDao.getByWeek(week).map(Match.fromDatabaseRecordWithGames(_, List(), players.map(it => (it.getName, it)).toMap, None)))
   }
 
   get("/next/:player1/:player2") {
@@ -105,7 +105,7 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
         val p1 = it._2
         val p2 = it._3
         val playerMap = Map(p1.getName -> p1, p2.getName -> p2)
-        Ok(Match.fromDatabaseRecordWithGames(m, None, playerMap, None))
+        Ok(Match.fromDatabaseRecordWithGames(m, List(), playerMap, None))
     }
   }
 
@@ -114,13 +114,13 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
 
     bout match {
       case -\/(error) => BadRequest(ErrorMessage(error))
-      case \/-(it) => Ok(Match.fromDatabaseRecordWithGames(it.bout, Some(it.games), it.playerMap, it.draft))
+      case \/-(it) => Ok(Match.fromDatabaseRecordWithGames(it.bout, it.games, it.playerMap, it.draft))
     }
   }
 
   get("/all") {
     val players = PlayerDao.all()
-    Ok(BoutDao.getAll().map(Match.fromDatabaseRecordWithGames(_, None, players.map(it => (it.getName, it)).toMap, None)))
+    Ok(BoutDao.getAll().map(Match.fromDatabaseRecordWithGames(_, List(), players.map(it => (it.getName, it)).toMap, None)))
   }
 
 }

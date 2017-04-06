@@ -14,4 +14,4 @@ object SclApiInfo extends ApiInfo (
   "http://example.com"
 )
 
-class SclSwagger extends Swagger(Swagger.SpecVersion, "1.0.0", SclApiInfo)
+class SclSwagger extends Swagger("2.0", "1.0.0", SclApiInfo)

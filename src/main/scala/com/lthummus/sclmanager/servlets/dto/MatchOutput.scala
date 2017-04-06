@@ -46,12 +46,15 @@ case class Game(id: Int,
 case class MatchList(matches: Seq[Match])
 
 object Match {
-  def fromDatabaseRecordWithGames(record: BoutRecord, games: Option[List[GameRecord]], playerMap: Map[String, PlayerRecord], draft: Option[Draft]) = {
-    val gameList = games.map(x => x.map(Game.fromDatabaseRecord(_, playerMap)))
+  def fromDatabaseRecordWithGames(record: BoutRecord, games: List[GameRecord], playerMap: Map[String, PlayerRecord], draft: Option[Draft]) = {
+    val gameList = games.map(Game.fromDatabaseRecord(_, playerMap))
     val winner = if (record.getWinner == null) None else Some(Player.fromDatabaseRecord(playerMap(record.getWinner)))
     val packagedMatchUrl = Option(record.getMatchUrl)
 
-    val maybeBout = gameList.map(_.map(_.asReplay)).map(Bout(_))
+    val maybeBout = gameList.size match {
+      case 0 => None
+      case _ => Some(Bout(gameList.map(_.asReplay)))
+    }
     val p1Text = maybeBout.map(_.player1).getOrElse("Player 1")
     val p2Text = maybeBout.map(_.player2).getOrElse("Player 2")
     val summaryText = maybeBout.map(_.getGameSummary).getOrElse(List()).mkString("\n")
@@ -88,7 +91,7 @@ object Match {
       Player.fromDatabaseRecord(playerMap(record.getPlayer2)),
       record.getStatus,
       winner,
-      gameList,
+      Some(gameList),
       packagedMatchUrl,
       draft,
       summary,

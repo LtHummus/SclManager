@@ -4,13 +4,31 @@ import com.typesafe.config.ConfigFactory
 
 case class Bout(replays: List[Replay]) {
 
-  val orderedReplays = replays.filter(_.isCompleted).sorted
+  val orderedReplays: List[Replay] = replays.filter(_.isCompleted).sorted
 
-  val player1 = orderedReplays.head.spy
-  val player2 = orderedReplays.head.sniper
+  val player1: String = orderedReplays.head.spy
+  val player2: String = orderedReplays.head.sniper
 
-  val player1Score = orderedReplays.count(_.winnerName == player1)
-  val player2Score = orderedReplays.count(_.winnerName == player2)
+  val player1Score: Int = orderedReplays.count(_.winnerName == player1)
+  val player2Score: Int = orderedReplays.count(_.winnerName == player2)
+
+  val isTie: Boolean = player1Score == player2Score
+
+  private def complete = {
+    //one player has 5 points and the other player has fewer than 4
+    //tied at 5-5
+    //6-4
+    Seq(player1Score, player2Score).sorted match {
+      case loser :: winner :: _ if winner == 5 && loser <= 4 => true
+      case loser :: winner :: _ if winner == 5 && loser == 5 => true
+      case loser :: winner :: _ if winner == 6 && loser == 4 => true
+      case _ => false
+    }
+  }
+
+  if (!complete) {
+    throw new Exception("This doesn't look like a complete SCL match.  Are all the replays included?")
+  }
 
   def pointsForPlayer(playerName: String): Int = {
     val ourScore = if (player1 == playerName) player1Score else player2Score
@@ -34,7 +52,6 @@ case class Bout(replays: List[Replay]) {
     }
   }
 
-  def isTie = player1Score == player2Score
 
   private def getSummaryForGroup(games: List[Replay]) = {
     if (games.size == 1) {

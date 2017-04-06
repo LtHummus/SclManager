@@ -3,8 +3,6 @@ import Keys._
 import org.scalatra.sbt._
 import org.scalatra.sbt.PluginKeys._
 import com.earldouglas.xwp.JettyPlugin
-import com.mojolly.scalate.ScalatePlugin._
-import ScalateKeys._
 
 import org.scalatra.sbt.DistPlugin._
 
@@ -12,8 +10,8 @@ object SclManagerBuild extends Build {
   val Organization = "com.lthummus"
   val Name = "sclmanager"
   val Version = "0.1.0-SNAPSHOT"
-  val ScalaVersion = "2.11.8"
-  val ScalatraVersion = "2.4.1"
+  val ScalaVersion = "2.12.1"
+  val ScalatraVersion = "2.5.0"
 
   val myDistSettings = DistPlugin.distSettings ++ Seq(
     mainClass in Dist := Some("JettyLauncher")
@@ -22,7 +20,7 @@ object SclManagerBuild extends Build {
   lazy val project = Project (
     "scl-manager",
     file("."),
-    settings = ScalatraPlugin.scalatraSettings ++ scalateSettings ++ myDistSettings ++
+    settings = ScalatraPlugin.scalatraSettings ++ myDistSettings ++
       Seq(
       organization := Organization,
       name := Name,
@@ -43,10 +41,10 @@ object SclManagerBuild extends Build {
 
         // json support
         "org.scalatra" %% "scalatra-json" % ScalatraVersion,
-        "org.json4s" %% "json4s-jackson" % "3.3.0",
+        "org.json4s" %% "json4s-jackson" % "3.5.1",
 
         // i am so functional right now
-        "org.scalaz" %% "scalaz-core" % "7.2.3",
+        "org.scalaz" %% "scalaz-core" % "7.2.10",
 
         // database bullshit
         "org.jooq" % "jooq" % "3.8.2",
@@ -60,20 +58,8 @@ object SclManagerBuild extends Build {
         "com.amazonaws" % "aws-java-sdk" % "1.11.39",
 
         //dates are garbage
-        "com.github.nscala-time" %% "nscala-time" % "2.12.0"
-      ),
-      scalateTemplateConfig in Compile <<= (sourceDirectory in Compile){ base =>
-        Seq(
-          TemplateConfig(
-            base / "webapp" / "WEB-INF" / "templates",
-            Seq.empty,  /* default imports should be added here */
-            Seq(
-              Binding("context", "_root_.org.scalatra.scalate.ScalatraRenderContext", importMembers = true, isImplicit = true)
-            ),  /* add extra bindings here */
-            Some("templates")
-          )
-        )
-      }
+        "com.github.nscala-time" %% "nscala-time" % "2.16.0"
+      )
     )
   ).enablePlugins(JettyPlugin)
 }
