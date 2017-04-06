@@ -72,9 +72,9 @@ case class Bout(replays: List[Replay]) {
 
   }
 
-  def getGameSummary = orderedReplays.grouped(2).map(getSummaryForGroup).toList
+  def getGameSummary: List[String] = orderedReplays.grouped(2).map(getSummaryForGroup).toList
 
-  def getScoreLine = {
+  def getScoreLine: String = {
     if (player1Score > player2Score) {
       s"$player1 wins $player1Score-$player2Score"
     } else if (player2Score > player1Score) {
@@ -84,7 +84,7 @@ case class Bout(replays: List[Replay]) {
     }
   }
 
-  def getForumPost = {
+  def getForumPost: String = {
     s"""
       |Results:
       |[results]

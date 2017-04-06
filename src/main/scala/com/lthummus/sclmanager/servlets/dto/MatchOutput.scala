@@ -70,7 +70,7 @@ object Match {
         |$summaryText
         |[/results]
         |
-        |Game link: ${record.getMatchUrl}
+        |Game link: [url]${record.getMatchUrl}[/url]
       """.stripMargin
 
     val summary =
