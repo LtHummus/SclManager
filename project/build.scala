@@ -46,6 +46,9 @@ object SclManagerBuild extends Build {
         // i am so functional right now
         "org.scalaz" %% "scalaz-core" % "7.2.10",
 
+        // apache is cool and good
+        "commons-io" % "commons-io" % "2.5",
+
         // database bullshit
         "org.jooq" % "jooq" % "3.8.2",
         "mysql" % "mysql-connector-java" % "5.1.16",

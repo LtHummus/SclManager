@@ -9,10 +9,11 @@ import org.json4s.{DefaultFormats, Formats}
 import org.scalatra._
 import org.scalatra.json.JacksonJsonSupport
 import org.scalatra.servlet.{FileUploadSupport, MultipartConfig}
-import zzz.generated.tables.records.{DraftRecord, GameRecord, PlayerRecord}
+import zzz.generated.tables.records.{BoutRecord, DraftRecord, GameRecord, PlayerRecord}
 import com.lthummus.sclmanager.database.dao.GameDao._
 import com.lthummus.sclmanager.servlets.dto.{BoutParseResults, ErrorMessage, Match}
 import com.lthummus.sclmanager.util.S3Uploader
+import org.apache.commons.io.FilenameUtils
 import org.scalatra.swagger.{Swagger, SwaggerEngine, SwaggerSupport}
 
 import scalaz._
@@ -61,6 +62,10 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
     MatchServlet.Uploader.putReplay(name, contents)
   }
 
+  private def generateFilename(originalName: String, bout: Bout, record: BoutRecord) = {
+    s"SCL Season 3 - Week ${record.getWeek} - ${bout.player1} vs ${bout.player2}.${FilenameUtils.getExtension(originalName)}"
+  }
+
   post("/parse") {
     val file = fileParams("file")
 
@@ -68,7 +73,8 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
 
     val result = for {
       parseResult <- SpyPartyZipParser.parseZipStream(zipContents)
-      url <- uploadToS3(file.name, zipContents)
+      bout <- BoutDao.getNextToBePlayedByPlayers(parseResult.player1, parseResult.player2) \/> "No match found between these two players"
+      url <- uploadToS3(generateFilename(file.name, parseResult, bout), zipContents)
       result <- persistBout(parseResult, url)
     } yield result
 

@@ -81,9 +81,6 @@ object BoutDao {
 
   def getBoutData(boutId: Int)(implicit dslContext: DSLContext): String \/ Bout = {
     for {
-      matchData <- getById(boutId) \/> s"No match found with id $boutId"
-      player1 <- PlayerDao.getByPlayerName(matchData.getPlayer1) \/> s"No player found with id ${matchData.getPlayer1}"
-      player2 <- PlayerDao.getByPlayerName(matchData.getPlayer2) \/> s"No player found with id ${matchData.getPlayer2}"
       gameList <- GameDao.getGamesByBoutId(boutId)
     } yield Bout(gameList)
   }
