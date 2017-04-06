@@ -83,17 +83,6 @@ case class Bout(replays: List[Replay]) {
       s"TieParty $player1Score-$player2Score"
     }
   }
-
-  def getForumPost: String = {
-    s"""
-      |Results:
-      |[results]
-      |${getGameSummary.mkString("\n")}
-      |
-      |$getScoreLine
-      |[/results]
-    """.stripMargin
-  }
 }
 
 object Bout {

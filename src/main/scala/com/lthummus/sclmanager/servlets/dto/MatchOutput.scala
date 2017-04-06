@@ -13,7 +13,6 @@ case class Match(id: Int,
                  player1: Player,
                  player2: Player,
                  status: Int,
-                 winner: Option[Player],
                  games: Option[List[Game]],
                  matchUrl: Option[String],
                  draft: Option[Draft],
@@ -37,7 +36,7 @@ case class Game(id: Int,
     } yield Replay(spy, sniper, new DateTime(id * 1000L), parsedResult, parsedLevel, parsedGameType)
 
     disjointReplay match {
-      case -\/(error) => ???
+      case -\/(_) => ???
       case \/-(replay) => replay
     }
   }
@@ -46,9 +45,8 @@ case class Game(id: Int,
 case class MatchList(matches: Seq[Match])
 
 object Match {
-  def fromDatabaseRecordWithGames(record: BoutRecord, games: List[GameRecord], playerMap: Map[String, PlayerRecord], draft: Option[Draft]) = {
+  def fromDatabaseRecordWithGames(record: BoutRecord, games: List[GameRecord], playerMap: Map[String, PlayerRecord], draft: Option[Draft]): Match = {
     val gameList = games.map(Game.fromDatabaseRecord(_, playerMap))
-    val winner = if (record.getWinner == null) None else Some(Player.fromDatabaseRecord(playerMap(record.getWinner)))
     val packagedMatchUrl = Option(record.getMatchUrl)
 
     val maybeBout = gameList.size match {
@@ -67,6 +65,8 @@ object Match {
         |$draftSummary
         |
         |[results]
+        |${maybeBout.map(_.getScoreLine).getOrElse("")}
+        |
         |$summaryText
         |[/results]
         |
@@ -90,7 +90,6 @@ object Match {
       Player.fromDatabaseRecord(playerMap(record.getPlayer1)),
       Player.fromDatabaseRecord(playerMap(record.getPlayer2)),
       record.getStatus,
-      winner,
       Some(gameList),
       packagedMatchUrl,
       draft,
