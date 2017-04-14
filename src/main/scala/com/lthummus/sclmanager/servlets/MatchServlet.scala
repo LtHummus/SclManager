@@ -41,10 +41,10 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
     val player2Res = bout.result(bout.player2)
 
     for {
-      player1Update <- PlayerDao.postResult(bout.player1, player1Res)
-      player2Update <- PlayerDao.postResult(bout.player2, player2Res)
-      boutPersist <- GameDao.persistBatchRecords(games)
-      markMatch <- BoutDao.markBoutAsPlayed(games.head.getBout, url, draft)
+      _ <- PlayerDao.postResult(bout.player1, player1Res)
+      _ <- PlayerDao.postResult(bout.player2, player2Res)
+      _ <- GameDao.persistBatchRecords(games)
+      _ <- BoutDao.markBoutAsPlayed(games.head.getBout, url, draft)
     } yield games.head.getBout
   }
 

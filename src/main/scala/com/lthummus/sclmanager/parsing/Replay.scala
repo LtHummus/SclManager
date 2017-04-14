@@ -184,7 +184,7 @@ object Replay {
     }
 
     for {
-      magicNumber <- verifyMagicNumber(headerData)
+      _ <- verifyMagicNumber(headerData)
       spyNameLength <- extractSpyNameLength(headerData)
       sniperNameLength <- extractSniperNameLength(headerData)
       gameResult <- extractGameResult(headerData)
