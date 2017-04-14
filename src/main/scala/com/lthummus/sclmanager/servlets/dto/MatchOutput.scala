@@ -10,14 +10,14 @@ import Scalaz._
 case class Match(id: Int,
                  week: Int,
                  league: String,
-                 player1: Player,
-                 player2: Player,
+                 player1: SimplePlayer,
+                 player2: SimplePlayer,
                  status: Int,
                  games: Option[List[Game]],
                  matchUrl: Option[String],
                  draft: Option[Draft],
-                 summary: String = "",
-                 forumPost: String = "") {
+                 summary: Option[String] = None,
+                 forumPost: Option[String] = None) {
 
 }
 
@@ -42,6 +42,14 @@ case class Game(id: Int,
   }
 }
 
+case class SimplePlayer(name: String, country: String)
+
+object SimplePlayer {
+  def fromDatabaseRecord(record: PlayerRecord): SimplePlayer = {
+    SimplePlayer(record.getName, record.getCountry)
+  }
+}
+
 case class MatchList(matches: Seq[Match])
 
 object Match {
@@ -53,42 +61,40 @@ object Match {
       case 0 => None
       case _ => Some(Bout(gameList.map(_.asReplay)))
     }
-    val p1Text = maybeBout.map(_.player1).getOrElse("Player 1")
-    val p2Text = maybeBout.map(_.player2).getOrElse("Player 2")
-    val summaryText = maybeBout.map(_.getGameSummary).getOrElse(List()).mkString("\n")
+
     val draftSummary = draft.map(_.asForumPost).getOrElse("")
 
-    val forumPost =
+    val forumPost = maybeBout.map(bout =>
       s"""
-        |Results for $p1Text v. $p2Text
+        |Results for ${bout.player1} v. ${bout.player2}
         |
         |$draftSummary
         |
         |[results]
-        |${maybeBout.map(_.getScoreLine).getOrElse("")}
+        |${bout.getScoreLine}
         |
-        |$summaryText
+        |${bout.getGameSummary.mkString("\n")}
         |[/results]
         |
         |Game link: [url]${record.getMatchUrl}[/url]
-      """.stripMargin
+      """.stripMargin)
 
-    val summary =
+    val summary = maybeBout.map(bout =>
       s"""
-        |Results for $p1Text v. $p2Text
+        |Results for ${bout.player1} v. ${bout.player2}
         |
         |$draftSummary
         |
-        |$summaryText
-      """.stripMargin
+        |${bout.getGameSummary.mkString("\n")}
+      """.stripMargin)
 
 
 
     Match(record.getId,
       record.getWeek,
       record.getDivision,
-      Player.fromDatabaseRecord(playerMap(record.getPlayer1)),
-      Player.fromDatabaseRecord(playerMap(record.getPlayer2)),
+      SimplePlayer.fromDatabaseRecord(playerMap(record.getPlayer1)),
+      SimplePlayer.fromDatabaseRecord(playerMap(record.getPlayer2)),
       record.getStatus,
       Some(gameList),
       packagedMatchUrl,
