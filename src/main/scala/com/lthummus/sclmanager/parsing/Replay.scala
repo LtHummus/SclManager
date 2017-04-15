@@ -102,8 +102,9 @@ case class Replay(spy: String,
                   startTime: DateTime,
                   result: GameResult,
                   level: Level,
-                  loadoutType: GameType) extends Ordered[Replay] {
-  override def compare(that: Replay): Int = if (this.startTime.isBefore(that.startTime.toInstant)) -1 else 1
+                  loadoutType: GameType,
+                  sequenceNumber: Int) extends Ordered[Replay] {
+  override def compare(that: Replay): Int = if (this.sequenceNumber < that.sequenceNumber) -1 else 1
 
   def isCompleted: Boolean = result != GameResult.InProgress
   def spyWon: Boolean = result == GameResult.CivilianShot || result == GameResult.MissionWin
@@ -123,6 +124,12 @@ object Replay {
     val buffer = ByteBuffer.wrap(data.slice(index, index + 4))
     buffer.order(ByteOrder.LITTLE_ENDIAN)
     buffer.getInt
+  }
+
+  private def extractShort(data: Array[Byte], index: Int) = {
+    val buffer = ByteBuffer.wrap(data.slice(index, index + 2))
+    buffer.order(ByteOrder.LITTLE_ENDIAN)
+    buffer.getShort
   }
 
   private def verifyMagicNumber(data: Array[Byte]): String \/ String = {
@@ -181,6 +188,10 @@ object Replay {
     }
   }
 
+  private def extractSequenceNumber(headerData: Array[Byte]): String \/ Int = {
+    extractShort(headerData, 0x2C).toInt.right
+  }
+
   def fromInputStream(is: DataInputStream): String \/ Replay = {
     val headerData = new Array[Byte](HeaderDataSizeBytes)
 
@@ -201,6 +212,7 @@ object Replay {
       sniper <- extractSniperName(headerData, spyNameLength, sniperNameLength)
       gameType <- GameType.fromInt(extractInt(headerData, 0x34))
       level <- extractLevel(headerData)
-    } yield Replay(spy, sniper, startTime, gameResult, level, gameType)
+      sequence <- extractSequenceNumber(headerData)
+    } yield Replay(spy, sniper, startTime, gameResult, level, gameType, sequence)
   }
 }

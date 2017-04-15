@@ -8,7 +8,7 @@ import Scalaz._
 
 object TestParser extends App {
 
-  val FilePath = "E:\\steph.zip"
+  val FilePath = "C:\\Users\\Benjamin\\Downloads\\SpyPartyReplay-20160609-18-03-46-cameraman-vs-warningtrack-1tZv_xHrSDCQLhXyUlfAEg-v18.zip"
 
   val bytes = Files.readAllBytes(Paths.get(FilePath))
 

@@ -18,13 +18,13 @@ object GameDao {
         resultValue <- GameResult.fromInt(record.getResult)
         level <- Level.getLevelByName(record.getVenue)
         decodedGameType <- GameType.fromString(record.getGametype)
-      } yield Replay(record.getSpy, record.getSniper, new DateTime(), resultValue, level, decodedGameType)
+      } yield Replay(record.getSpy, record.getSniper, new DateTime(), resultValue, level, decodedGameType, record.getSequence)
     }
   }
 
   implicit class ConvertableFromReplay(replay: Replay) {
     def toDatabase(matchId: Int) = {
-      new GameRecord(null, replay.spy, replay.sniper, matchId, GameResult.toInt(replay.result), 2, replay.level.name, replay.loadoutType.toString)
+      new GameRecord(null, replay.spy, replay.sniper, matchId, GameResult.toInt(replay.result), replay.sequenceNumber, replay.level.name, replay.loadoutType.toString)
     }
   }
 
