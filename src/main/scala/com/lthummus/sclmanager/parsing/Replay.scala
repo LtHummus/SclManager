@@ -4,7 +4,7 @@ package com.lthummus.sclmanager.parsing
 import java.io.{DataInputStream, InputStream}
 import java.nio.{ByteBuffer, ByteOrder}
 import java.util
-import java.util.Date
+import java.util.{Base64, Date}
 
 import com.lthummus.sclmanager.parsing.GameLoadoutType.GameLoadoutType
 import com.lthummus.sclmanager.parsing.GameResult.GameResult
@@ -192,6 +192,16 @@ object Replay {
     extractShort(headerData, 0x2C).toInt.right
   }
 
+  private def extractUuid(headerData: Array[Byte]): String \/ String = {
+    Base64
+      .getEncoder
+      .encodeToString(headerData.slice(0x18, 0x18 + 16))
+      .split("=")(0)
+      .replaceAll("\\+", "-")
+      .replaceAll("/", "_")
+      .right
+  }
+
   def fromInputStream(is: DataInputStream): String \/ Replay = {
     val headerData = new Array[Byte](HeaderDataSizeBytes)
 
@@ -213,6 +223,7 @@ object Replay {
       gameType <- GameType.fromInt(extractInt(headerData, 0x34))
       level <- extractLevel(headerData)
       sequence <- extractSequenceNumber(headerData)
+      uuid <- extractUuid(headerData)
     } yield Replay(spy, sniper, startTime, gameResult, level, gameType, sequence)
   }
 }
