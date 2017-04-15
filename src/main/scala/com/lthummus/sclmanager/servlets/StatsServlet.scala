@@ -34,7 +34,6 @@ class StatsServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
     val mapCounts = games.groupBy(_.level).map{case (key, value) => (key.name.toString, value.length)}
 
 
-
     Ok(Map("numberOfGamesPlayed" -> numberOfGamesPlayed,
       "resultCounts" -> resultCounts,
       "mapCounts" -> mapCounts))

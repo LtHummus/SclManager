@@ -132,6 +132,13 @@ object Replay {
       "Magic number incorrect".left
   }
 
+  private def verifyFileHeaderVersion(data: Byte): String \/ String = {
+    if (data == 0x03)
+      "File header version OK".right
+    else
+      "File header version not understood".left
+  }
+
   private def extractSpyNameLength(headerData: Array[Byte]) = {
     headerData(0x2E).right
   }
@@ -185,6 +192,7 @@ object Replay {
 
     for {
       _ <- verifyMagicNumber(headerData)
+      _ <- verifyFileHeaderVersion(headerData(4))
       spyNameLength <- extractSpyNameLength(headerData)
       sniperNameLength <- extractSniperNameLength(headerData)
       gameResult <- extractGameResult(headerData)
