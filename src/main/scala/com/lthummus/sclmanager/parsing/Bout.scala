@@ -19,7 +19,7 @@ case class Bout(replays: List[Replay]) {
     //tied at 5-5
     //6-4
     Seq(player1Score, player2Score).sorted match {
-      case loser :: winner :: _ if winner == 5 && loser <= 4 => true
+      case loser :: winner :: _ if winner == 5 && loser <  4 => true
       case loser :: winner :: _ if winner == 5 && loser == 5 => true
       case loser :: winner :: _ if winner == 6 && loser == 4 => true
       case _ => false

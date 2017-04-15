@@ -105,12 +105,12 @@ case class Replay(spy: String,
                   loadoutType: GameType) extends Ordered[Replay] {
   override def compare(that: Replay): Int = if (this.startTime.isBefore(that.startTime.toInstant)) -1 else 1
 
-  def isCompleted = result != GameResult.InProgress
-  def spyWon = result == GameResult.CivilianShot || result == GameResult.MissionWin
-  def sniperWon = result == GameResult.SpyShot || result == GameResult.SpyTimeout
+  def isCompleted: Boolean = result != GameResult.InProgress
+  def spyWon: Boolean = result == GameResult.CivilianShot || result == GameResult.MissionWin
+  def sniperWon: Boolean = result == GameResult.SpyShot || result == GameResult.SpyTimeout
 
-  def winnerName = if (spyWon) spy else sniper
-  def winnerRole = if (spyWon) "spy" else "sniper"
+  def winnerName: String = if (spyWon) spy else sniper
+  def winnerRole: String = if (spyWon) "spy" else "sniper"
 
   def fullLevelName = s"${level.name} $loadoutType"
 }
