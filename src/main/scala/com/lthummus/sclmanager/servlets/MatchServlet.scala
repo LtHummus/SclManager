@@ -82,7 +82,22 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
       case -\/(error) => BadRequest(ErrorMessage(error))
       case \/-(bout) => redirect(s"/match/$bout")
     }
+  }
 
+  //TODO: see below
+  /*
+  FOR THE LOVE OF ALL THAT IS HOLY REMOVE THIS BEFORE FINAL RELEASE
+   */
+  put("/delete/:id") {
+    val id = params("id").toInt
+
+    GameDao.deleteBelongingToMatch(id)
+    val finalResult = BoutDao.resetBout(id)
+
+    finalResult match {
+      case -\/(_) => InternalServerError("result" -> "something screwed up")
+      case \/-(_) => Ok("result" -> "ok")
+    }
   }
 
   get("/week/:week") {

@@ -85,6 +85,18 @@ object BoutDao {
     } yield Bout(gameList)
   }
 
+  def resetBout(id: Int)(implicit dslContext: DSLContext) = {
+    val bout = getById(id)
+    bout match {
+      case Some(b) =>
+        b.setStatus(0)
+        b.setMatchUrl(null)
+        b.setDraft(null)
+        b.update().right
+      case None => ().left
+    }
+  }
+
 
   def markBoutAsPlayed(boutId: Int, url: String, draft: Option[DraftRecord])(implicit dslContext: DSLContext): String \/ Int = {
     val matchOption = getById(boutId)

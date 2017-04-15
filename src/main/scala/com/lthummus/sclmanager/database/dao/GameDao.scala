@@ -34,6 +34,13 @@ object GameDao {
       .fetch().asScala.toList
   }
 
+  def deleteBelongingToMatch(matchId: Int)(implicit dslContext: DSLContext) = {
+    dslContext
+      .deleteFrom(Tables.GAME)
+      .where(Tables.GAME.BOUT.eq(matchId))
+      .execute()
+  }
+
   def getGameRecordsByBoutId(matchId: Int)(implicit dslContext: DSLContext): List[GameRecord] = {
     dslContext
       .selectFrom(Tables.GAME)
