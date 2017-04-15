@@ -41,7 +41,7 @@
             <packageName>zzz.generated</packageName>
 
             <!-- The destination directory of your generated classes -->
-            <directory>C:/mvn</directory>
+            <directory>src\main\scala</directory>
         </target>
     </generator>
 </configuration>

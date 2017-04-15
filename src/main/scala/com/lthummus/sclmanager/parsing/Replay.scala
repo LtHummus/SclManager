@@ -103,7 +103,8 @@ case class Replay(spy: String,
                   result: GameResult,
                   level: Level,
                   loadoutType: GameType,
-                  sequenceNumber: Int) extends Ordered[Replay] {
+                  sequenceNumber: Int,
+                  uuid: String) extends Ordered[Replay] {
   override def compare(that: Replay): Int = if (this.sequenceNumber < that.sequenceNumber) -1 else 1
 
   def isCompleted: Boolean = result != GameResult.InProgress
@@ -195,10 +196,10 @@ object Replay {
   private def extractUuid(headerData: Array[Byte]): String \/ String = {
     Base64
       .getEncoder
-      .encodeToString(headerData.slice(0x18, 0x18 + 16))
-      .split("=")(0)
-      .replaceAll("\\+", "-")
-      .replaceAll("/", "_")
+      .encodeToString(headerData.slice(0x18, 0x18 + 16)) //encode bytes to base64 string
+      .split("=")(0)                                     //drop trailing = signs
+      .replaceAll("\\+", "-")                            //replace + with - because that's how spyparty does things
+      .replaceAll("/", "_")                              //replace / with _ ibid
       .right
   }
 
@@ -224,6 +225,6 @@ object Replay {
       level <- extractLevel(headerData)
       sequence <- extractSequenceNumber(headerData)
       uuid <- extractUuid(headerData)
-    } yield Replay(spy, sniper, startTime, gameResult, level, gameType, sequence)
+    } yield Replay(spy, sniper, startTime, gameResult, level, gameType, sequence, uuid)
   }
 }

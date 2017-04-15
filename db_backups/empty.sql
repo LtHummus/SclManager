@@ -73,7 +73,6 @@ CREATE TABLE IF NOT EXISTS `bout` (
 ) ENGINE=InnoDB AUTO_INCREMENT=127 DEFAULT CHARSET=utf8;
 
 
--- Data exporting was unselected.
 -- Dumping structure for table scl.game
 CREATE TABLE IF NOT EXISTS `game` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -84,14 +83,17 @@ CREATE TABLE IF NOT EXISTS `game` (
   `sequence` int(11) NOT NULL DEFAULT '0',
   `venue` text NOT NULL,
   `gametype` text NOT NULL,
+  `uuid` varchar(50) NOT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_uuid` (`uuid`),
   KEY `fk_match` (`bout`),
   KEY `fk_spy` (`spy`),
   KEY `fk_sniper` (`sniper`),
   CONSTRAINT `fk_match` FOREIGN KEY (`bout`) REFERENCES `bout` (`id`),
   CONSTRAINT `fk_sniper` FOREIGN KEY (`sniper`) REFERENCES `player` (`name`),
   CONSTRAINT `fk_spy` FOREIGN KEY (`spy`) REFERENCES `player` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=281 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=372 DEFAULT CHARSET=utf8;
+
 
 -- Data exporting was unselected.
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
