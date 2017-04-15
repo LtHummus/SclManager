@@ -24,7 +24,7 @@ class S3Uploader {
 
     try {
       S3.putObject(BucketName, name, new ByteArrayInputStream(input), metadata)
-      URLEncoder.encode(s"https://s3-us-west-2.amazonaws.com/$BucketName/$name", "UTF-8").right
+      s"https://s3-us-west-2.amazonaws.com/$BucketName/${URLEncoder.encode(name, "UTF-8")}".right
     } catch {
       case e: Exception => e.getMessage.left
     }
