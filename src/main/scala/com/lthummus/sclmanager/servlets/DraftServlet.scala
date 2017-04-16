@@ -20,12 +20,11 @@ class DraftServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
 
   protected implicit lazy val jsonFormats: Formats = DefaultFormats
 
-  lazy val sharedSecret = ConfigFactory.load().getString("sharedSecret")
+  lazy private val sharedSecret = ConfigFactory.load().getString("sharedSecret")
 
   before() {
     contentType = formats("json")
   }
-
 
   post("/report") {
     val auth = request.header("Authentication")

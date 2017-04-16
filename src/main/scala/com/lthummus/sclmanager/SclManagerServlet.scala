@@ -5,6 +5,8 @@ import org.scalatra._
 
 class SclManagerServlet(implicit dslContext: DSLContext) extends SclManagerStack {
 
+
+
   get("/") {
     Ok("nothing")
   }

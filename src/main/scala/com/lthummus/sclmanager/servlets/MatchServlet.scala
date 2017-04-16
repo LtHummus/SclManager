@@ -8,7 +8,7 @@ import org.jooq.DSLContext
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra._
 import org.scalatra.json.JacksonJsonSupport
-import org.scalatra.servlet.{FileUploadSupport, MultipartConfig}
+import org.scalatra.servlet.{FileItem, FileUploadSupport, MultipartConfig}
 import zzz.generated.tables.records.{BoutRecord, DraftRecord, GameRecord, PlayerRecord}
 import com.lthummus.sclmanager.database.dao.GameDao._
 import com.lthummus.sclmanager.servlets.dto.{BoutParseResults, ErrorMessage, Match}
@@ -41,10 +41,10 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
     val player2Res = bout.result(bout.player2)
 
     for {
-      _ <- PlayerDao.postResult(bout.player1, player1Res)
-      _ <- PlayerDao.postResult(bout.player2, player2Res)
       _ <- GameDao.persistBatchRecords(games)
       _ <- BoutDao.markBoutAsPlayed(games.head.getBout, url, draft)
+      _ <- PlayerDao.postResult(bout.player1, player1Res)
+      _ <- PlayerDao.postResult(bout.player2, player2Res)
     } yield games.head.getBout
   }
 
@@ -66,6 +66,7 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
     s"SCL Season 3 - Week ${record.getWeek} - ${bout.player1} vs ${bout.player2}.${FilenameUtils.getExtension(originalName)}"
   }
 
+
   post("/parse") {
     val file = fileParams("file")
 
@@ -80,7 +81,11 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
 
     result match {
       case -\/(error) => BadRequest(ErrorMessage(error))
-      case \/-(bout) => redirect(s"/match/$bout")
+      case \/-(boutId) =>
+        BoutDao.getFullBoutRecords(boutId) match {
+          case -\/(error) => InternalServerError(ErrorMessage(error))
+          case \/-(it)    => Ok(Match.fromDatabaseRecordWithGames(it.bout, it.games, it.playerMap, it.draft))
+        }
     }
   }
 
@@ -88,7 +93,12 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
   /*
   FOR THE LOVE OF ALL THAT IS HOLY REMOVE THIS BEFORE FINAL RELEASE
    */
-  put("/delete/:id") {
+  private val resetById = (apiOperation[Match]("resetById")
+    summary "Reset matches to their default state"
+    notes "THIS IS FOR TESTING ONLY -- DELETES ALL DATA ASSOCIATED WITH A MATCH"
+    parameter pathParam[String]("id").description("id to reset"))
+
+  put("/reset/:id", operation(resetById)) {
     val id = params("id").toInt
 
     GameDao.deleteBelongingToMatch(id)
@@ -100,10 +110,14 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
     }
   }
 
-  get("/week/:week") {
+  private val getByWeek = (apiOperation[Match]("getById")
+    summary "Get matches by their week"
+    parameter pathParam[String]("week").description("the week number to get"))
+
+  get("/week/:week", operation(getByWeek)) {
     val week = params("week").toInt
     val players = PlayerDao.all()
-    Ok(BoutDao.getByWeek(week).map(Match.fromDatabaseRecordWithGames(_, List(), players.map(it => (it.getName, it)).toMap, None)))
+    Ok(BoutDao.getByWeek(week).map(m => Match.fromDatabaseRecordWithGames(m, GameDao.getGameRecordsByBoutId(m.getId), players.map(it => (it.getName, it)).toMap, None)))
   }
 
   get("/next/:player1/:player2") {
@@ -130,7 +144,11 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
     }
   }
 
-  get("/:id") {
+  private val getById = (apiOperation[Match]("getById")
+    summary "Get a match by its id"
+    parameter pathParam[String]("id").description("the id of the match to get"))
+
+  get("/:id", operation(getById)) {
     val bout = BoutDao.getFullBoutRecords(params("id").toInt)
 
     bout match {
@@ -139,7 +157,9 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
     }
   }
 
-  get("/all") {
+  private val getAll = (apiOperation[Match]("getAll")
+    summary "get all the matches")
+  get("/all", operation(getAll)) {
     val players = PlayerDao.all()
     Ok(BoutDao.getAll().map(Match.fromDatabaseRecordWithGames(_, List(), players.map(it => (it.getName, it)).toMap, None)))
   }

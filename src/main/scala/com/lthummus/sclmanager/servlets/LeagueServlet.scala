@@ -28,7 +28,7 @@ class LeagueServlet(implicit dslContext: DSLContext, val swagger: Swagger) exten
     val leagueDatabaseRecords = DivisionDao.all()
     val playerDatabaseRecords = PlayerDao.all()
 
-    val leagues = leagueDatabaseRecords.map(l => League.fromDatabaseRecord(l, playerDatabaseRecords.filter(_.getDivision == l.getName)))
+    val leagues = leagueDatabaseRecords.map(l => League.fromDatabaseRecord(l, playerDatabaseRecords.filter(_.getDivision == l.getName))).sorted
 
     Ok(LeagueOverview(LeagueList(leagues)))
   }

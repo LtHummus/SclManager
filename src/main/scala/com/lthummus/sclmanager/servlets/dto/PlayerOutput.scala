@@ -23,4 +23,7 @@ object Player {
       record.matchesPlayed,
       record.getScore,
       matches)
+
+  def sortByScore(p1: Player, p2: Player): Boolean = p1.score > p2.score
+
 }

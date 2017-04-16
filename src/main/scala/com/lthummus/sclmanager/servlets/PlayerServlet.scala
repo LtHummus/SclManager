@@ -1,7 +1,7 @@
 package com.lthummus.sclmanager.servlets
 
 import com.lthummus.sclmanager.SclManagerStack
-import com.lthummus.sclmanager.database.dao.{BoutDao, DivisionDao, PlayerDao}
+import com.lthummus.sclmanager.database.dao.{BoutDao, DivisionDao, GameDao, PlayerDao}
 import com.lthummus.sclmanager.servlets.dto.{ErrorMessage, Match, Player}
 import org.jooq.DSLContext
 import org.json4s.{DefaultFormats, Formats}
@@ -48,7 +48,7 @@ class PlayerServlet(implicit dslContext: DSLContext, val swagger: Swagger) exten
       leaguePlayers = DivisionDao.getPlayersInLeague(player.getDivision)
       playerMap = leaguePlayers.map(it => (it.getName, it)).toMap
       matchRecords = BoutDao.getMatchesForPlayer(player.getName)
-      matches = matchRecords.map(Match.fromDatabaseRecordWithGames(_, List(), playerMap, None))
+      matches = matchRecords.map(m => Match.fromDatabaseRecordWithGames(m, GameDao.getGameRecordsByBoutId(m.getId), playerMap, None))
     } yield Player.fromDatabaseRecord(player, Some(matches))
 
     decoded match {
