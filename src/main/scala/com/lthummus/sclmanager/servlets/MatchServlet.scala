@@ -159,6 +159,7 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
 
   private val getAll = (apiOperation[Match]("getAll")
     summary "get all the matches")
+
   get("/all", operation(getAll)) {
     val players = PlayerDao.all()
     Ok(BoutDao.getAll().map(Match.fromDatabaseRecordWithGames(_, List(), players.map(it => (it.getName, it)).toMap, None)))
