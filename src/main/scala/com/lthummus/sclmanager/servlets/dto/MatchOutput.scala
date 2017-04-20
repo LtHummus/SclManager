@@ -3,6 +3,8 @@ package com.lthummus.sclmanager.servlets.dto
 import com.lthummus.sclmanager.parsing.BoutTypeEnum.BoutType
 import com.lthummus.sclmanager.parsing._
 import org.joda.time.DateTime
+import org.jooq.Record
+import zzz.generated.Tables
 import zzz.generated.tables.records.{BoutRecord, DraftRecord, GameRecord, PlayerRecord}
 
 import scalaz._
@@ -58,13 +60,14 @@ object SimplePlayer {
 case class MatchList(matches: Seq[Match])
 
 object Match {
-  def fromDatabaseRecordWithGames(record: BoutRecord, games: List[GameRecord], playerMap: Map[String, PlayerRecord], draft: Option[Draft]): Match = {
+  def fromDatabaseRecordWithGames(record: Record, games: List[GameRecord], playerMap: Map[String, PlayerRecord], draft: Option[Draft]): Match = {
+    val boutRecord = record.into(Tables.BOUT)
     val gameList = games.map(Game.fromDatabaseRecord(_, playerMap))
-    val packagedMatchUrl = Option(record.getMatchUrl)
+    val packagedMatchUrl = Option(boutRecord.getMatchUrl)
 
     val maybeBout = gameList.size match {
       case 0 => None
-      case _ => Some(Bout(gameList.map(_.asReplay), BoutTypeEnum.fromInt(record.getBoutType)))
+      case _ => Some(Bout(gameList.map(_.asReplay), BoutTypeEnum.fromInt(boutRecord.getBoutType)))
     }
 
     val draftSummary = draft.map(_.asForumPost).getOrElse("")
@@ -81,7 +84,7 @@ object Match {
         |${bout.getGameSummary.mkString("\n")}
         |[/results]
         |
-        |Game link: [url]${record.getMatchUrl}[/url]
+        |Game link: [url]${boutRecord.getMatchUrl}[/url]
       """.stripMargin)
 
     val summary = maybeBout.map(bout =>
@@ -95,13 +98,13 @@ object Match {
 
 
 
-    Match(record.getId,
-      record.getWeek,
-      record.getDivision,
-      SimplePlayer.fromDatabaseRecord(playerMap(record.getPlayer1)),
-      SimplePlayer.fromDatabaseRecord(playerMap(record.getPlayer2)),
-      record.getStatus,
-      BoutTypeEnum.fromInt(record.getBoutType).toString,
+    Match(boutRecord.getId,
+      boutRecord.getWeek,
+      boutRecord.getDivision,
+      SimplePlayer.fromDatabaseRecord(playerMap(boutRecord.getPlayer1)),
+      SimplePlayer.fromDatabaseRecord(playerMap(boutRecord.getPlayer2)),
+      boutRecord.getStatus,
+      BoutTypeEnum.fromInt(boutRecord.getBoutType).toString,
       Some(gameList),
       packagedMatchUrl,
       draft,
