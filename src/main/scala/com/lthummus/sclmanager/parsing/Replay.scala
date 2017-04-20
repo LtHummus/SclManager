@@ -17,7 +17,7 @@ object GameResult extends Enumeration {
   type GameResult = Value
   val MissionWin, SpyTimeout, SpyShot, CivilianShot, InProgress = Value
 
-  def fromString(value: String) = {
+  def fromString(value: String): String \/ GameResult = {
     value match {
       case "MissionWin"   => MissionWin.right
       case "SpyTimeout"   => SpyTimeout.right
@@ -28,7 +28,7 @@ object GameResult extends Enumeration {
     }
   }
 
-  def fromInt(value: Int) = {
+  def fromInt(value: Int): String \/ GameResult = {
     value match {
       case 0 => MissionWin.right
       case 1 => SpyTimeout.right
@@ -105,7 +105,7 @@ case class Replay(spy: String,
                   loadoutType: GameType,
                   sequenceNumber: Int,
                   uuid: String) extends Ordered[Replay] {
-  override def compare(that: Replay): Int = if (this.sequenceNumber < that.sequenceNumber) -1 else 1
+  override def compare(that: Replay): Int = if (this.startTime.isBefore(that.startTime)) -1 else 1
 
   def isCompleted: Boolean = result != GameResult.InProgress
   def spyWon: Boolean = result == GameResult.CivilianShot || result == GameResult.MissionWin
