@@ -6,7 +6,6 @@ import java.nio.{ByteBuffer, ByteOrder}
 import java.util
 import java.util.{Base64, Date}
 
-import com.lthummus.sclmanager.parsing.GameLoadoutType.GameLoadoutType
 import org.joda.time.DateTime
 
 import scalaz._
@@ -25,11 +24,11 @@ object GameResultEnum {
 
   def fromString(value: String): String \/ GameResult = {
     value match {
-      case "MissionWin"   => MissionWin.right
-      case "SpyTimeout"   => SpyTimeout.right
-      case "SpyShot"      => SpyShot.right
-      case "CivilianShot" => CivilianShot.right
-      case "InProgress"   => InProgress.right
+      case "Mission Win"   => MissionWin.right
+      case "Spy Timeout"   => SpyTimeout.right
+      case "Spy Shot"      => SpyShot.right
+      case "Civilian Shot" => CivilianShot.right
+      case "In Progress"   => InProgress.right
       case _              => s"Unknown game result type: $value".left
     }
   }
@@ -46,9 +45,15 @@ object GameResultEnum {
   }
 }
 
-object GameLoadoutType extends Enumeration {
-  type GameLoadoutType = Value
-  val Known, Any, Pick = Value
+import GameResultEnum._
+import GameLoadoutTypeEnum._
+
+object GameLoadoutTypeEnum {
+  sealed abstract class GameLoadoutType(shortName: String)
+
+  case object Known extends GameLoadoutType("k")
+  case object Pick extends GameLoadoutType("p")
+  case object Any extends GameLoadoutType("a")
 
   def fromInt(value: Int): String \/ GameLoadoutType = {
     value match {
@@ -60,23 +65,15 @@ object GameLoadoutType extends Enumeration {
   }
 }
 
-case class GameType(kind: GameLoadoutType, x: Int, y: Int) {
-  override def toString = kind match {
-    case GameLoadoutType.Known => s"k$x"
-    case GameLoadoutType.Any => s"a$x/$y"
-    case GameLoadoutType.Pick => s"p$x/$y"
-  }
-}
-
 object GameType {
   def fromString(value: String): String \/ GameType = {
     val kind = value.charAt(0)
     val x = value.charAt(1) - 0x30
 
     kind match {
-      case 'k' => GameType(GameLoadoutType.Known, x, 0).right
-      case 'a' => GameType(GameLoadoutType.Any, x, value.charAt(3) - 0x30).right
-      case 'p' => GameType(GameLoadoutType.Pick, x, value.charAt(3) - 0x30).right
+      case 'k' => GameType(GameLoadoutTypeEnum.Known, x, 0).right
+      case 'a' => GameType(GameLoadoutTypeEnum.Any, x, value.charAt(3) - 0x30).right
+      case 'p' => GameType(GameLoadoutTypeEnum.Pick, x, value.charAt(3) - 0x30).right
       case _ => "Unknown game type format".left
     }
   }
@@ -87,12 +84,22 @@ object GameType {
     val x = value & 0x00003FFF
 
     for {
-      gameType <- GameLoadoutType.fromInt(mode)
+      gameType <- GameLoadoutTypeEnum.fromInt(mode)
     } yield GameType(gameType, x, y)
   }
 }
 
-import GameResultEnum._
+
+
+case class GameType(kind: GameLoadoutType, x: Int, y: Int) {
+  override def toString = kind match {
+    case GameLoadoutTypeEnum.Known => s"k$x"
+    case GameLoadoutTypeEnum.Any => s"a$x/$y"
+    case GameLoadoutTypeEnum.Pick => s"p$x/$y"
+  }
+}
+
+
 
 case class Replay(spy: String,
                   sniper: String,
