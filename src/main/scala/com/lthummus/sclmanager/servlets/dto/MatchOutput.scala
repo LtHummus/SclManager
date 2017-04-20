@@ -1,5 +1,6 @@
 package com.lthummus.sclmanager.servlets.dto
 
+import com.lthummus.sclmanager.parsing.BoutTypeEnum.BoutType
 import com.lthummus.sclmanager.parsing._
 import org.joda.time.DateTime
 import zzz.generated.tables.records.{BoutRecord, DraftRecord, GameRecord, PlayerRecord}
@@ -13,6 +14,7 @@ case class Match(id: Int,
                  player1: SimplePlayer,
                  player2: SimplePlayer,
                  status: Int,
+                 matchType: String,
                  games: Option[List[Game]],
                  matchUrl: Option[String],
                  draft: Option[Draft],
@@ -99,6 +101,7 @@ object Match {
       SimplePlayer.fromDatabaseRecord(playerMap(record.getPlayer1)),
       SimplePlayer.fromDatabaseRecord(playerMap(record.getPlayer2)),
       record.getStatus,
+      BoutTypeEnum.fromInt(record.getBoutType).toString,
       Some(gameList),
       packagedMatchUrl,
       draft,
