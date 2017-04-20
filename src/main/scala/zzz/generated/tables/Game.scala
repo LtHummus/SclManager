@@ -7,6 +7,7 @@ package zzz.generated.tables
 import java.lang.Class
 import java.lang.Integer
 import java.lang.String
+import java.sql.Timestamp
 import java.util.Arrays
 import java.util.List
 
@@ -101,6 +102,11 @@ class Game(alias : String, aliased : Table[GameRecord], parameters : Array[ Fiel
   val UUID : TableField[GameRecord, String] = createField("uuid", org.jooq.impl.SQLDataType.VARCHAR.length(50).nullable(false), "")
 
   /**
+   * The column <code>scl.game.timestamp</code>.
+   */
+  val TIMESTAMP : TableField[GameRecord, Timestamp] = createField("timestamp", org.jooq.impl.SQLDataType.TIMESTAMP, "")
+
+  /**
    * Create a <code>scl.game</code> table reference
    */
   def this() = {
@@ -129,7 +135,7 @@ class Game(alias : String, aliased : Table[GameRecord], parameters : Array[ Fiel
   }
 
   override def getKeys : List[ UniqueKey[GameRecord] ] = {
-    return Arrays.asList[ UniqueKey[GameRecord] ](Keys.KEY_GAME_PRIMARY)
+    return Arrays.asList[ UniqueKey[GameRecord] ](Keys.KEY_GAME_PRIMARY, Keys.KEY_GAME_IDX_UUID)
   }
 
   override def getReferences : List[ ForeignKey[GameRecord, _] ] = {

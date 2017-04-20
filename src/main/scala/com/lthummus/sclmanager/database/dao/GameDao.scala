@@ -1,5 +1,7 @@
 package com.lthummus.sclmanager.database.dao
 
+import java.sql.Timestamp
+
 import com.lthummus.sclmanager.parsing._
 import org.joda.time.DateTime
 import org.jooq.DSLContext
@@ -23,8 +25,8 @@ object GameDao {
   }
 
   implicit class ConvertableFromReplay(replay: Replay) {
-    def toDatabase(matchId: Int) = {
-      new GameRecord(null, replay.spy, replay.sniper, matchId, replay.result.internalId, replay.sequenceNumber, replay.level.name, replay.loadoutType.toString, replay.uuid)
+    def toDatabase(matchId: Int): GameRecord = {
+      new GameRecord(null, replay.spy, replay.sniper, matchId, replay.result.internalId, replay.sequenceNumber, replay.level.name, replay.loadoutType.toString, replay.uuid, new Timestamp(replay.startTime.getMillis))
     }
   }
 

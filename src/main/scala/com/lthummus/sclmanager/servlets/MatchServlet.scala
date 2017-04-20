@@ -14,6 +14,7 @@ import com.lthummus.sclmanager.database.dao.GameDao._
 import com.lthummus.sclmanager.servlets.dto.{BoutParseResults, ErrorMessage, Match}
 import com.lthummus.sclmanager.util.S3Uploader
 import org.apache.commons.io.FilenameUtils
+import org.json4s.ext.JodaTimeSerializers
 import org.scalatra.swagger.{Swagger, SwaggerEngine, SwaggerSupport}
 
 import scalaz._
@@ -26,7 +27,7 @@ object MatchServlet {
 class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extends SclManagerStack with JacksonJsonSupport
                                                                             with FileUploadSupport
                                                                             with SwaggerSupport {
-  protected implicit lazy val jsonFormats: Formats = DefaultFormats
+  protected implicit lazy val jsonFormats: Formats = DefaultFormats ++ JodaTimeSerializers.all
 
   protected val applicationDescription = "Gets match information"
 

@@ -5,6 +5,7 @@ import com.lthummus.sclmanager.database.dao.DraftDao
 import com.lthummus.sclmanager.servlets.dto.{Draft, DraftInput, DraftPayload}
 import com.typesafe.config.ConfigFactory
 import org.jooq.DSLContext
+import org.json4s.ext.JodaTimeSerializers
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.{Forbidden, NotFound, Ok}
 import org.scalatra.json.JacksonJsonSupport
@@ -18,7 +19,7 @@ class DraftServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
 
   protected val applicationDescription = "Gets draft information"
 
-  protected implicit lazy val jsonFormats: Formats = DefaultFormats
+  protected implicit lazy val jsonFormats: Formats = DefaultFormats ++ JodaTimeSerializers.all
 
   lazy private val sharedSecret = ConfigFactory.load().getString("sharedSecret")
 

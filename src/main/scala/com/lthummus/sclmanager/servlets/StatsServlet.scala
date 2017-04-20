@@ -5,6 +5,7 @@ import com.lthummus.sclmanager.database.dao.{GameDao, PlayerDao}
 import com.lthummus.sclmanager.database.dao.GameDao._
 import com.lthummus.sclmanager.database.dao.PlayerDao._
 import org.jooq.DSLContext
+import org.json4s.ext.JodaTimeSerializers
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.Ok
 import org.scalatra.json.JacksonJsonSupport
@@ -24,7 +25,7 @@ class StatsServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
 
   override protected def applicationDescription: String = "Some stats"
 
-  override protected implicit def jsonFormats: Formats = DefaultFormats
+  protected implicit lazy val jsonFormats: Formats = DefaultFormats ++ JodaTimeSerializers.all
 
   get("/") {
     val games = GameDao.all.map(_.asReplay).collect{ case \/-(it) => it}

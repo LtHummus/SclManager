@@ -29,13 +29,14 @@ case class Game(id: Int,
                 level: String,
                 gameType: String,
                 sequence: Int,
-                uuid: String) {
+                uuid: String,
+                timestamp: DateTime) {
   def asReplay: Replay = {
     val disjointReplay = for {
       parsedResult <- GameResultEnum.fromString(result)
       parsedLevel <- Level.getLevelByName(level)
       parsedGameType <- GameType.fromString(gameType)
-    } yield Replay(spy, sniper, new DateTime(id * 1000L), parsedResult, parsedLevel, parsedGameType, sequence, uuid)
+    } yield Replay(spy, sniper, timestamp, parsedResult, parsedLevel, parsedGameType, sequence, uuid)
 
     disjointReplay match {
       case -\/(_) => ???
@@ -123,6 +124,7 @@ object Game {
       record.getVenue,
       record.getGametype,
       record.getSequence,
-      record.getUuid)
+      record.getUuid,
+      new DateTime(record.getTimestamp))
   }
 }

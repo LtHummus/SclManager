@@ -56,6 +56,7 @@ object Keys {
   val KEY_DIVISION_PRIMARY = UniqueKeys0.KEY_DIVISION_PRIMARY
   val KEY_DRAFT_PRIMARY = UniqueKeys0.KEY_DRAFT_PRIMARY
   val KEY_GAME_PRIMARY = UniqueKeys0.KEY_GAME_PRIMARY
+  val KEY_GAME_IDX_UUID = UniqueKeys0.KEY_GAME_IDX_UUID
   val KEY_PLAYER_PRIMARY = UniqueKeys0.KEY_PLAYER_PRIMARY
 
   // -------------------------------------------------------------------------
@@ -87,6 +88,7 @@ object Keys {
     val KEY_DIVISION_PRIMARY : UniqueKey[DivisionRecord] = AbstractKeys.createUniqueKey(Division.DIVISION, "KEY_division_PRIMARY", Division.DIVISION.NAME)
     val KEY_DRAFT_PRIMARY : UniqueKey[DraftRecord] = AbstractKeys.createUniqueKey(Draft.DRAFT, "KEY_draft_PRIMARY", Draft.DRAFT.ID)
     val KEY_GAME_PRIMARY : UniqueKey[GameRecord] = AbstractKeys.createUniqueKey(Game.GAME, "KEY_game_PRIMARY", Game.GAME.ID)
+    val KEY_GAME_IDX_UUID : UniqueKey[GameRecord] = AbstractKeys.createUniqueKey(Game.GAME, "KEY_game_idx_uuid", Game.GAME.UUID)
     val KEY_PLAYER_PRIMARY : UniqueKey[PlayerRecord] = AbstractKeys.createUniqueKey(Player.PLAYER, "KEY_player_PRIMARY", Player.PLAYER.NAME)
   }
 
