@@ -24,12 +24,15 @@ case class Draft(id: Int, roomCode: String, player1: String, player2: String, ti
 object Draft {
   implicit val formats = DefaultFormats
 
-  def fromDatabaseRecord(record: DraftRecord) = {
-    Draft(record.getId,
-      record.getRoomCode,
-      record.getPlayer1,
-      record.getPlayer2,
-      record.getTime,
-      parse(record.getPayload).extract[DraftPayload])
+  def fromDatabaseRecord(record: DraftRecord): Option[Draft] = {
+    if (record.getId == null)
+      None
+    else
+      Some(Draft(record.getId,
+        record.getRoomCode,
+        record.getPlayer1,
+        record.getPlayer2,
+        record.getTime,
+        parse(record.getPayload).extract[DraftPayload]))
   }
 }

@@ -2,7 +2,7 @@ package com.lthummus.sclmanager.database.dao
 
 import com.lthummus.sclmanager.parsing.{Bout, BoutTypeEnum}
 import com.lthummus.sclmanager.servlets.dto.Draft
-import org.jooq.DSLContext
+import org.jooq.{DSLContext, Record}
 import zzz.generated.Tables
 import zzz.generated.tables.records.{BoutRecord, DraftRecord, GameRecord, PlayerRecord}
 
@@ -18,12 +18,19 @@ object BoutDao {
   def getAll()(implicit dslContext: DSLContext) = dslContext.selectFrom(Tables.BOUT).fetch().toList
 
   def getById(id: Int)(implicit dslContext: DSLContext): Option[BoutRecord] = {
-    val res = dslContext.selectFrom(Tables.BOUT).where(Tables.BOUT.ID.eq(id)).fetch()
+    Option(dslContext
+      .selectFrom(Tables.BOUT)
+      .where(Tables.BOUT.ID.eq(id))
+      .fetchOne())
+  }
 
-    res.size() match {
-      case 0 => None
-      case _ => Some(res.get(0))
-    }
+  def getByIdWithDraft(id: Int)(implicit dslContext: DSLContext): Option[Record] = {
+    Option(dslContext
+      .selectFrom(Tables.BOUT
+                    .leftJoin(Tables.DRAFT)
+                    .on(Tables.BOUT.DRAFT.eq(Tables.DRAFT.ID)))
+      .where(Tables.BOUT.ID.eq(id))
+      .fetchOne())
   }
 
   def getByWeek(week: Int)(implicit dslContext: DSLContext): List[BoutRecord] = {
@@ -71,12 +78,13 @@ object BoutDao {
 
   def getFullBoutRecords(boutId: Int)(implicit dslContext: DSLContext): String \/ FullBoutRecord = {
     for {
-      matchData <- getById(boutId) \/> s"No match found with id $boutId"
+      matchRes <- getByIdWithDraft(boutId) \/> s"No match found with id $boutId"
+      matchData = matchRes.into(Tables.BOUT)
       player1 <- PlayerDao.getByPlayerName(matchData.getPlayer1) \/> s"No player found with id ${matchData.getPlayer1}"
       player2 <- PlayerDao.getByPlayerName(matchData.getPlayer2) \/> s"No player found with id ${matchData.getPlayer2}"
       gameList = GameDao.getGameRecordsByBoutId(boutId)
-      draft = if (matchData.getDraft != null) DraftDao.getById(matchData.getDraft) else None
-    } yield FullBoutRecord(matchData, gameList, Map(player1.getName -> player1, player2.getName -> player2), draft.map(Draft.fromDatabaseRecord))
+      draft = Draft.fromDatabaseRecord(matchRes.into(Tables.DRAFT))
+    } yield FullBoutRecord(matchData, gameList, Map(player1.getName -> player1, player2.getName -> player2), draft)
   }
 
   def getBoutData(boutId: Int)(implicit dslContext: DSLContext): String \/ Bout = {
