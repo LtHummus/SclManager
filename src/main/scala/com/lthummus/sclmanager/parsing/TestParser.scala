@@ -14,9 +14,5 @@ object TestParser extends App {
 
   val result = SpyPartyZipParser.parseZipStream(bytes)
 
-  result match {
-    case -\/(error) => s"Something done fucked up: $error"
-    case \/-(parsed) =>
-      parsed.orderedReplays.foreach(println(_))
-  }
+  println(result)
 }

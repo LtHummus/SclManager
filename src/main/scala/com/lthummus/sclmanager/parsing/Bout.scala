@@ -1,8 +1,9 @@
 package com.lthummus.sclmanager.parsing
 
+import com.lthummus.sclmanager.parsing.BoutTypeEnum.BoutType
 import com.typesafe.config.ConfigFactory
 
-case class Bout(replays: List[Replay]) {
+case class Bout(replays: List[Replay], kind: BoutType) {
 
   val orderedReplays: List[Replay] = replays.filter(_.isCompleted).sorted
 
@@ -14,19 +15,7 @@ case class Bout(replays: List[Replay]) {
 
   val isTie: Boolean = player1Score == player2Score
 
-  private def complete = {
-    //one player has 5 points and the other player has fewer than 4
-    //tied at 5-5
-    //6-4
-    Seq(player1Score, player2Score).sorted match {
-      case loser :: winner :: _ if winner == 5 && loser <  4 => true
-      case loser :: winner :: _ if winner == 5 && loser == 5 => true
-      case loser :: winner :: _ if winner == 6 && loser == 4 => true
-      case _ => false
-    }
-  }
-
-  if (!complete) {
+  if (!kind.isComplete(player1Score, player2Score)) {
     throw new Exception("This doesn't look like a complete SCL match.  Are all the replays included?")
   }
 

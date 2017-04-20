@@ -1,6 +1,6 @@
 package com.lthummus.sclmanager.database.dao
 
-import com.lthummus.sclmanager.parsing.Bout
+import com.lthummus.sclmanager.parsing.{Bout, BoutTypeEnum}
 import com.lthummus.sclmanager.servlets.dto.Draft
 import org.jooq.DSLContext
 import zzz.generated.Tables
@@ -81,8 +81,9 @@ object BoutDao {
 
   def getBoutData(boutId: Int)(implicit dslContext: DSLContext): String \/ Bout = {
     for {
+      boutRecord <- getById(boutId) \/> s"No match found with id $boutId"
       gameList <- GameDao.getGamesByBoutId(boutId)
-    } yield Bout(gameList)
+    } yield Bout(gameList, BoutTypeEnum.fromInt(boutRecord.getBoutType))
   }
 
   def resetBout(id: Int)(implicit dslContext: DSLContext) = {

@@ -101,6 +101,11 @@ class Bout(alias : String, aliased : Table[BoutRecord], parameters : Array[ Fiel
   val DRAFT : TableField[BoutRecord, Integer] = createField("draft", org.jooq.impl.SQLDataType.INTEGER, "")
 
   /**
+   * The column <code>scl.bout.bout_type</code>.
+   */
+  val BOUT_TYPE : TableField[BoutRecord, Integer] = createField("bout_type", org.jooq.impl.SQLDataType.INTEGER.defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), "")
+
+  /**
    * Create a <code>scl.bout</code> table reference
    */
   def this() = {

@@ -3,7 +3,7 @@ package com.lthummus.sclmanager.servlets
 import com.amazonaws.util.IOUtils
 import com.lthummus.sclmanager.SclManagerStack
 import com.lthummus.sclmanager.database.dao.{BoutDao, DraftDao, GameDao, PlayerDao}
-import com.lthummus.sclmanager.parsing.{Bout, SpyPartyZipParser}
+import com.lthummus.sclmanager.parsing.{Bout, BoutTypeEnum, SpyPartyZipParser}
 import org.jooq.DSLContext
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra._
@@ -19,6 +19,7 @@ import org.scalatra.swagger.{Swagger, SwaggerEngine, SwaggerSupport}
 
 import scalaz._
 import Scalaz._
+import scala.util.Try
 
 object MatchServlet {
   val Uploader = new S3Uploader()
@@ -74,8 +75,9 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
     val zipContents = IOUtils.toByteArray(file.getInputStream)
 
     val result = for {
-      parseResult <- SpyPartyZipParser.parseZipStream(zipContents)
-      bout <- BoutDao.getNextToBePlayedByPlayers(parseResult.player1, parseResult.player2) \/> "No match found between these two players"
+      replayList <- SpyPartyZipParser.parseZipStream(zipContents)
+      bout <- BoutDao.getNextToBePlayedByPlayers(replayList.head.spy, replayList.head.sniper) \/> "No match found between these two players"
+      parseResult <- Try(Bout(replayList, BoutTypeEnum.fromInt(bout.getBoutType))).toDisjunction.leftMap(_.getMessage)
       url <- uploadToS3(generateFilename(file.name, parseResult, bout), zipContents)
       result <- persistBout(parseResult, url)
     } yield result

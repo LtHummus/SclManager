@@ -47,7 +47,7 @@ object GameDao {
     dslContext
       .selectFrom(Tables.GAME)
       .where(Tables.GAME.BOUT.eq(matchId))
-      .orderBy(Tables.GAME.SEQUENCE)
+      .orderBy(Tables.GAME.TIMESTAMP)
       .fetch().asScala.toList
   }
 
@@ -55,7 +55,7 @@ object GameDao {
     val res = dslContext
       .selectFrom(Tables.GAME)
       .where(Tables.GAME.BOUT.eq(boutId))
-      .orderBy(Tables.GAME.SEQUENCE)
+      .orderBy(Tables.GAME.TIMESTAMP)
       .fetch()
 
     val replays = res.asScala.map(it => it.asReplay).collect{ case \/-(it) => it}.toList

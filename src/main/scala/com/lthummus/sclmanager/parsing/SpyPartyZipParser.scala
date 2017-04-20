@@ -3,6 +3,8 @@ package com.lthummus.sclmanager.parsing
 import java.io.{ByteArrayInputStream, DataInputStream, InputStream}
 import java.util.zip.{ZipEntry, ZipInputStream}
 
+import com.lthummus.sclmanager.parsing.BoutTypeEnum.BoutType
+
 import scalaz._
 import Scalaz._
 import scala.util.Try
@@ -10,7 +12,7 @@ import scala.util.Try
 
 object SpyPartyZipParser {
 
-  def parseZipStream(bytes: Array[Byte]): String \/ Bout = {
+  def parseZipStream(bytes: Array[Byte]): String \/ List[Replay] = {
     val zis = new ZipInputStream(new ByteArrayInputStream(bytes))
 
     val replays = scala.collection.mutable.ListBuffer[Replay]()
@@ -30,7 +32,10 @@ object SpyPartyZipParser {
     zis.close()
 
     try {
-      Bout(replays.toList).right
+      if (replays.isEmpty)
+        "No replays found in ZIP file".left
+      else
+        replays.toList.right
     } catch {
       case e: Exception => e.getMessage.left
     }

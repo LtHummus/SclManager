@@ -62,7 +62,7 @@ object Match {
 
     val maybeBout = gameList.size match {
       case 0 => None
-      case _ => Some(Bout(gameList.map(_.asReplay)))
+      case _ => Some(Bout(gameList.map(_.asReplay), BoutTypeEnum.fromInt(record.getBoutType)))
     }
 
     val draftSummary = draft.map(_.asForumPost).getOrElse("")

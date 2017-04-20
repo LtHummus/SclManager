@@ -104,7 +104,7 @@ class Game(alias : String, aliased : Table[GameRecord], parameters : Array[ Fiel
   /**
    * The column <code>scl.game.timestamp</code>.
    */
-  val TIMESTAMP : TableField[GameRecord, Timestamp] = createField("timestamp", org.jooq.impl.SQLDataType.TIMESTAMP, "")
+  val TIMESTAMP : TableField[GameRecord, Timestamp] = createField("timestamp", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), "")
 
   /**
    * Create a <code>scl.game</code> table reference
