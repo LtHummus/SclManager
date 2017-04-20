@@ -5,7 +5,6 @@ import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import org.jooq.{DSLContext, SQLDialect}
 import org.jooq.impl.DSL
 
-
 object DatabaseConfigurator {
 
   def getDslContext: DSLContext = {
@@ -24,4 +23,12 @@ object DatabaseConfigurator {
 
     DSL.using(hikariDataSource, SQLDialect.MYSQL)
   }
+}
+
+trait TransactionSupport {
+  def withTransaction[T](func: (DSLContext) => T)(implicit dslContext: DSLContext): T = ???
+//    dslContext.transaction(config => {
+//      val result = func(DSL.using(config))
+//    })
+//  }
 }

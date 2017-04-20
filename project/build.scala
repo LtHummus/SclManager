@@ -28,6 +28,7 @@ object SclManagerBuild extends Build {
       scalaVersion := ScalaVersion,
       resolvers += Classpaths.typesafeReleases,
       resolvers += "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases",
+      resolvers += "spray repo" at "http://repo.typesafe.com/typesafe/releases/",
       javaOptions ++= Seq("-Xdebug",
         "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"),
       libraryDependencies ++= Seq(
@@ -51,7 +52,7 @@ object SclManagerBuild extends Build {
 
         // database bullshit
         "org.jooq" % "jooq" % "3.8.2",
-        "org.jooq" % "jooq-codegen" % "3.8.2",
+        "org.jooq" % "jooq-codegen" % "3.8.2" % "provided",
         "mysql" % "mysql-connector-java" % "5.1.16",
         "com.zaxxer" % "HikariCP" % "2.4.6",
 
