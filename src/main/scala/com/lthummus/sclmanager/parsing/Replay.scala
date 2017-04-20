@@ -7,15 +7,21 @@ import java.util
 import java.util.{Base64, Date}
 
 import com.lthummus.sclmanager.parsing.GameLoadoutType.GameLoadoutType
-import com.lthummus.sclmanager.parsing.GameResult.GameResult
 import org.joda.time.DateTime
 
 import scalaz._
 import Scalaz._
 
-object GameResult extends Enumeration {
-  type GameResult = Value
-  val MissionWin, SpyTimeout, SpyShot, CivilianShot, InProgress = Value
+object GameResultEnum {
+  sealed abstract class GameResult(val niceName: String, val internalId: Int) {
+    override def toString: String = niceName
+  }
+
+  case object MissionWin extends GameResult("Mission Win", 0)
+  case object SpyTimeout extends GameResult("Spy Timeout", 1)
+  case object SpyShot extends GameResult("Spy Shot", 2)
+  case object CivilianShot extends GameResult("Civilian Shot", 3)
+  case object InProgress extends GameResult("In Progress", 4)
 
   def fromString(value: String): String \/ GameResult = {
     value match {
@@ -36,17 +42,6 @@ object GameResult extends Enumeration {
       case 3 => CivilianShot.right
       case 4 => InProgress.right
       case _ => s"Unknown game result type: $value".left
-    }
-  }
-
-  def toInt(value: GameResult) = {
-    value match {
-      case MissionWin => 0
-      case SpyTimeout => 1
-      case SpyShot => 2
-      case CivilianShot => 3
-      case InProgress => 4
-      case _ => ???
     }
   }
 }
@@ -97,6 +92,8 @@ object GameType {
   }
 }
 
+import GameResultEnum._
+
 case class Replay(spy: String,
                   sniper: String,
                   startTime: DateTime,
@@ -107,9 +104,9 @@ case class Replay(spy: String,
                   uuid: String) extends Ordered[Replay] {
   override def compare(that: Replay): Int = if (this.startTime.isBefore(that.startTime)) -1 else 1
 
-  def isCompleted: Boolean = result != GameResult.InProgress
-  def spyWon: Boolean = result == GameResult.CivilianShot || result == GameResult.MissionWin
-  def sniperWon: Boolean = result == GameResult.SpyShot || result == GameResult.SpyTimeout
+  def isCompleted: Boolean = result != GameResultEnum.InProgress
+  def spyWon: Boolean = result == GameResultEnum.CivilianShot || result == GameResultEnum.MissionWin
+  def sniperWon: Boolean = result == GameResultEnum.SpyShot || result == GameResultEnum.SpyTimeout
 
   def winnerName: String = if (spyWon) spy else sniper
   def winnerRole: String = if (spyWon) "spy" else "sniper"
@@ -157,7 +154,7 @@ object Replay {
 
   private def extractGameResult(headerData: Array[Byte]): String \/ GameResult = {
     for {
-      gameResult <- GameResult.fromInt(headerData(0x30))
+      gameResult <- GameResultEnum.fromInt(headerData(0x30))
     } yield gameResult
   }
 

@@ -1,6 +1,6 @@
 package com.lthummus.sclmanager.database.dao
 
-import com.lthummus.sclmanager.parsing.{GameResult, GameType, Level, Replay}
+import com.lthummus.sclmanager.parsing._
 import org.joda.time.DateTime
 import org.jooq.DSLContext
 import zzz.generated.Tables
@@ -15,7 +15,7 @@ object GameDao {
   implicit class ConvertableToReplay(record: GameRecord) {
     def asReplay: String \/ Replay = {
       for {
-        resultValue <- GameResult.fromInt(record.getResult)
+        resultValue <- GameResultEnum.fromInt(record.getResult)
         level <- Level.getLevelByName(record.getVenue)
         decodedGameType <- GameType.fromString(record.getGametype)
       } yield Replay(record.getSpy, record.getSniper, new DateTime(), resultValue, level, decodedGameType, record.getSequence, record.getUuid)
@@ -24,7 +24,7 @@ object GameDao {
 
   implicit class ConvertableFromReplay(replay: Replay) {
     def toDatabase(matchId: Int) = {
-      new GameRecord(null, replay.spy, replay.sniper, matchId, GameResult.toInt(replay.result), replay.sequenceNumber, replay.level.name, replay.loadoutType.toString, replay.uuid)
+      new GameRecord(null, replay.spy, replay.sniper, matchId, replay.result.internalId, replay.sequenceNumber, replay.level.name, replay.loadoutType.toString, replay.uuid)
     }
   }
 

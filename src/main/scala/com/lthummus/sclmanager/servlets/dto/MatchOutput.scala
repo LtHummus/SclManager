@@ -32,7 +32,7 @@ case class Game(id: Int,
                 uuid: String) {
   def asReplay: Replay = {
     val disjointReplay = for {
-      parsedResult <- GameResult.fromString(result)
+      parsedResult <- GameResultEnum.fromString(result)
       parsedLevel <- Level.getLevelByName(level)
       parsedGameType <- GameType.fromString(gameType)
     } yield Replay(spy, sniper, new DateTime(id * 1000L), parsedResult, parsedLevel, parsedGameType, sequence, uuid)
@@ -108,7 +108,7 @@ object Match {
 
 object Game {
   def fromDatabaseRecord(record: GameRecord, playerMap: Map[String, PlayerRecord]): Game = {
-    val gameResult = GameResult.fromInt(record.getResult) match {
+    val gameResult = GameResultEnum.fromInt(record.getResult) match {
       case -\/(error) => error
       case \/-(res) => res.toString
     }
