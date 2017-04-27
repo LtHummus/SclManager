@@ -36,6 +36,16 @@ case class Game(id: Int,
                 sequence: Int,
                 uuid: String,
                 timestamp: DateTime) {
+
+  def isCompleted: Boolean = result != GameResultEnum.InProgress.niceName
+  def spyWon: Boolean = result == GameResultEnum.CivilianShot.niceName || result == GameResultEnum.MissionWin.niceName
+  def sniperWon: Boolean = result == GameResultEnum.SpyShot.niceName || result == GameResultEnum.SpyTimeout.niceName
+
+  val winnerName: String = if (spyWon) spy else sniper
+  val winnerRole: String = if (spyWon) "spy" else "sniper"
+
+  val description: String = s"$winnerName won as $winnerRole on $level $gameType"
+
   def asReplay: Replay = {
     val disjointReplay = for {
       parsedResult <- GameResultEnum.fromString(result)
@@ -62,7 +72,7 @@ case class MatchList(matches: Seq[Match])
 
 object Match {
   def fromDatabaseRecordWithGames(record: Record, games: List[GameRecord], playerMap: Map[String, PlayerRecord], draft: Option[Draft]): Match = {
-    val boutRecord: BoutRecord = record.into(Tables.BOUT) //intellij thinks this is bad, no idea??
+    val boutRecord: BoutRecord = record.into(Tables.BOUT) //intellij thinks this is a compiler error, no idea why??
     val gameList = games.map(Game.fromDatabaseRecord(_, playerMap))
     val packagedMatchUrl = Option(boutRecord.getMatchUrl)
 
