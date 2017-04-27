@@ -6,13 +6,13 @@ import com.lthummus.sclmanager.database.TransactionSupport
 import com.lthummus.sclmanager.database.dao.{BoutDao, DraftDao, GameDao, PlayerDao}
 import com.lthummus.sclmanager.parsing.{Bout, BoutTypeEnum, SpyPartyZipParser}
 import org.jooq.DSLContext
-import org.json4s.{DefaultFormats, Formats}
+import org.json4s.{DefaultFormats, FieldSerializer, Formats}
 import org.scalatra._
 import org.scalatra.json.JacksonJsonSupport
 import org.scalatra.servlet.{FileItem, FileUploadSupport, MultipartConfig}
 import zzz.generated.tables.records.{BoutRecord, DraftRecord, GameRecord, PlayerRecord}
 import com.lthummus.sclmanager.database.dao.GameDao._
-import com.lthummus.sclmanager.servlets.dto.{BoutParseResults, ErrorMessage, Match}
+import com.lthummus.sclmanager.servlets.dto.{BoutParseResults, ErrorMessage, Game, Match}
 import com.lthummus.sclmanager.util.S3Uploader
 import org.apache.commons.io.FilenameUtils
 import org.json4s.ext.JodaTimeSerializers
@@ -30,7 +30,7 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
                                                                             with FileUploadSupport
                                                                             with SwaggerSupport
                                                                             with TransactionSupport {
-  protected implicit lazy val jsonFormats: Formats = DefaultFormats ++ JodaTimeSerializers.all
+  protected implicit lazy val jsonFormats: Formats = DefaultFormats ++ JodaTimeSerializers.all + FieldSerializer[Game]()
 
   protected val applicationDescription = "Gets match information"
 
