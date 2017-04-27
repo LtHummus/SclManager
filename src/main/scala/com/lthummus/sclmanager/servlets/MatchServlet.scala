@@ -2,6 +2,7 @@ package com.lthummus.sclmanager.servlets
 
 import com.amazonaws.util.IOUtils
 import com.lthummus.sclmanager.SclManagerStack
+import com.lthummus.sclmanager.database.TransactionSupport
 import com.lthummus.sclmanager.database.dao.{BoutDao, DraftDao, GameDao, PlayerDao}
 import com.lthummus.sclmanager.parsing.{Bout, BoutTypeEnum, SpyPartyZipParser}
 import org.jooq.DSLContext
@@ -27,7 +28,8 @@ object MatchServlet {
 
 class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extends SclManagerStack with JacksonJsonSupport
                                                                             with FileUploadSupport
-                                                                            with SwaggerSupport {
+                                                                            with SwaggerSupport
+                                                                            with TransactionSupport {
   protected implicit lazy val jsonFormats: Formats = DefaultFormats ++ JodaTimeSerializers.all
 
   protected val applicationDescription = "Gets match information"
@@ -51,13 +53,15 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
   }
 
   private def persistBout(bout: Bout, url: String) = {
-    for {
-      player1 <- PlayerDao.getByPlayerName(bout.player1) \/> s"No player found with name ${bout.player1}"
-      player2 <- PlayerDao.getByPlayerName(bout.player2) \/> s"No player found with name ${bout.player2}"
-      boutObj <- BoutDao.getNextToBePlayedByPlayers(player1.getName, player2.getName) \/> s"No match found between these players"
-      draft = DraftDao.getLatestUnusedDraftForPlayer(Seq(player1.getName, player2.getName))
-      updateRes <- updateScores(bout, bout.orderedReplays.map(_.toDatabase(boutObj.getId)), url, draft)
-    } yield updateRes
+    insideTransaction{ implicit dslContext =>
+      for {
+        player1 <- PlayerDao.getByPlayerName(bout.player1) \/> s"No player found with name ${bout.player1}"
+        player2 <- PlayerDao.getByPlayerName(bout.player2) \/> s"No player found with name ${bout.player2}"
+        boutObj <- BoutDao.getNextToBePlayedByPlayers(player1.getName, player2.getName) \/> s"No match found between these players"
+        draft = DraftDao.getLatestUnusedDraftForPlayer(Seq(player1.getName, player2.getName))
+        updateRes <- updateScores(bout, bout.orderedReplays.map(_.toDatabase(boutObj.getId)), url, draft)
+      } yield updateRes
+    }
   }
 
   private def uploadToS3(name: String, contents: Array[Byte]) = {

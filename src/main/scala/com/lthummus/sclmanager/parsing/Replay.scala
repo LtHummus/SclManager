@@ -119,6 +119,8 @@ case class Replay(spy: String,
   def winnerRole: String = if (spyWon) "spy" else "sniper"
 
   def fullLevelName = s"${level.name} $loadoutType"
+
+  def description: String = s"$winnerName won as $winnerRole on $fullLevelName"
 }
 
 object Replay {
