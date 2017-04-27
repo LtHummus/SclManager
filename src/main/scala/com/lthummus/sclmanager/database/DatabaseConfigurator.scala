@@ -1,9 +1,11 @@
 package com.lthummus.sclmanager.database
 
+import java.sql.Connection
+
 import com.typesafe.config.ConfigFactory
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
-import org.jooq.{DSLContext, SQLDialect}
-import org.jooq.impl.DSL
+import org.jooq._
+import org.jooq.impl.{DSL, DefaultTransactionContext, DefaultTransactionProvider, SclTransactionContext}
 
 object DatabaseConfigurator {
 
@@ -25,10 +27,19 @@ object DatabaseConfigurator {
   }
 }
 
+
 trait TransactionSupport {
-  def withTransaction[T](func: (DSLContext) => T)(implicit dslContext: DSLContext): T = ???
-//    dslContext.transaction(config => {
-//      val result = func(DSL.using(config))
-//    })
-//  }
+  def insideTransaction[T](func: (DSLContext) => T)(implicit dslContext: DSLContext): T = {
+    val ctx = new SclTransactionContext(dslContext.configuration().derive)
+    val provider = ctx.configuration().transactionProvider()
+
+    try {
+      provider.begin(ctx)
+      val res = func(DSL.using(ctx.configuration()))
+      provider.commit(ctx)
+      res
+    } catch {
+      case e: Exception => provider.rollback(ctx); throw e
+    }
+  }
 }

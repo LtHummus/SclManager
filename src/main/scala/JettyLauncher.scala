@@ -19,6 +19,7 @@ object JettyLauncher {
 
     server.setHandler(context)
 
+
     server.start()
     server.join()
   }

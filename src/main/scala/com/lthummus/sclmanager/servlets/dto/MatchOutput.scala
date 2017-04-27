@@ -20,6 +20,7 @@ case class Match(id: Int,
                  games: Option[List[Game]],
                  matchUrl: Option[String],
                  draft: Option[Draft],
+                 gameSummaryList: List[String],
                  summary: Option[String] = None,
                  forumPost: Option[String] = None) {
 
@@ -61,7 +62,7 @@ case class MatchList(matches: Seq[Match])
 
 object Match {
   def fromDatabaseRecordWithGames(record: Record, games: List[GameRecord], playerMap: Map[String, PlayerRecord], draft: Option[Draft]): Match = {
-    val boutRecord = record.into(Tables.BOUT)
+    val boutRecord: BoutRecord = record.into(Tables.BOUT) //intellij thinks this is bad, no idea??
     val gameList = games.map(Game.fromDatabaseRecord(_, playerMap))
     val packagedMatchUrl = Option(boutRecord.getMatchUrl)
 
@@ -108,6 +109,7 @@ object Match {
       Some(gameList),
       packagedMatchUrl,
       draft,
+      maybeBout.map(it => it.replays.map(_.description)).getOrElse(List()),
       summary,
       forumPost)
   }
