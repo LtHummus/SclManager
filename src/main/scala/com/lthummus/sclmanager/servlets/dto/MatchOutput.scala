@@ -20,7 +20,6 @@ case class Match(id: Int,
                  games: Option[List[Game]],
                  matchUrl: Option[String],
                  draft: Option[Draft],
-                 gameSummaryList: List[String],
                  summary: Option[String] = None,
                  forumPost: Option[String] = None) {
 
@@ -119,7 +118,6 @@ object Match {
       Some(gameList),
       packagedMatchUrl,
       draft,
-      maybeBout.map(it => it.replays.map(_.description)).getOrElse(List()),
       summary,
       forumPost)
   }
