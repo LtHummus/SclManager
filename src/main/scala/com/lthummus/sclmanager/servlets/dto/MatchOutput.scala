@@ -20,7 +20,9 @@ case class Match(id: Int,
                  games: Option[List[Game]],
                  matchUrl: Option[String],
                  draft: Option[Draft],
-                 summary: Option[String] = None,
+                 draftSummary: Option[String],
+                 scoreSummary: Option[String],
+                 summary: Option[List[String]] = None,
                  forumPost: Option[String] = None) {
 
 }
@@ -80,7 +82,7 @@ object Match {
       case _ => Some(Bout(gameList.map(_.asReplay), BoutTypeEnum.fromInt(boutRecord.getBoutType)))
     }
 
-    val draftSummary = draft.map(_.asForumPost).getOrElse("")
+    val draftSummary = draft.map(_.asForumPost)
 
     val forumPost = maybeBout.map(bout =>
       s"""
@@ -97,16 +99,6 @@ object Match {
         |Game link: [url]${boutRecord.getMatchUrl}[/url]
       """.stripMargin)
 
-    val summary = maybeBout.map(bout =>
-      s"""
-        |Results for ${bout.player1} v. ${bout.player2}
-        |
-        |$draftSummary
-        |
-        |${bout.getGameSummary.mkString("\n")}
-      """.stripMargin)
-
-
 
     Match(boutRecord.getId,
       boutRecord.getWeek,
@@ -118,7 +110,9 @@ object Match {
       Some(gameList),
       packagedMatchUrl,
       draft,
-      summary,
+      draftSummary,
+      maybeBout.map(_.getScoreLine),
+      maybeBout.map(_.getGameSummary),
       forumPost)
   }
 }
