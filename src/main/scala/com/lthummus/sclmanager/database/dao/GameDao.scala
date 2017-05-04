@@ -3,8 +3,11 @@ package com.lthummus.sclmanager.database.dao
 import java.sql.Timestamp
 
 import com.lthummus.sclmanager.parsing._
+import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException
 import org.joda.time.DateTime
 import org.jooq.DSLContext
+import org.jooq.exception.DataAccessException
+import org.slf4j.LoggerFactory
 import zzz.generated.Tables
 import zzz.generated.tables.records.GameRecord
 
@@ -13,6 +16,8 @@ import scalaz._
 import Scalaz._
 
 object GameDao {
+
+  private val Logger = LoggerFactory.getLogger("GameDao")
 
   implicit class ConvertableToReplay(record: GameRecord) {
     def asReplay: String \/ Replay = {
@@ -71,7 +76,13 @@ object GameDao {
     try {
       dslContext.batchInsert(records.asJava).execute().right
     } catch {
-      case e: Throwable => e.getMessage.left
+      case e: DataAccessException if e.getCause.getCause.isInstanceOf[MySQLIntegrityConstraintViolationException] =>
+        Logger.warn("Potential duplicate records", e)
+        "It looks like I already have at least one of these replays.  Are you uploading the right file?".left
+
+      case e: Throwable =>
+        Logger.warn("Could not persist batch records", e)
+        e.getMessage.left
     }
   }
 }
