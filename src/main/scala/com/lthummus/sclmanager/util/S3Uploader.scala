@@ -25,7 +25,7 @@ class S3Uploader {
 
     try {
       S3.putObject(BucketName, name, new ByteArrayInputStream(input), metadata)
-      s"https://s3-us-west-2.amazonaws.com/$BucketName/${URLEncoder.encode(name, "UTF-8")}".right
+      s"https://s3-us-west-2.amazonaws.com/$BucketName/$name".right
     } catch {
       case e: Exception =>
         S3Uploader.Logger.warn("Error uploading", e)

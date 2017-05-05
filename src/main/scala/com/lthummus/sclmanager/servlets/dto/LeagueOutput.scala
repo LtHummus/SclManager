@@ -11,7 +11,7 @@ case class League(name: String, players: Option[List[Player]], precedence: Int) 
 object League {
   def fromDatabaseRecord(record: DivisionRecord) = League(record.getName, None, record.getPrecedence)
   def fromDatabaseRecord(record: DivisionRecord, players: List[PlayerRecord]) = {
-    League(record.getName, Some(players.map(Player.fromDatabaseRecord(_)).sortWith(Player.sortByScore)), record.getPrecedence)
+    League(record.getName, Some(players.map(Player.fromDatabaseRecord(_)).sorted), record.getPrecedence)
   }
 }
 

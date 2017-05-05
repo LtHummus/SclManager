@@ -86,17 +86,17 @@ object Match {
 
     val forumPost = maybeBout.map(bout =>
       s"""
-        |Results for ${bout.player1} v. ${bout.player2}
-        |
-        |$draftSummary
-        |
-        |[results]
-        |${bout.getScoreLine}
-        |
-        |${bout.getGameSummary.mkString("\n")}
-        |[/results]
-        |
-        |Game link: [url]${boutRecord.getMatchUrl}[/url]
+        |Results for ${bout.player1} v. ${bout.player2} (Week ${boutRecord.getWeek})<br />
+        |<br />
+        |${draftSummary.getOrElse("")}<br />
+        |<br />
+        |[results]<br />
+        |${bout.getScoreLine}<br />
+        |<br />
+        |${bout.getGameSummary.mkString("<br />")}<br />
+        |[/results]<br />
+        |<br />
+        |Game link: [url]${boutRecord.getMatchUrl}[/url]<br />
       """.stripMargin)
 
 
