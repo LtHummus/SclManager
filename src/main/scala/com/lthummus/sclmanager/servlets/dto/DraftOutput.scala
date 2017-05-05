@@ -9,14 +9,14 @@ import zzz.generated.tables.records.DraftRecord
 
 case class Draft(id: Int, roomCode: String, player1: String, player2: String, time: Timestamp, payload: DraftPayload) {
   def asForumPost: String = {
-    val banString = payload.bannedMaps.map(it => s"\t${it.picker} has banned ${it.map}").mkString("\n")
-    val pickString = payload.pickedMaps.map(it => s"\t${it.picker} has picked ${it.map}").mkString("\n")
+    val banString = payload.bannedMaps.map(it => s"\t${it.picker} has banned ${it.map}").mkString("<br />")
+    val pickString = payload.pickedMaps.map(it => s"\t${it.picker} has picked ${it.map}").mkString("<br />")
     s"""
-      |BANS:
-      |$banString
-      |
-      |PICKS:
-      |$pickString
+      |BANS:<br />
+      |$banString<br />
+      |<br />
+      |PICKS:<br />
+      |$pickString<br />
     """.stripMargin
   }
 }

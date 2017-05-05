@@ -69,7 +69,7 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
   }
 
   private def generateFilename(originalName: String, bout: Bout, record: BoutRecord) = {
-    s"SCL Season 3 - Week ${record.getWeek} - ${bout.player1} vs ${bout.player2}.${FilenameUtils.getExtension(originalName)}"
+    f"SCL Season 3 - Week ${record.getWeek.toInt}%02d - ${bout.player1} vs ${bout.player2}.${FilenameUtils.getExtension(originalName)}"
   }
 
 
