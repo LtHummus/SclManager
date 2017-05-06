@@ -143,10 +143,22 @@ private object LeagueGenerator extends App {
     }
   }
 
+  private def printLeagueAndMatches(league: League, matches: Seq[List[(Player, Player)]]) = {
+    println(s"${league.name} League")
+    for (weekNum <- matches.indices) {
+      val week = matches(weekNum)
+      println(s"\tWeek ${weekNum + 1}")
+      val records = week.map(it => s"\t\t${it._1.name} vs ${it._2.name}" )
+      println(records.mkString("\n"))
+      println()
+    }
+  }
+
   private val allLeaguesXMatches = generateMatches(Leagues)
 
   for {(league, matches) <- allLeaguesXMatches} {
-    persistLeagueData(league, matches)
+    printLeagueAndMatches(league, matches)
+    //persistLeagueData(league, matches)
   }
 
 }
