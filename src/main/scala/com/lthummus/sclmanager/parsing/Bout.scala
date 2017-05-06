@@ -3,6 +3,9 @@ package com.lthummus.sclmanager.parsing
 import com.lthummus.sclmanager.parsing.BoutTypeEnum.BoutType
 import com.typesafe.config.ConfigFactory
 
+import com.lthummus.sclmanager.scaffolding.SystemConfig._
+
+
 case class Bout(replays: List[Replay], kind: BoutType) {
 
   val orderedReplays: List[Replay] = replays.filter(_.isCompleted).sorted
@@ -77,7 +80,7 @@ case class Bout(replays: List[Replay], kind: BoutType) {
 object Bout {
   val Config = ConfigFactory.load()
 
-  val PointsForWin = Config.getInt("tournament.pointsPerWin")
-  val PointsForDraw = Config.getInt("tournament.pointsPerDraw")
-  val PointsForLoss = Config.getInt("tournament.pointsPerLoss")
+  val PointsForWin = Config.getIntWithStage("tournament.pointsPerWin")
+  val PointsForDraw = Config.getIntWithStage("tournament.pointsPerDraw")
+  val PointsForLoss = Config.getIntWithStage("tournament.pointsPerLoss")
 }

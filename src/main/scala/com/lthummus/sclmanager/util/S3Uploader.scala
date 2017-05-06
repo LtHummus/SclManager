@@ -12,12 +12,15 @@ import org.slf4j.{Logger, LoggerFactory}
 import scalaz._
 import Scalaz._
 
+import com.lthummus.sclmanager.scaffolding.SystemConfig._
+
+
 class S3Uploader {
-  val config = ConfigFactory.load()
+  private val config = ConfigFactory.load()
 
-  val S3 = new AmazonS3Client()
+  private val S3 = new AmazonS3Client()
 
-  val BucketName = config.getString("s3.bucketName")
+  private val BucketName = config.getStringWithStage("s3.bucketName")
 
   def putReplay(name: String, input: Array[Byte]): String \/ String = {
     val metadata = new ObjectMetadata()

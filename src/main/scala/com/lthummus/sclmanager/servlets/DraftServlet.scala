@@ -11,6 +11,8 @@ import org.scalatra.{Forbidden, NotFound, Ok}
 import org.scalatra.json.JacksonJsonSupport
 import org.scalatra.swagger.{Swagger, SwaggerSupport}
 
+import com.lthummus.sclmanager.scaffolding.SystemConfig._
+
 
 class DraftServlet(implicit dslContext: DSLContext, val swagger: Swagger) extends SclManagerStack
   with JacksonJsonSupport
@@ -21,7 +23,7 @@ class DraftServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
 
   protected implicit lazy val jsonFormats: Formats = DefaultFormats ++ JodaTimeSerializers.all
 
-  lazy private val sharedSecret = ConfigFactory.load().getString("sharedSecret")
+  private val sharedSecret = ConfigFactory.load().getEncryptedString("sharedSecret")
 
   before() {
     contentType = formats("json")

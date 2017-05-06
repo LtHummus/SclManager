@@ -12,6 +12,7 @@ import org.scalatra.json.JacksonJsonSupport
 import org.scalatra.servlet.{FileItem, FileUploadSupport, MultipartConfig}
 import zzz.generated.tables.records.{BoutRecord, DraftRecord, GameRecord, PlayerRecord}
 import com.lthummus.sclmanager.database.dao.GameDao._
+import com.lthummus.sclmanager.scaffolding.SystemConfig
 import com.lthummus.sclmanager.servlets.dto.{BoutParseResults, ErrorMessage, Game, Match}
 import com.lthummus.sclmanager.util.S3Uploader
 import org.apache.commons.io.FilenameUtils
@@ -96,26 +97,27 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
     }
   }
 
-  //TODO: see below
-  /*
-  FOR THE LOVE OF ALL THAT IS HOLY REMOVE THIS BEFORE FINAL RELEASE
-   */
-  private val resetById = (apiOperation[Match]("resetById")
-    summary "Reset matches to their default state"
-    notes "THIS IS FOR TESTING ONLY -- DELETES ALL DATA ASSOCIATED WITH A MATCH"
-    parameter pathParam[String]("id").description("id to reset"))
 
-  put("/reset/:id", operation(resetById)) {
-    val id = params("id").toInt
+  if (SystemConfig.isTest) {
+    val resetById = (apiOperation[Match]("resetById")
+      summary "Reset matches to their default state"
+      notes "THIS IS FOR TESTING ONLY -- DELETES ALL DATA ASSOCIATED WITH A MATCH"
+      parameter pathParam[String]("id").description("id to reset"))
 
-    GameDao.deleteBelongingToMatch(id)
-    val finalResult = BoutDao.resetBout(id)
+    put("/reset/:id", operation(resetById)) {
+      val id = params("id").toInt
 
-    finalResult match {
-      case -\/(_) => InternalServerError("result" -> "something screwed up")
-      case \/-(_) => Ok("result" -> "ok")
+      GameDao.deleteBelongingToMatch(id)
+      val finalResult = BoutDao.resetBout(id)
+
+      finalResult match {
+        case -\/(_) => InternalServerError("result" -> "something screwed up")
+        case \/-(_) => Ok("result" -> "ok")
+      }
     }
   }
+
+
 
   private val getByWeek = (apiOperation[Match]("getById")
     summary "Get matches by their week"
