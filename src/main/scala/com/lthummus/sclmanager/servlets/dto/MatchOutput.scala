@@ -85,10 +85,9 @@ object Match {
     val draftSummary = draft.map(_.asForumPost)
 
     val forumPost = maybeBout.map(bout =>
-      s"""
-        |Results for ${bout.player1} v. ${bout.player2} (Week ${boutRecord.getWeek})<br />
+      s"""Results for ${bout.player1} v. ${bout.player2} (Week ${boutRecord.getWeek})<br />
         |<br />
-        |${draftSummary.getOrElse("")}<br />
+        |${draftSummary.getOrElse("Draft Data Unavailable")}<br />
         |<br />
         |[results]<br />
         |${bout.getScoreLine}<br />
@@ -96,8 +95,7 @@ object Match {
         |${bout.getGameSummary.mkString("<br />")}<br />
         |[/results]<br />
         |<br />
-        |Game link: [url]${boutRecord.getMatchUrl}[/url]<br />
-      """.stripMargin)
+        |Game link: [url]${boutRecord.getMatchUrl}[/url]<br />""".stripMargin.lines.mkString(""))
 
 
     Match(boutRecord.getId,
