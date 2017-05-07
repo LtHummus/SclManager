@@ -118,6 +118,10 @@ private object LeagueGenerator extends App {
     leagues.map(it => (it, generateWeeklySchedule(it.players) ++ generateWeeklySchedule(it.players)))
   }
 
+  private def generateMatchesOneTime(leagues: Seq[League]) = {
+    leagues.map(it => (it, generateWeeklySchedule(it.players)))
+  }
+
   private def populateWeekMatches(league: League, week: Int, matches: Iterable[(Player, Player)]) = {
     Logger.info(s"populating matches for ${league.name} week $week: ")
     for (curr <- matches) {
@@ -154,11 +158,11 @@ private object LeagueGenerator extends App {
     }
   }
 
-  private val allLeaguesXMatches = generateMatches(Leagues)
+  private val allLeaguesXMatches = generateMatches(Leagues.dropRight(1)) ++ generateMatchesOneTime(Leagues.takeRight(1))
 
   for {(league, matches) <- allLeaguesXMatches} {
     printLeagueAndMatches(league, matches)
-    //persistLeagueData(league, matches)
+    persistLeagueData(league, matches)
   }
 
 }
