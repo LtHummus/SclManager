@@ -23,8 +23,8 @@ object DraftDao {
     val players = Seq(input.player1, input.player2).sorted
     val record = dslContext.newRecord(Tables.DRAFT)
 
-    record.setPlayer1(players.head)
-    record.setPlayer2(players(1))
+    record.setPlayer1(players.head.toLowerCase)
+    record.setPlayer2(players(1).toLowerCase)
     record.setRoomCode(input.roomCode)
     record.setPayload(write(input.payload))
 
