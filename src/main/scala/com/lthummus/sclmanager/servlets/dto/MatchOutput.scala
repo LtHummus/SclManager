@@ -95,7 +95,7 @@ object Match {
         |${bout.getGameSummary.mkString("<br />")}<br />
         |[/results]<br />
         |<br />
-        |Game link: [url]${boutRecord.getMatchUrl}[/url]<br />""".stripMargin.lines.mkString(""))
+        |Download link: [url]${boutRecord.getMatchUrl}[/url]<br />""".stripMargin.lines.mkString(""))
 
 
     Match(boutRecord.getId,

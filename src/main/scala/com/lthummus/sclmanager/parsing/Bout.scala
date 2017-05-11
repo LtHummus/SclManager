@@ -64,7 +64,15 @@ case class Bout(replays: List[Replay], kind: BoutType) {
 
   }
 
-  def getGameSummary: List[String] = orderedReplays.grouped(2).map(getSummaryForGroup).toList
+  def getGameSummary: List[String] = {
+    if (kind.hasOvertime(player1Score, player2Score)) {
+      val overtimeGames = orderedReplays.takeRight(2)
+      orderedReplays.dropRight(2).grouped(2).map(getSummaryForGroup).toList ++ overtimeGames.map(it => s"**OVERTIME** ${it.description}")
+    } else {
+      orderedReplays.grouped(2).map(getSummaryForGroup).toList
+    }
+
+  }
 
   def getScoreLine: String = {
     if (player1Score > player2Score) {

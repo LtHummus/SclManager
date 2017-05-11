@@ -15,8 +15,6 @@ object JettyLauncher {
     val config = ConfigFactory.load()
     val port = config.getIntWithStage("server.port")
 
-    Logger.info("Password: " + config.getEncryptedString("database.password"))
-
     val server = new Server(port)
     val context = new WebAppContext()
     context.setContextPath("/")
