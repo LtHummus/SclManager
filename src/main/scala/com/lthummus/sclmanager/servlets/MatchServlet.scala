@@ -73,7 +73,6 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
     f"SCL Season 3 - Week ${record.getWeek.toInt}%02d - ${bout.player1} vs ${bout.player2}.${FilenameUtils.getExtension(originalName)}"
   }
 
-
   post("/parse") {
     val file = fileParams("file")
 
@@ -164,6 +163,13 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
       case -\/(error) => BadRequest(ErrorMessage(error))
       case \/-(it) => Ok(Match.fromDatabaseRecordWithGames(it.bout, it.games, it.playerMap, it.draft))
     }
+  }
+
+
+  get("/last") {
+    val bout = BoutDao.getLastUploaded()
+
+    Ok(Map("player1" -> bout.getPlayer1, "player2" -> bout.getPlayer2))
   }
 
   private val getAll = (apiOperation[Match]("getAll")

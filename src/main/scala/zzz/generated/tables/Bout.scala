@@ -7,6 +7,7 @@ package zzz.generated.tables
 import java.lang.Class
 import java.lang.Integer
 import java.lang.String
+import java.sql.Timestamp
 import java.util.Arrays
 import java.util.List
 
@@ -103,7 +104,12 @@ class Bout(alias : String, aliased : Table[BoutRecord], parameters : Array[ Fiel
   /**
    * The column <code>scl.bout.bout_type</code>.
    */
-  val BOUT_TYPE : TableField[BoutRecord, Integer] = createField("bout_type", org.jooq.impl.SQLDataType.INTEGER.defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), "")
+  val BOUT_TYPE : TableField[BoutRecord, Integer] = createField("bout_type", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), "")
+
+  /**
+   * The column <code>scl.bout.timestamp</code>.
+   */
+  val TIMESTAMP : TableField[BoutRecord, Timestamp] = createField("timestamp", org.jooq.impl.SQLDataType.TIMESTAMP, "")
 
   /**
    * Create a <code>scl.bout</code> table reference
