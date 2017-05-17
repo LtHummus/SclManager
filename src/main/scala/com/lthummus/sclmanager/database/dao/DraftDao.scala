@@ -46,16 +46,14 @@ object DraftDao {
 
     val sortedPlayers = players.sorted
 
-    val res = dslContext.selectFrom(Tables.DRAFT)
+    Option(dslContext.selectFrom(Tables.DRAFT)
       .where(Tables.DRAFT.PLAYER1.eq(sortedPlayers.head))
       .and(Tables.DRAFT.PLAYER2.eq(sortedPlayers(1)))
-      .orderBy(Tables.DRAFT.TIME.desc()).fetch()
+      .orderBy(Tables.DRAFT.TIME.desc())
+      .limit(1)
+      .fetchOne())
 
-    res.size() match {
-      case 0 => None
-      case 1 => Some(res.get(0))
-      case _ => ???
-    }
+
   }
 
   def isDraftUsed(id: Int)(implicit dslContext: DSLContext): Boolean =

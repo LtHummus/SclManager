@@ -17,6 +17,15 @@ object BoutDao {
 
   def getAll()(implicit dslContext: DSLContext) = dslContext.selectFrom(Tables.BOUT).fetch().toList
 
+  def getLastUploaded()(implicit dslContext: DSLContext): BoutRecord = {
+    dslContext
+      .selectFrom(Tables.BOUT)
+      .where(Tables.BOUT.STATUS.eq(1))
+      .orderBy(Tables.BOUT.TIMESTAMP.desc())
+      .limit(1)
+      .fetchOne()
+  }
+
   def getById(id: Int)(implicit dslContext: DSLContext): Option[BoutRecord] = {
     Option(dslContext
       .selectFrom(Tables.BOUT)
