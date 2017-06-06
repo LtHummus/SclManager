@@ -76,8 +76,8 @@ private object LeagueGenerator extends App {
         Player("fourliberties", "it"),
         Player("anorexicwhale", "us"),
         Player("quicklime", "us"),
-        Player("moon", "us"),
-        Player("sailormoon92", "us")))
+        Player("moon", "us")
+       ))
   )
   val NumberOfTimesEveryonePlaysEachOther = 2
 
@@ -162,7 +162,7 @@ private object LeagueGenerator extends App {
 
   for {(league, matches) <- allLeaguesXMatches} {
     printLeagueAndMatches(league, matches)
-    persistLeagueData(league, matches)
+    //persistLeagueData(league, matches)
   }
 
 }

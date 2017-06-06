@@ -34,7 +34,7 @@ object MatchPrinter extends App {
     println(s"[center][b][color=#0000FF]${formatWeek(firstDayWeekOne.plusWeeks(week - 1), endDayWeekOne.plusWeeks(week - 1))}[/color][/b][/center]")
 
     println("[center]")
-    for (div <- divisions) {
+    for (div <- divisions.filter(_.getName == "Challenger")) {
       boutsWithDivision.get(div.getName) match {
         case Some(boutsWeCareAbout) =>
           println(s"[b]${div.getName}[/b]")
