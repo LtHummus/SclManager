@@ -109,10 +109,10 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
   put("/forfeit") {
     val data = parsedBody.extract[MatchForfeitInput]
     if (ForfeitPassword != data.password) {
-      Forbidden("error" -> "incorrect password")
+      Forbidden(ErrorMessage("incorrect password"))
     } else {
       forfeitMatch(data.matchId, data.winnerName, data.text) match {
-        case -\/(error) => InternalServerError("error" -> error.toString)
+        case -\/(error) => InternalServerError(ErrorMessage(error.toString))
         case \/-(_) => Ok("message" -> "ok")
       }
     }
