@@ -142,7 +142,7 @@ private object LeagueGenerator extends App {
     //step 3: insert all the matches
     for (week <- matches.indices) {
       val thisWeek = matches(week)
-      val matchRecords = thisWeek.map(it => new BoutRecord(null, week + 1, league.name, it._1.name, it._2.name, 0, null, null, null, 0, null)) // 0 = standard
+      val matchRecords = thisWeek.map(it => new BoutRecord(null, week + 1, league.name, it._1.name, it._2.name, 0, null, null, null, 0, null, null)) // 0 = standard
       Db.batchInsert(matchRecords.asJava).execute()
     }
   }

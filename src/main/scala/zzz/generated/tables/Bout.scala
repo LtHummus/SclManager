@@ -87,9 +87,9 @@ class Bout(alias : String, aliased : Table[BoutRecord], parameters : Array[ Fiel
   val STATUS : TableField[BoutRecord, Integer] = createField("status", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), "")
 
   /**
-   * The column <code>scl.bout.winner</code>.
+   * The column <code>scl.bout.forfeit_winner</code>.
    */
-  val WINNER : TableField[BoutRecord, String] = createField("winner", org.jooq.impl.SQLDataType.VARCHAR.length(50).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.VARCHAR)), "")
+  val FORFEIT_WINNER : TableField[BoutRecord, String] = createField("forfeit_winner", org.jooq.impl.SQLDataType.VARCHAR.length(50).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.VARCHAR)), "")
 
   /**
    * The column <code>scl.bout.match_url</code>.
@@ -110,6 +110,11 @@ class Bout(alias : String, aliased : Table[BoutRecord], parameters : Array[ Fiel
    * The column <code>scl.bout.timestamp</code>.
    */
   val TIMESTAMP : TableField[BoutRecord, Timestamp] = createField("timestamp", org.jooq.impl.SQLDataType.TIMESTAMP, "")
+
+  /**
+   * The column <code>scl.bout.forfeit_text</code>.
+   */
+  val FORFEIT_TEXT : TableField[BoutRecord, String] = createField("forfeit_text", org.jooq.impl.SQLDataType.VARCHAR.length(140), "")
 
   /**
    * Create a <code>scl.bout</code> table reference
@@ -144,7 +149,7 @@ class Bout(alias : String, aliased : Table[BoutRecord], parameters : Array[ Fiel
   }
 
   override def getReferences : List[ ForeignKey[BoutRecord, _] ] = {
-    return Arrays.asList[ ForeignKey[BoutRecord, _] ](Keys.FK_DIVISON, Keys.FK_PLAYER1, Keys.FK_PLAYER2, Keys.FK_WINNER, Keys.FK_DRAFT)
+    return Arrays.asList[ ForeignKey[BoutRecord, _] ](Keys.FK_DIVISON, Keys.FK_PLAYER1, Keys.FK_PLAYER2, Keys.FK_FORFEIT_WINNER, Keys.FK_DRAFT)
   }
 
   override def as(alias : String) : Bout = {

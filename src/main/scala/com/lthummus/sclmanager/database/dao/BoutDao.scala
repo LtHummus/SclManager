@@ -103,7 +103,7 @@ object BoutDao {
     } yield Bout(gameList, BoutTypeEnum.fromInt(boutRecord.getBoutType))
   }
 
-  def resetBout(id: Int)(implicit dslContext: DSLContext) = {
+  def resetBout(id: Int)(implicit dslContext: DSLContext): Unit \/ Int = {
     val bout = getById(id)
     bout match {
       case Some(b) =>
@@ -115,6 +115,17 @@ object BoutDao {
     }
   }
 
+  def updateBoutForfeitStatus(id: Int, winner: String, text: String)(implicit dslContext: DSLContext): Unit \/ Int = {
+    val bout = getById(id)
+    bout match {
+      case Some(b) =>
+        b.setStatus(2)
+        b.setForfeitWinner(winner)
+        b.setForfeitText(text)
+        b.update().right
+      case None => ().left
+    }
+  }
 
   def markBoutAsPlayed(boutId: Int, url: String, draft: Option[DraftRecord])(implicit dslContext: DSLContext): String \/ Int = {
     val matchOption = getById(boutId)

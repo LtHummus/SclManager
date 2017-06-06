@@ -66,7 +66,7 @@ object Keys {
   val FK_DIVISON = ForeignKeys0.FK_DIVISON
   val FK_PLAYER1 = ForeignKeys0.FK_PLAYER1
   val FK_PLAYER2 = ForeignKeys0.FK_PLAYER2
-  val FK_WINNER = ForeignKeys0.FK_WINNER
+  val FK_FORFEIT_WINNER = ForeignKeys0.FK_FORFEIT_WINNER
   val FK_DRAFT = ForeignKeys0.FK_DRAFT
   val FK_SPY = ForeignKeys0.FK_SPY
   val FK_SNIPER = ForeignKeys0.FK_SNIPER
@@ -96,7 +96,7 @@ object Keys {
     val FK_DIVISON : ForeignKey[BoutRecord, DivisionRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_DIVISION_PRIMARY, Bout.BOUT, "fk_divison", Bout.BOUT.DIVISION)
     val FK_PLAYER1 : ForeignKey[BoutRecord, PlayerRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_PLAYER_PRIMARY, Bout.BOUT, "fk_player1", Bout.BOUT.PLAYER1)
     val FK_PLAYER2 : ForeignKey[BoutRecord, PlayerRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_PLAYER_PRIMARY, Bout.BOUT, "fk_player2", Bout.BOUT.PLAYER2)
-    val FK_WINNER : ForeignKey[BoutRecord, PlayerRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_PLAYER_PRIMARY, Bout.BOUT, "fk_winner", Bout.BOUT.WINNER)
+    val FK_FORFEIT_WINNER : ForeignKey[BoutRecord, PlayerRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_PLAYER_PRIMARY, Bout.BOUT, "fk_forfeit_winner", Bout.BOUT.FORFEIT_WINNER)
     val FK_DRAFT : ForeignKey[BoutRecord, DraftRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_DRAFT_PRIMARY, Bout.BOUT, "fk_draft", Bout.BOUT.DRAFT)
     val FK_SPY : ForeignKey[GameRecord, PlayerRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_PLAYER_PRIMARY, Game.GAME, "fk_spy", Game.GAME.SPY)
     val FK_SNIPER : ForeignKey[GameRecord, PlayerRecord] = AbstractKeys.createForeignKey(zzz.generated.Keys.KEY_PLAYER_PRIMARY, Game.GAME, "fk_sniper", Game.GAME.SNIPER)

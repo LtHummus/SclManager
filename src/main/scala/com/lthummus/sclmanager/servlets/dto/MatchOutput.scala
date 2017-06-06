@@ -23,7 +23,9 @@ case class Match(id: Int,
                  draftSummary: Option[String],
                  scoreSummary: Option[String],
                  summary: Option[List[String]] = None,
-                 forumPost: Option[String] = None) {
+                 forumPost: Option[String] = None,
+                 forfeitWinner: Option[String] = None,
+                 forfeitText: Option[String] = None) {
 
 }
 
@@ -111,7 +113,9 @@ object Match {
       draftSummary,
       maybeBout.map(_.getScoreLine),
       maybeBout.map(_.getGameSummary),
-      forumPost)
+      forumPost,
+      Option(boutRecord.getForfeitWinner),
+      Option(boutRecord.getForfeitText))
   }
 }
 
