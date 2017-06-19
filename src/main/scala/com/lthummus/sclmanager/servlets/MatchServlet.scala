@@ -106,12 +106,18 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
     f"SCL Season 3 - Week ${record.getWeek.toInt}%02d - ${record.getDivision} - ${bout.player1} vs ${bout.player2}.${FilenameUtils.getExtension(originalName)}"
   }
 
-  put("/forfeit") {
+  val forfeit = (apiOperation[Map[String, String]]("forfeit")
+    summary "Forfeit a match given the information provided"
+    parameter pathParam[String]("id").description("id of the match")
+    parameter bodyParam[MatchForfeitInput].description("information on the match to forfeit"))
+
+  put("/:id/forfeit", operation(forfeit)) {
     val data = parsedBody.extract[MatchForfeitInput]
+    val matchId = params("id").toInt
     if (ForfeitPassword != data.password) {
       Forbidden(ErrorMessage("incorrect password"))
     } else {
-      forfeitMatch(data.matchId, data.winnerName, data.text) match {
+      forfeitMatch(matchId, data.winnerName, data.text) match {
         case -\/(error) => InternalServerError(ErrorMessage(error.toString))
         case \/-(_) => Ok("message" -> "ok")
       }
