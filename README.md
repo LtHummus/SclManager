@@ -16,8 +16,7 @@ While SclManager has been battle-tested in Season 3 of the SpyParty Competitive 
 1. Automatic creation of playoff/demotion matches. Right now their creation is manual.
 1. Cleanup API and database calls. There's definitely some optimizations that can be made (especially on the db), but since the tournament is small (for now), they weren't high priority.
 1. Build an admin UI for the tournament administrators. Right now, everything is mostly done by hand.
-1. Clean up some mismatched terminology
-  1. This is mostly caused because I did the db design first, forgetting that `match` is a reserved word in Scala. You'll see things referred to as a "match" in some places, and a "bout" in others.  Same thing happened with `type`
+1. Clean up some mismatched terminology.  This is mostly caused because I did the db design first, forgetting that `match` is a reserved word in Scala. You'll see things referred to as a "match" in some places, and a "bout" in others.  Same thing happened with `type`
 
 ## The `com.lthummus.sclmanager.util` Package ##
 
