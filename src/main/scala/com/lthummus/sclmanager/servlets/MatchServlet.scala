@@ -13,8 +13,10 @@ import org.scalatra.servlet.{FileItem, FileUploadSupport, MultipartConfig}
 import zzz.generated.tables.records.{BoutRecord, DraftRecord, GameRecord, PlayerRecord}
 import com.lthummus.sclmanager.database.dao.GameDao._
 import com.lthummus.sclmanager.scaffolding.SystemConfig
-import com.lthummus.sclmanager.servlets.dto.{BoutParseResults, ErrorMessage, Game, Match}
+import com.lthummus.sclmanager.scaffolding.SystemConfig._
+import com.lthummus.sclmanager.servlets.dto._
 import com.lthummus.sclmanager.util.S3Uploader
+import com.typesafe.config.ConfigFactory
 import org.apache.commons.io.FilenameUtils
 import org.json4s.ext.JodaTimeSerializers
 import org.scalatra.swagger.{Swagger, SwaggerEngine, SwaggerSupport}
@@ -34,11 +36,42 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
   protected implicit lazy val jsonFormats: Formats = DefaultFormats ++ JodaTimeSerializers.all + FieldSerializer[Game]()
 
   protected val applicationDescription = "Gets match information"
+  private val ForfeitPassword = ConfigFactory.load().getEncryptedString("forefitPassword")
 
   configureMultipartHandling(MultipartConfig(maxFileSize = Some(3 * 1024 * 1024))) // 3 megabytes
 
   before() {
     contentType = formats("json")
+  }
+
+  private def forfeitMatch(id: Int, winner: String, text: String) = {
+    def winnerIsValid(winner: String, player1Name: String, player2Name: String) = {
+      if (winner == player1Name || winner == player2Name)
+        ().right
+      else
+        s"$winner is not valid for this match".left
+    }
+
+    def checkStatus(bout: BoutRecord) = {
+      if (bout.getStatus == 0) {
+        ().right
+      } else {
+        "Match has already been played or forfeited".left
+      }
+    }
+
+    insideTransaction { implicit dslContext =>
+      for {
+        bout <- BoutDao.getById(id) \/> "There is no match with that id"
+        _ <- winnerIsValid(winner, bout.getPlayer1, bout.getPlayer2)
+        _ <- checkStatus(bout)
+        _ <- BoutDao.updateBoutForfeitStatus(id, winner, text)
+        _ <- PlayerDao.postResult(bout.getPlayer1, if (bout.getPlayer1 == winner) "win" else "loss")
+        _ <- PlayerDao.postResult(bout.getPlayer2, if (bout.getPlayer2 == winner) "win" else "loss")
+      } yield {
+        bout
+      }
+   }
   }
 
   private def updateScores(bout: Bout, games: List[GameRecord], url: String, draft: Option[DraftRecord]): String \/ Int = {
@@ -70,7 +103,25 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
   }
 
   private def generateFilename(originalName: String, bout: Bout, record: BoutRecord) = {
-    f"SCL Season 3 - Week ${record.getWeek.toInt}%02d - ${bout.player1} vs ${bout.player2}.${FilenameUtils.getExtension(originalName)}"
+    f"SCL Season 3 - Week ${record.getWeek.toInt}%02d - ${record.getDivision} - ${bout.player1} vs ${bout.player2}.${FilenameUtils.getExtension(originalName)}"
+  }
+
+  val forfeit = (apiOperation[Map[String, String]]("forfeit")
+    summary "Forfeit a match given the information provided"
+    parameter pathParam[String]("id").description("id of the match")
+    parameter bodyParam[MatchForfeitInput].description("information on the match to forfeit"))
+
+  put("/:id/forfeit", operation(forfeit)) {
+    val data = parsedBody.extract[MatchForfeitInput]
+    val matchId = params("id").toInt
+    if (ForfeitPassword != data.password) {
+      Forbidden(ErrorMessage("incorrect password"))
+    } else {
+      forfeitMatch(matchId, data.winnerName, data.text) match {
+        case -\/(error) => InternalServerError(ErrorMessage(error.toString))
+        case \/-(_) => Ok("message" -> "ok")
+      }
+    }
   }
 
   post("/parse") {
