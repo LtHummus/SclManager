@@ -15,7 +15,7 @@ object DraftDao {
 
   implicit val formats = Serialization.formats(NoTypeHints)
 
-  def all()(implicit dslContext: DSLContext) = {
+  def all()(implicit dslContext: DSLContext): List[DraftRecord] = {
     dslContext.selectFrom(Tables.DRAFT).fetch().toList
   }
 
