@@ -167,6 +167,17 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
     }
   }
 
+  get("/bulk") {
+    val players = PlayerDao.all()
+    val everything = BoutDao.getAll().map(Match.fromDatabaseRecordWithGames(_, List(), players.map(it => (it.getName, it)).toMap, None))
+    val ids = everything.map(_.id)
+
+    Ok(ids.map(curr => {
+      val res = BoutDao.getFullBoutRecords(curr)
+      val thing = res.getOrElse(throw new IllegalArgumentException())
+      thing
+    }))
+  }
 
 
   private val getByWeek = (apiOperation[Match]("getById")
@@ -174,7 +185,7 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
     parameter pathParam[String]("week").description("the week number to get"))
 
   get("/week/:week", operation(getByWeek)) {
-    val week = params("week").toInt
+    val week = Math.min(params("week").toInt, 10)
     val players = PlayerDao.all()
     Ok(BoutDao.getByWeek(week).map(m => Match.fromDatabaseRecordWithGames(m, GameDao.getGameRecordsByBoutId(m.getId), players.map(it => (it.getName, it)).toMap, None)))
   }
@@ -220,7 +231,7 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
   get("/last") {
     val bout = BoutDao.getLastUploaded()
 
-    Ok(Map("player1" -> bout.getPlayer1, "player2" -> bout.getPlayer2))
+    Ok(Map("player1" -> bout.getPlayer1, "player2" -> bout.getPlayer2, "id" -> bout.getId, "matchUrl" -> bout.getMatchUrl))
   }
 
   private val getAll = (apiOperation[Match]("getAll")
@@ -230,5 +241,6 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
     val players = PlayerDao.all()
     Ok(BoutDao.getAll().map(Match.fromDatabaseRecordWithGames(_, List(), players.map(it => (it.getName, it)).toMap, None)))
   }
+
 
 }

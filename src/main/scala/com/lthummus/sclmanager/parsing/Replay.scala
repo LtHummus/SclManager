@@ -40,6 +40,7 @@ object GameResultEnum {
       case 2 => SpyShot.right
       case 3 => CivilianShot.right
       case 4 => InProgress.right
+      case 17 => SpyShot.right //v4
       case _ => s"Unknown game result type: $value".left
     }
   }
@@ -99,7 +100,56 @@ case class GameType(kind: GameLoadoutType, x: Int, y: Int) {
   }
 }
 
+sealed trait ReplayOffsets {
+  val magicNumberOffset: Int
+  val fileVersionOffset: Int
+  val protocolVersionOffset: Int
+  val spyPartyVersionOffset: Int
+  val durationOffset: Int
+  val uuidOffset: Int
+  val timestampOffset: Int
+  val sequenceNumberOffset: Int
+  val spyNameLengthOffset: Int
+  val sniperNameLengthOffset: Int
+  val gameResultOffset: Int
+  val gameTypeOffset: Int
+  val levelOffset: Int
+  val playerNamesOffset: Int
+}
 
+object Version3ReplayOffsets extends ReplayOffsets {
+  override val magicNumberOffset: Int = 0x00
+  override val fileVersionOffset: Int = 0x04
+  override val protocolVersionOffset: Int = 0x08
+  override val spyPartyVersionOffset: Int = 0x0C
+  override val durationOffset: Int = 0x14
+  override val uuidOffset: Int = 0x18
+  override val timestampOffset: Int = 0x28
+  override val sequenceNumberOffset: Int = 0x2C
+  override val spyNameLengthOffset: Int = 0x2E
+  override val sniperNameLengthOffset: Int = 0x2F
+  override val gameResultOffset: Int = 0x30
+  override val gameTypeOffset: Int = 0x34
+  override val levelOffset: Int = 0x38
+  override val playerNamesOffset: Int = 0x50
+}
+
+object Version4ReplayOffsets extends ReplayOffsets {
+  override val magicNumberOffset: Int = 0x00
+  override val fileVersionOffset: Int = 0x04
+  override val protocolVersionOffset: Int = 0x08
+  override val spyPartyVersionOffset: Int = 0x0C
+  override val durationOffset: Int = 0x14
+  override val uuidOffset: Int = 0x18
+  override val timestampOffset: Int = 0x28
+  override val sequenceNumberOffset: Int = 0x2C
+  override val spyNameLengthOffset: Int = 0x2E
+  override val sniperNameLengthOffset: Int = 0x2F
+  override val gameResultOffset: Int = 0x34
+  override val gameTypeOffset: Int = 0x38
+  override val levelOffset: Int = 0x3C
+  override val playerNamesOffset: Int = 0x54
+}
 
 case class Replay(spy: String,
                   sniper: String,
@@ -146,29 +196,30 @@ object Replay {
       "Magic number incorrect".left
   }
 
-  private def verifyFileHeaderVersion(data: Byte): String \/ String = {
-    if (data == 0x03)
-      "File header version OK".right
-    else
-      "File header version not understood".left
+  private def verifyFileHeaderVersion(data: Byte): String \/ ReplayOffsets = {
+    data match {
+      case 0x03 => Version3ReplayOffsets.right
+      case 0x04 => Version4ReplayOffsets.right
+      case _    => "Unknown replay header".left
+    }
   }
 
-  private def extractSpyNameLength(headerData: Array[Byte]) = {
-    headerData(0x2E).right
+  private def extractSpyNameLength(headerData: Array[Byte], offsets: ReplayOffsets) = {
+    headerData(offsets.spyNameLengthOffset).right
   }
 
-  private def extractSniperNameLength(headerData: Array[Byte]) = {
-    headerData(0x2F).right
+  private def extractSniperNameLength(headerData: Array[Byte], offsets: ReplayOffsets) = {
+    headerData(offsets.sniperNameLengthOffset).right
   }
 
-  private def extractGameResult(headerData: Array[Byte]): String \/ GameResult = {
+  private def extractGameResult(headerData: Array[Byte], offsets: ReplayOffsets): String \/ GameResult = {
     for {
-      gameResult <- GameResultEnum.fromInt(headerData(0x30))
+      gameResult <- GameResultEnum.fromInt(headerData(offsets.gameResultOffset))
     } yield gameResult
   }
 
-  private def extractStartTime(headerData: Array[Byte]) = {
-    val timeBytes = headerData.slice(0x28, 0x2C)
+  private def extractStartTime(headerData: Array[Byte], offsets: ReplayOffsets) = {
+    val timeBytes = headerData.slice(offsets.timestampOffset, offsets.timestampOffset + 4)
     val buffer = ByteBuffer.wrap(timeBytes)
     buffer.order(ByteOrder.LITTLE_ENDIAN)
     val res = buffer.getInt() & 0xFFFFFFFFL
@@ -176,15 +227,15 @@ object Replay {
     new DateTime(res * 1000).right
   }
 
-  private def extractSpyName(headerData: Array[Byte], spyNameLength: Int) = {
-    new String(headerData.slice(0x50, 0x50 + spyNameLength)).right
+  private def extractSpyName(headerData: Array[Byte], spyNameLength: Int, offsets: ReplayOffsets) = {
+    new String(headerData.slice(offsets.playerNamesOffset, offsets.playerNamesOffset + spyNameLength)).right
   }
-  private def extractSniperName(headerData: Array[Byte], spyNameLength: Int, sniperNameLength: Int) = {
-    new String(headerData.slice(0x50 + spyNameLength, 0x50 + spyNameLength + sniperNameLength)).right
+  private def extractSniperName(headerData: Array[Byte], spyNameLength: Int, sniperNameLength: Int, offsets: ReplayOffsets) = {
+    new String(headerData.slice(offsets.playerNamesOffset + spyNameLength, offsets.playerNamesOffset + spyNameLength + sniperNameLength)).right
   }
 
-  private def extractLevel(headerData: Array[Byte]): String \/ Level = {
-    val levelId = extractInt(headerData, 0x38)
+  private def extractLevel(headerData: Array[Byte], offsets: ReplayOffsets): String \/ Level = {
+    val levelId = extractInt(headerData, offsets.levelOffset)
 
     val levelObj = Level.AllLevels.filter(_.checksum == levelId)
 
@@ -195,14 +246,14 @@ object Replay {
     }
   }
 
-  private def extractSequenceNumber(headerData: Array[Byte]): String \/ Int = {
-    extractShort(headerData, 0x2C).toInt.right
+  private def extractSequenceNumber(headerData: Array[Byte], offsets: ReplayOffsets): String \/ Int = {
+    extractShort(headerData, offsets.sequenceNumberOffset).toInt.right
   }
 
-  private def extractUuid(headerData: Array[Byte]): String \/ String = {
-    Base64
+  private def extractUuid(headerData: Array[Byte], offsets: ReplayOffsets): String \/ String = {
+   Base64
       .getEncoder
-      .encodeToString(headerData.slice(0x18, 0x18 + 16)) //encode bytes to base64 string
+      .encodeToString(headerData.slice(offsets.uuidOffset, offsets.uuidOffset + 16)) //encode bytes to base64 string
       .split("=")(0)                                     //drop trailing = signs
       .replaceAll("\\+", "-")                            //replace + with - because that's how spyparty does things
       .replaceAll("/", "_")                              //replace / with _ ibid
@@ -220,17 +271,17 @@ object Replay {
 
     for {
       _ <- verifyMagicNumber(headerData)
-      _ <- verifyFileHeaderVersion(headerData(4))
-      spyNameLength <- extractSpyNameLength(headerData)
-      sniperNameLength <- extractSniperNameLength(headerData)
-      gameResult <- extractGameResult(headerData)
-      startTime <- extractStartTime(headerData)
-      spy <- extractSpyName(headerData, spyNameLength)
-      sniper <- extractSniperName(headerData, spyNameLength, sniperNameLength)
-      gameType <- GameType.fromInt(extractInt(headerData, 0x34))
-      level <- extractLevel(headerData)
-      sequence <- extractSequenceNumber(headerData)
-      uuid <- extractUuid(headerData)
+      dataOffsets <- verifyFileHeaderVersion(headerData(4))
+      spyNameLength <- extractSpyNameLength(headerData, dataOffsets)
+      sniperNameLength <- extractSniperNameLength(headerData, dataOffsets)
+      gameResult <- extractGameResult(headerData, dataOffsets)
+      startTime <- extractStartTime(headerData, dataOffsets)
+      spy <- extractSpyName(headerData, spyNameLength, dataOffsets)
+      sniper <- extractSniperName(headerData, spyNameLength, sniperNameLength, dataOffsets)
+      gameType <- GameType.fromInt(extractInt(headerData, dataOffsets.gameTypeOffset))
+      level <- extractLevel(headerData, dataOffsets)
+      sequence <- extractSequenceNumber(headerData, dataOffsets)
+      uuid <- extractUuid(headerData, dataOffsets)
     } yield Replay(spy, sniper, startTime, gameResult, level, gameType, sequence, uuid)
   }
 }

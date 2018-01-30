@@ -1,6 +1,6 @@
 package com.lthummus.sclmanager.parsing
 
-import java.io.{ByteArrayInputStream, DataInputStream, InputStream}
+import java.io.{BufferedInputStream, ByteArrayInputStream, DataInputStream, InputStream}
 import java.util.zip.{ZipEntry, ZipInputStream}
 
 import com.lthummus.sclmanager.parsing.BoutTypeEnum.BoutType
@@ -40,4 +40,5 @@ object SpyPartyZipParser {
       case e: Exception => e.getMessage.left
     }
   }
+
 }
