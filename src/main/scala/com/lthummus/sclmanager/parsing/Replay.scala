@@ -40,7 +40,6 @@ object GameResultEnum {
       case 2 => SpyShot.right
       case 3 => CivilianShot.right
       case 4 => InProgress.right
-      case 17 => SpyShot.right //v4
       case _ => s"Unknown game result type: $value".left
     }
   }
