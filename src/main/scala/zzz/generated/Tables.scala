@@ -12,6 +12,7 @@ import zzz.generated.tables.Bout
 import zzz.generated.tables.Division
 import zzz.generated.tables.Draft
 import zzz.generated.tables.Game
+import zzz.generated.tables.HomeMaps
 import zzz.generated.tables.Player
 
 
@@ -46,6 +47,11 @@ object Tables {
    * The table <code>scl.game</code>.
    */
   val GAME = zzz.generated.tables.Game.GAME
+
+  /**
+   * The table <code>scl.home_maps</code>.
+   */
+  val HOME_MAPS = zzz.generated.tables.HomeMaps.HOME_MAPS
 
   /**
    * The table <code>scl.player</code>.
