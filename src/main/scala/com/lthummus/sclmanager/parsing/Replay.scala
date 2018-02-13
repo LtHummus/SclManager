@@ -196,7 +196,7 @@ object Replay {
       "Magic number incorrect".left
   }
 
-  private def verifyFileHeaderVersion(data: Byte): String \/ ReplayOffsets = {
+  private def getFileVersionOffsets(data: Byte): String \/ ReplayOffsets = {
     data match {
       case 0x03 => Version3ReplayOffsets.right
       case 0x04 => Version4ReplayOffsets.right
@@ -271,7 +271,7 @@ object Replay {
 
     for {
       _ <- verifyMagicNumber(headerData)
-      dataOffsets <- verifyFileHeaderVersion(headerData(4))
+      dataOffsets <- getFileVersionOffsets(headerData(4))
       spyNameLength <- extractSpyNameLength(headerData, dataOffsets)
       sniperNameLength <- extractSniperNameLength(headerData, dataOffsets)
       gameResult <- extractGameResult(headerData, dataOffsets)
