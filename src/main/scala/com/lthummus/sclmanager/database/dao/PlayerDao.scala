@@ -16,7 +16,10 @@ object PlayerDao {
   }
 
   def getByPlayerName(name: String)(implicit dslContext: DSLContext): Option[PlayerRecord] = {
-    val res = dslContext.selectFrom(Tables.PLAYER).where(Tables.PLAYER.NAME.eq(name)).fetch()
+    val res = dslContext
+      .selectFrom(Tables.PLAYER)
+      .where(Tables.PLAYER.NAME.eq(name))
+      .fetch()
 
     res.size() match {
       case 0 => None
