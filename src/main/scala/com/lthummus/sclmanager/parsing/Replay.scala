@@ -279,9 +279,9 @@ object Replay {
       spy <- extractSpyName(headerData, spyNameLength, dataOffsets)
       sniper <- extractSniperName(headerData, spyNameLength, sniperNameLength, dataOffsets)
       gameType <- GameType.fromInt(extractInt(headerData, dataOffsets.gameTypeOffset))
+      uuid <- extractUuid(headerData, dataOffsets)
       level <- extractLevel(headerData, dataOffsets)
       sequence <- extractSequenceNumber(headerData, dataOffsets)
-      uuid <- extractUuid(headerData, dataOffsets)
     } yield Replay(spy, sniper, startTime, gameResult, level, gameType, sequence, uuid)
   }
 }

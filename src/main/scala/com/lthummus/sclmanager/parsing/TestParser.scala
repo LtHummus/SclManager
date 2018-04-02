@@ -9,14 +9,14 @@ import Scalaz._
 
 object TestParser extends App {
 
-  val FilePath = "G:\\tunewins.zip"
+  val FilePath = "G:\\testnew.zip"
 
   val bytes = Files.readAllBytes(Paths.get(FilePath))
 
   val result = SpyPartyZipParser.parseZipStream(bytes)
 
   result match {
-    case -\/(error)   => s"Error parsing: $error"
+    case -\/(error)   => println(s"Error parsing: $error")
     case \/-(replays) => replays.foreach(println)
       val b = Bout(replays, BoutTypeEnum.Standard)
       println(b.isTie)
