@@ -9,7 +9,7 @@ import Scalaz._
 
 object TestParser extends App {
 
-  val FilePath = "G:\\testnew.zip"
+  val FilePath = "G:\\lthummus vs s76561198016757660%2fsteam - 20180429-13-13-34.zip"
 
   val bytes = Files.readAllBytes(Paths.get(FilePath))
 
@@ -17,7 +17,8 @@ object TestParser extends App {
 
   result match {
     case -\/(error)   => println(s"Error parsing: $error")
-    case \/-(replays) => replays.foreach(println)
+    case \/-(replays) =>
+      replays.foreach(println)
       val b = Bout(replays, BoutTypeEnum.Standard)
       println(b.isTie)
       println(b.getGameSummary.mkString("\n"))

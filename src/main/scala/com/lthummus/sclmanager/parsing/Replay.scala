@@ -29,7 +29,7 @@ object GameResultEnum {
       case "Spy Shot"      => SpyShot.right
       case "Civilian Shot" => CivilianShot.right
       case "In Progress"   => InProgress.right
-      case _              => s"Unknown game result type: $value".left
+      case _               => s"Unknown game result type: $value".left
     }
   }
 
@@ -40,7 +40,6 @@ object GameResultEnum {
       case 2 => SpyShot.right
       case 3 => CivilianShot.right
       case 4 => InProgress.right
-      case 17 => SpyShot.right //v4
       case _ => s"Unknown game result type: $value".left
     }
   }
@@ -93,7 +92,7 @@ object GameType {
 
 
 case class GameType(kind: GameLoadoutType, x: Int, y: Int) {
-  override def toString = kind match {
+  override def toString: String = kind match {
     case GameLoadoutTypeEnum.Known => s"k$x"
     case GameLoadoutTypeEnum.Any => s"a$x/$y"
     case GameLoadoutTypeEnum.Pick => s"p$x/$y"
@@ -135,20 +134,20 @@ object Version3ReplayOffsets extends ReplayOffsets {
 }
 
 object Version4ReplayOffsets extends ReplayOffsets {
-  override val magicNumberOffset: Int = 0x00
-  override val fileVersionOffset: Int = 0x04
-  override val protocolVersionOffset: Int = 0x08
-  override val spyPartyVersionOffset: Int = 0x0C
-  override val durationOffset: Int = 0x14
-  override val uuidOffset: Int = 0x18
-  override val timestampOffset: Int = 0x28
-  override val sequenceNumberOffset: Int = 0x2C
-  override val spyNameLengthOffset: Int = 0x2E
+  override val magicNumberOffset: Int      = 0x00
+  override val fileVersionOffset: Int      = 0x04
+  override val protocolVersionOffset: Int  = 0x08
+  override val spyPartyVersionOffset: Int  = 0x0C
+  override val durationOffset: Int         = 0x14
+  override val uuidOffset: Int             = 0x18
+  override val timestampOffset: Int        = 0x28
+  override val sequenceNumberOffset: Int   = 0x2C
+  override val spyNameLengthOffset: Int    = 0x2E
   override val sniperNameLengthOffset: Int = 0x2F
-  override val gameResultOffset: Int = 0x34
-  override val gameTypeOffset: Int = 0x38
-  override val levelOffset: Int = 0x3C
-  override val playerNamesOffset: Int = 0x54
+  override val gameResultOffset: Int       = 0x34
+  override val gameTypeOffset: Int         = 0x38
+  override val levelOffset: Int            = 0x3C
+  override val playerNamesOffset: Int      = 0x54
 }
 
 case class Replay(spy: String,
@@ -270,18 +269,18 @@ object Replay {
     }
 
     for {
-      _ <- verifyMagicNumber(headerData)
-      dataOffsets <- getFileVersionOffsets(headerData(4))
-      spyNameLength <- extractSpyNameLength(headerData, dataOffsets)
+      _                <- verifyMagicNumber(headerData)
+      dataOffsets      <- getFileVersionOffsets(headerData(4))
+      spyNameLength    <- extractSpyNameLength(headerData, dataOffsets)
       sniperNameLength <- extractSniperNameLength(headerData, dataOffsets)
-      gameResult <- extractGameResult(headerData, dataOffsets)
-      startTime <- extractStartTime(headerData, dataOffsets)
-      spy <- extractSpyName(headerData, spyNameLength, dataOffsets)
-      sniper <- extractSniperName(headerData, spyNameLength, sniperNameLength, dataOffsets)
-      gameType <- GameType.fromInt(extractInt(headerData, dataOffsets.gameTypeOffset))
-      uuid <- extractUuid(headerData, dataOffsets)
-      level <- extractLevel(headerData, dataOffsets)
-      sequence <- extractSequenceNumber(headerData, dataOffsets)
+      gameResult       <- extractGameResult(headerData, dataOffsets)
+      startTime        <- extractStartTime(headerData, dataOffsets)
+      spy              <- extractSpyName(headerData, spyNameLength, dataOffsets)
+      sniper           <- extractSniperName(headerData, spyNameLength, sniperNameLength, dataOffsets)
+      gameType         <- GameType.fromInt(extractInt(headerData, dataOffsets.gameTypeOffset))
+      uuid             <- extractUuid(headerData, dataOffsets)
+      level            <- extractLevel(headerData, dataOffsets)
+      sequence         <- extractSequenceNumber(headerData, dataOffsets)
     } yield Replay(spy, sniper, startTime, gameResult, level, gameType, sequence, uuid)
   }
 }
