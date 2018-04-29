@@ -44,7 +44,7 @@ class LeagueServlet(implicit dslContext: DSLContext, val swagger: Swagger) exten
     val name = params("name")
 
     val league = DivisionDao.getByName(name)
-    val players = DivisionDao.getPlayersInLeague(name)
+    val players = DivisionDao.getPlayersInDivision(name)
 
     league match {
       case None => NotFound(ErrorMessage(s"No league with id $name found"))

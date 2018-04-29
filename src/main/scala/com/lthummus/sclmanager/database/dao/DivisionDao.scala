@@ -2,7 +2,7 @@ package com.lthummus.sclmanager.database.dao
 
 import org.jooq.DSLContext
 import zzz.generated.Tables
-import zzz.generated.tables.records.DivisionRecord
+import zzz.generated.tables.records.{DivisionRecord, PlayerRecord}
 
 import scala.collection.JavaConversions._
 
@@ -22,7 +22,7 @@ object DivisionDao {
     }
   }
 
-  def getPlayersInLeague(name: String)(implicit dslContext: DSLContext) = {
+  def getPlayersInDivision(name: String)(implicit dslContext: DSLContext): List[PlayerRecord] = {
     dslContext.selectFrom(Tables.PLAYER).where(Tables.PLAYER.DIVISION.eq(name)).fetch().toList
   }
 }
