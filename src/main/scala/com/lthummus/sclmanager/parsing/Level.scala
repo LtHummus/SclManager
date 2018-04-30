@@ -52,7 +52,10 @@ object Level {
   def getLevelByName(name: String): String \/ Level = {
     val results = AllLevels.filter(_.name == name)
     results.size match {
-      case 0 => s"No map found with the name $name".left
+      //XXX: CASE = 0 IS A DIRTY HACK -- used for backwards compatibility in older map pools
+      //     this shouldn't matter in practice, because the parser doesn't actually use
+      //     this function
+      case 0 => Level(name, -1).right
       case 1 => results.head.right
       case _ => s"Multiple maps found with the name $name".left
     }

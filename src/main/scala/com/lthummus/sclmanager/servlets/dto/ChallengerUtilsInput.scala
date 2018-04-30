@@ -1,11 +1,14 @@
 package com.lthummus.sclmanager.servlets.dto
 
-case class NewMatchesInput(week: Int, matches: String, division: Option[String]) {
+case class NewMatchesInput(week: Int, matches: String, division: Option[String], password: String) {
 
   def matchPairs: List[(String, String)] = {
-    matches.lines.toList.map{ l =>
-      val parts = l.split(",")
-      (parts(0).trim, parts(1).trim)
+    matches.lines.toList.flatMap{ l =>
+      val parts = l.split(",").map(_.trim).sorted
+      if (parts(0) != "BYE" && parts(1) != "BYE")
+        Some((parts(0).trim, parts(1).trim))
+      else
+        None
     }
   }
 

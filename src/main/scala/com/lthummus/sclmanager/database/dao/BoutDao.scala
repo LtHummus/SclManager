@@ -17,6 +17,19 @@ object BoutDao {
 
   def getAll()(implicit dslContext: DSLContext) = dslContext.selectFrom(Tables.BOUT).fetch().toList
 
+  def getNormalizedMatchesByDivision(division: String)(implicit dslContext: DSLContext): List[(String, String)] = {
+    val rawBoutRecords = dslContext
+      .selectFrom(Tables.BOUT)
+      .where(Tables.BOUT.DIVISION.eq(division))
+      .toList
+
+    rawBoutRecords.map(record => {
+      val players = Seq(record.getPlayer1, record.getPlayer2).sorted
+
+      (players(0), players(1))
+    })
+  }
+
   def getLastUploaded()(implicit dslContext: DSLContext): BoutRecord = {
     dslContext
       .selectFrom(Tables.BOUT)

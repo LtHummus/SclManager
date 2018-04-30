@@ -2,12 +2,12 @@ package com.lthummus.sclmanager.servlets
 
 import com.lthummus.sclmanager.SclManagerStack
 import com.lthummus.sclmanager.database.TransactionSupport
-import com.lthummus.sclmanager.database.dao.DivisionDao
+import com.lthummus.sclmanager.database.dao.{BoutDao, DivisionDao}
 import com.lthummus.sclmanager.servlets.dto.NewMatchesInput
 import org.jooq.DSLContext
 import org.json4s.{DefaultFormats, Formats}
 import org.omg.CORBA.BAD_INV_ORDER
-import org.scalatra.{BadRequest, Ok}
+import org.scalatra.{BadRequest, Ok, Unauthorized}
 import org.scalatra.json.JacksonJsonSupport
 import org.scalatra.servlet.FileUploadSupport
 import org.scalatra.swagger.{Swagger, SwaggerSupport}
@@ -41,23 +41,32 @@ class ChallengerUtils(implicit dslContext: DSLContext, val swagger: Swagger)
 
     val data = parsedBody.extract[NewMatchesInput]
 
-    val matchesToAdd = data.matchPairs
-
-    val divisionPlayers = DivisionDao.getPlayersInDivision(data.effectiveDivision).map(_.getName).toSet
-    val requestedPlayers = matchesToAdd.flatMap{case (a, b) => List(a, b)}.toSet
-
-    val unknownPlayers = requestedPlayers -- divisionPlayers
-
-    if (divisionPlayers.isEmpty) {
-      BadRequest(Map("error" -> s"Unknown division: ${data.effectiveDivision}"))
-    } else if (unknownPlayers.nonEmpty) {
-      BadRequest(Map("error" -> "Unknown players", "unknown" -> unknownPlayers.toList.sorted))
+    if (data.password != "password") { //TODO: replace this with the secure password
+      Unauthorized(Map("error" -> "Wrong password", "detail" -> "Password is incorrect"))
     } else {
-      val matchRecords = matchesToAdd.map(pairToBoutRecord(_, data.week, data.effectiveDivision))
-      val recordsCreated = dslContext.batchInsert(matchRecords.asJava).execute()
-      Map("week" -> data.week, "matches" -> matchesToAdd.map{ case(a, b) => s"$a vs $b"}, "division" -> data.effectiveDivision, "records_created" -> recordsCreated)
-    }
+      val matchesToAdd = data.matchPairs
+      val divisionPlayers = DivisionDao.getPlayersInDivision(data.effectiveDivision).map(_.getName).toSet
+      val requestedPlayers = matchesToAdd.flatMap{case (a, b) => List(a, b)}.toSet
 
+      val unknownPlayers = requestedPlayers -- divisionPlayers
+
+      val existingMatches = BoutDao.getNormalizedMatchesByDivision(data.effectiveDivision).toSet
+      val newMatchSet = matchesToAdd.toSet
+
+      val duplicateMatches = existingMatches.intersect(newMatchSet)
+
+      if (divisionPlayers.isEmpty) {
+        BadRequest(Map("error" -> s"Unknown division", "detail" -> s"Unknown division: ${data.effectiveDivision}"))
+      } else if (unknownPlayers.nonEmpty) {
+        BadRequest(Map("error" -> "Unknown players", "detail" -> unknownPlayers.toList.sorted))
+      } else if (duplicateMatches.nonEmpty) {
+        BadRequest(Map("error" -> "Duplicate Matches", "detail" -> duplicateMatches.toList.map{ case (a, b) => s"$a/$b"}))
+      } else {
+        val matchRecords = matchesToAdd.map(pairToBoutRecord(_, data.week, data.effectiveDivision))
+        val recordsCreated = dslContext.batchInsert(matchRecords.asJava).execute()
+        Map("week" -> data.week, "matches" -> matchesToAdd.map{ case(a, b) => s"$a v $b"}, "division" -> data.effectiveDivision, "records_created" -> recordsCreated.size)
+      }
+    }
   }
 
   get("/swiss/:division") {
