@@ -98,10 +98,6 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
     }
   }
 
-  private def uploadToS3(name: String, contents: Array[Byte]) = {
-    MatchServlet.Uploader.putReplay(name, contents)
-  }
-
   private def generateFilename(originalName: String, bout: Bout, record: BoutRecord) = {
     f"SCL Season 4 - Week ${record.getWeek.toInt}%02d - ${record.getDivision} - ${bout.player1} vs ${bout.player2}.${FilenameUtils.getExtension(originalName)}"
   }
@@ -130,11 +126,13 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
     val zipContents = IOUtils.toByteArray(file.getInputStream)
 
     val result = for {
-      replayList <- SpyPartyZipParser.parseZipStream(zipContents)
-      bout <- BoutDao.getNextToBePlayedByPlayers(replayList.head.spy, replayList.head.sniper) \/> "No match found between these two players"
-      parseResult <- Try(Bout(replayList, BoutTypeEnum.fromInt(bout.getBoutType))).toDisjunction.leftMap(_.getMessage)
-      url <- uploadToS3(generateFilename(file.name, parseResult, bout), zipContents)
-      result <- persistBout(parseResult, url)
+      replayList      <- SpyPartyZipParser.parseZipStream(zipContents)
+      player1RealName <- PlayerDao.getPlayerFromReplayName(replayList.head.spy) \/> s"Could not find player with name ${replayList.head.spy}"
+      player2RealName <- PlayerDao.getPlayerFromReplayName(replayList.head.sniper) \/> s"Could not find player with name ${replayList.head.sniper}"
+      bout            <- BoutDao.getNextToBePlayedByPlayers(player1RealName, player2RealName) \/> "No match found between these two players"
+      parseResult     <- Try(Bout(replayList, BoutTypeEnum.fromInt(bout.getBoutType))).toDisjunction.leftMap(_.getMessage)
+      url             <- MatchServlet.Uploader.putReplay(generateFilename(file.name, parseResult, bout), zipContents)
+      result          <- persistBout(parseResult, url)
     } yield result
 
     result match {
