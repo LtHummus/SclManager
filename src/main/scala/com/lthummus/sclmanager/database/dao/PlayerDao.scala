@@ -41,7 +41,7 @@ object PlayerDao {
       .where(Tables.PLAYER.REPLAY_NAME.eq(replayName))
       .fetchOne()
 
-    Option(result).map(_.getReplayName)
+    Option(result).map(_.getName)
   }
 
   def postResult(name: String, result: String)(implicit dslContext: DSLContext): String \/ PlayerRecord = {

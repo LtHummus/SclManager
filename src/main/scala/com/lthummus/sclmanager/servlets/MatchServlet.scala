@@ -129,7 +129,7 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
       replayList      <- SpyPartyZipParser.parseZipStream(zipContents)
       player1RealName <- PlayerDao.getPlayerFromReplayName(replayList.head.spy) \/> s"Could not find player with name ${replayList.head.spy}"
       player2RealName <- PlayerDao.getPlayerFromReplayName(replayList.head.sniper) \/> s"Could not find player with name ${replayList.head.sniper}"
-      bout            <- BoutDao.getNextToBePlayedByPlayers(player1RealName, player2RealName) \/> "No match found between these two players"
+      bout            <- BoutDao.getNextToBePlayedByPlayers(player1RealName, player2RealName) \/> s"No match found between $player1RealName and $player2RealName"
       parseResult     <- Try(Bout(replayList, BoutTypeEnum.fromInt(bout.getBoutType))).toDisjunction.leftMap(_.getMessage)
       url             <- MatchServlet.Uploader.putReplay(generateFilename(file.name, parseResult, bout), zipContents)
       result          <- persistBout(parseResult, url)
