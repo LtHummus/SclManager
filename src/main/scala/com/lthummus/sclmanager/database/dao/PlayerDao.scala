@@ -35,6 +35,15 @@ object PlayerDao {
       .or(Tables.BOUT.PLAYER2.eq(name)).fetchOne(0, classOf[Int])
   }
 
+  def getPlayerFromReplayName(replayName: String)(implicit dslContext: DSLContext): Option[String] = {
+    val result = dslContext
+      .selectFrom(Tables.PLAYER)
+      .where(Tables.PLAYER.REPLAY_NAME.eq(replayName))
+      .fetchOne()
+
+    Option(result).map(_.getReplayName)
+  }
+
   def postResult(name: String, result: String)(implicit dslContext: DSLContext): String \/ PlayerRecord = {
     val player = getByPlayerName(name)
 

@@ -3,7 +3,7 @@
     <!-- Configure the database connection here -->
     <jdbc>
         <driver>com.mysql.jdbc.Driver</driver>
-        <url>jdbc:mysql://localhost:3306/scl</url>
+        <url>jdbc:mysql://localhost:3306/scl?useSSL=false</url>
         <user>root</user>
         <password>root</password>
     </jdbc>
