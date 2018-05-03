@@ -73,6 +73,7 @@ object BoutDao {
       .toList
   }
 
+
   def getNextToBePlayedByPlayers(player1: String, player2: String)(implicit dslContext: DSLContext) = {
     val res1 = dslContext
       .selectFrom(Tables.BOUT)
