@@ -9,7 +9,7 @@ import org.apache.commons.io.IOUtils
 
 object ZipFilePatcher {
 
-  def patchZipFile(zipFileBytes: Array[Byte], nameChanges: Map[String, String]): String \/ InputStream = {
+  def patchZipFile(zipFileBytes: Array[Byte], nameChanges: Map[String, String]): String \/ Array[Byte] = {
     val baos = new ByteArrayOutputStream()
     val zis = new ZipInputStream(new ByteArrayInputStream(zipFileBytes))
     val zos = new ZipOutputStream(baos)
@@ -37,6 +37,6 @@ object ZipFilePatcher {
     zis.close()
     zos.close()
 
-    new ByteArrayInputStream(baos.toByteArray).right
+    baos.toByteArray.right
   }
 }

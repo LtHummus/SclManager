@@ -30,8 +30,8 @@ object BoutTypeEnum {
   case object Standard extends BoutType("Standard", 0) {
     override def isComplete(player1Score: Int, player2Score: Int): Boolean = {
       sortedScores(player1Score, player2Score) match {
-        case loser :: winner :: _ if winner == 6 && loser <=  4 => true
-        case loser :: winner :: _ if winner == 5 && loser == 5 => true
+        case loser :: winner :: _ if winner == 7               => true
+        case loser :: winner :: _ if winner == 6 && loser == 6 => true
         case _ => false
       }
     }
