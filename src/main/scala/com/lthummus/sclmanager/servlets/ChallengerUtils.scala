@@ -14,9 +14,13 @@ import org.scalatra.swagger.{Swagger, SwaggerSupport}
 import zzz.generated.tables.records.BoutRecord
 import scalaz._
 import Scalaz._
+import com.typesafe.config.ConfigFactory
 
 import scala.collection.JavaConverters._
 import scala.util.Random
+
+import com.lthummus.sclmanager.scaffolding.SystemConfig._
+
 
 class ChallengerUtils(implicit dslContext: DSLContext, val swagger: Swagger)
   extends SclManagerStack
@@ -28,6 +32,8 @@ class ChallengerUtils(implicit dslContext: DSLContext, val swagger: Swagger)
   override protected def applicationDescription: String = "Utility for challenger division"
 
   override protected implicit def jsonFormats: Formats = DefaultFormats
+
+  private val sharedSecret = ConfigFactory.load().getEncryptedString("sharedSecret")
 
   before() {
     contentType = formats("json")
@@ -41,7 +47,7 @@ class ChallengerUtils(implicit dslContext: DSLContext, val swagger: Swagger)
 
     val data = parsedBody.extract[NewMatchesInput]
 
-    if (data.password != "password") { //TODO: replace this with the secure password
+    if (data.password != sharedSecret) {
       Unauthorized(Map("error" -> "Wrong password", "detail" -> "Password is incorrect"))
     } else {
       val matchesToAdd = data.matchPairs
