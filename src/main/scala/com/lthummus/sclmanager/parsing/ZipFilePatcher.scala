@@ -30,8 +30,9 @@ object ZipFilePatcher {
             zos.closeEntry()
         }
 
-        inputEntry = zis.getNextEntry
       }
+
+      inputEntry = zis.getNextEntry
     }
 
     zis.close()
