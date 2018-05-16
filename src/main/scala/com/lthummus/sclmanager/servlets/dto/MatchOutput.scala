@@ -57,7 +57,7 @@ case class Game(id: Int,
     } yield Replay(spy, sniper, timestamp, parsedResult, parsedLevel, parsedGameType, sequence, uuid)
 
     disjointReplay match {
-      case -\/(_) => ???
+      case -\/(s) => println(s); ???
       case \/-(replay) => replay
     }
   }
@@ -75,7 +75,7 @@ case class MatchList(matches: Seq[Match])
 
 object Match {
   def fromDatabaseRecordWithGames(record: Record, games: List[GameRecord], playerMap: Map[String, PlayerRecord], draft: Option[Draft]): Match = {
-    val boutRecord: BoutRecord = record.into(Tables.BOUT) //intellij thinks this is a compiler error, no idea why??
+    val boutRecord: BoutRecord = record.into(Tables.BOUT)
     val gameList = games.map(Game.fromDatabaseRecord(_, playerMap))
     val packagedMatchUrl = Option(boutRecord.getMatchUrl)
 

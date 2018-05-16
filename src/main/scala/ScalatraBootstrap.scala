@@ -20,5 +20,6 @@ class ScalatraBootstrap extends LifeCycle {
     context.mount(new DraftServlet, "/api/draft/*")
     context.mount(new ResourcesApp, "/api-docs")
     context.mount(new StatsServlet, "/api/stats/*")
+    context.mount(new ChallengerUtils, "/api/challenger/*")
   }
 }

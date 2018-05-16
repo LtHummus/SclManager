@@ -4,7 +4,7 @@ import com.amazonaws.util.IOUtils
 import com.lthummus.sclmanager.SclManagerStack
 import com.lthummus.sclmanager.database.TransactionSupport
 import com.lthummus.sclmanager.database.dao.{BoutDao, DraftDao, GameDao, PlayerDao}
-import com.lthummus.sclmanager.parsing.{Bout, BoutTypeEnum, SpyPartyZipParser}
+import com.lthummus.sclmanager.parsing._
 import org.jooq.DSLContext
 import org.json4s.{DefaultFormats, FieldSerializer, Formats}
 import org.scalatra._
@@ -20,9 +20,9 @@ import com.typesafe.config.ConfigFactory
 import org.apache.commons.io.FilenameUtils
 import org.json4s.ext.JodaTimeSerializers
 import org.scalatra.swagger.{Swagger, SwaggerEngine, SwaggerSupport}
-
 import scalaz._
 import Scalaz._
+
 import scala.util.Try
 
 object MatchServlet {
@@ -98,12 +98,19 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
     }
   }
 
-  private def uploadToS3(name: String, contents: Array[Byte]) = {
-    MatchServlet.Uploader.putReplay(name, contents)
+  private def generateFilename(originalName: String, bout: Bout, record: BoutRecord) = {
+    f"SCL Season 4 - Week ${record.getWeek.toInt}%02d - ${record.getDivision} - ${bout.player1} vs ${bout.player2}.${FilenameUtils.getExtension(originalName)}"
   }
 
-  private def generateFilename(originalName: String, bout: Bout, record: BoutRecord) = {
-    f"SCL Season 3 - Week ${record.getWeek.toInt}%02d - ${record.getDivision} - ${bout.player1} vs ${bout.player2}.${FilenameUtils.getExtension(originalName)}"
+  private def patchIfNecessary(zipBytes: Array[Byte], nameChanges: Map[String, String], oldReplays: List[Replay]): String \/ List[Replay] = {
+    if (nameChanges.forall{ case (a, b) => a == b}) {
+      oldReplays.right
+    } else {
+      for {
+        patched <- ZipFilePatcher.patchZipFile(zipBytes, nameChanges)
+        replays <- SpyPartyZipParser.parseZipStream(patched)
+      } yield replays
+    }
   }
 
   val forfeit = (apiOperation[Map[String, String]]("forfeit")
@@ -129,12 +136,18 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
 
     val zipContents = IOUtils.toByteArray(file.getInputStream)
 
+    //XXX: this whole business with name changes is because of the way that spyparty handles steam names in replays
+    //     it's super inefficient, but that's ok
     val result = for {
-      replayList <- SpyPartyZipParser.parseZipStream(zipContents)
-      bout <- BoutDao.getNextToBePlayedByPlayers(replayList.head.spy, replayList.head.sniper) \/> "No match found between these two players"
-      parseResult <- Try(Bout(replayList, BoutTypeEnum.fromInt(bout.getBoutType))).toDisjunction.leftMap(_.getMessage)
-      url <- uploadToS3(generateFilename(file.name, parseResult, bout), zipContents)
-      result <- persistBout(parseResult, url)
+      oldReplayList   <- SpyPartyZipParser.parseZipStream(zipContents)
+      player1RealName <- PlayerDao.getPlayerFromReplayName(oldReplayList.head.spy) \/> s"Could not find player with name ${oldReplayList.head.spy}"
+      player2RealName <- PlayerDao.getPlayerFromReplayName(oldReplayList.head.sniper) \/> s"Could not find player with name ${oldReplayList.head.sniper}"
+      nameChanges     =  Map(oldReplayList.head.spy -> player1RealName, oldReplayList.head.sniper -> player2RealName)
+      replayList      <- patchIfNecessary(zipContents, nameChanges, oldReplayList)
+      bout            <- BoutDao.getNextToBePlayedByPlayers(player1RealName, player2RealName) \/> s"No match found between $player1RealName and $player2RealName"
+      parseResult     <- Try(Bout(replayList, BoutTypeEnum.fromInt(bout.getBoutType))).toDisjunction.leftMap(_.getMessage)
+      url             <- MatchServlet.Uploader.putReplay(generateFilename(file.name, parseResult, bout), zipContents)
+      result          <- persistBout(parseResult, url)
     } yield result
 
     result match {

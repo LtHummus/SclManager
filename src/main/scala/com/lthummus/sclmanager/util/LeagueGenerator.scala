@@ -136,7 +136,7 @@ private object LeagueGenerator extends App {
     Db.executeInsert(leagueRecord)
 
     //step 2: insert the players
-    val playerRecords = league.players.map(p => new PlayerRecord(p.name, league.name, 0, 0, 0, p.country))
+    val playerRecords = league.players.map(p => new PlayerRecord(p.name.toLowerCase, p.name.toLowerCase, league.name, 0, 0, 0, p.country))
     Db.batchInsert(playerRecords.asJava).execute()
 
     //step 3: insert all the matches

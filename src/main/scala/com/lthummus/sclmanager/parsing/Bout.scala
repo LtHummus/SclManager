@@ -52,13 +52,12 @@ case class Bout(replays: List[Replay], kind: BoutType) {
     } else {
       val game1winner = games.head.winnerName
       val game1winnerRole = games.head.winnerRole
-      val game2winner = games(1).winnerName
       val game2winnerRole = games(1).winnerRole
 
-      (game1winner, game1winnerRole, game2winner, game2winnerRole) match {
-        case (_, "spy", _, "spy") => s"Spies win ${games.head.fullLevelName}"
-        case (_, "sniper", _, "sniper") => s"Snipers win ${games.head.fullLevelName}"
-        case _ => s"$game1winner sweeps ${games.head.fullLevelName}"
+      (game1winnerRole, game2winnerRole) match {
+        case ("spy", "spy")       => s"Spies win ${games.head.fullLevelName}"
+        case ("sniper", "sniper") => s"Snipers win ${games.head.fullLevelName}"
+        case _                    => s"$game1winner sweeps ${games.head.fullLevelName}"
       }
     }
 

@@ -31,7 +31,7 @@ object Dump extends App {
   //println(write(records))
 
   val parsedPlayers = players.map(player => {
-    val leaguePlayers = DivisionDao.getPlayersInLeague(player.getDivision)
+    val leaguePlayers = DivisionDao.getPlayersInDivision(player.getDivision)
     val playerMap = leaguePlayers.map(it => (it.getName, it)).toMap
     val matchRecords = BoutDao.getMatchesForPlayer(player.getName)
     val matches = matchRecords.map(m => Match.fromDatabaseRecordWithGames(m, GameDao.getGameRecordsByBoutId(m.getId), playerMap, None))
