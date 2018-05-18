@@ -3,25 +3,25 @@ package com.lthummus.sclmanager.servlets
 import com.amazonaws.util.IOUtils
 import com.lthummus.sclmanager.SclManagerStack
 import com.lthummus.sclmanager.database.TransactionSupport
+import com.lthummus.sclmanager.database.dao.GameDao._
 import com.lthummus.sclmanager.database.dao.{BoutDao, DraftDao, GameDao, PlayerDao}
 import com.lthummus.sclmanager.parsing._
-import org.jooq.DSLContext
-import org.json4s.{DefaultFormats, FieldSerializer, Formats}
-import org.scalatra._
-import org.scalatra.json.JacksonJsonSupport
-import org.scalatra.servlet.{FileItem, FileUploadSupport, MultipartConfig}
-import zzz.generated.tables.records.{BoutRecord, DraftRecord, GameRecord, PlayerRecord}
-import com.lthummus.sclmanager.database.dao.GameDao._
 import com.lthummus.sclmanager.scaffolding.SystemConfig
 import com.lthummus.sclmanager.scaffolding.SystemConfig._
 import com.lthummus.sclmanager.servlets.dto._
 import com.lthummus.sclmanager.util.S3Uploader
 import com.typesafe.config.ConfigFactory
 import org.apache.commons.io.FilenameUtils
+import org.jooq.DSLContext
 import org.json4s.ext.JodaTimeSerializers
-import org.scalatra.swagger.{Swagger, SwaggerEngine, SwaggerSupport}
+import org.json4s.{DefaultFormats, FieldSerializer, Formats}
+import org.scalatra._
+import org.scalatra.json.JacksonJsonSupport
+import org.scalatra.servlet.{FileUploadSupport, MultipartConfig}
+import org.scalatra.swagger.{Swagger, SwaggerSupport}
+import scalaz.Scalaz._
 import scalaz._
-import Scalaz._
+import zzz.generated.tables.records.{BoutRecord, DraftRecord, GameRecord}
 
 import scala.util.Try
 

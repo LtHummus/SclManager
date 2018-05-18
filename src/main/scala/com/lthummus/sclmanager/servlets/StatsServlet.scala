@@ -1,17 +1,14 @@
 package com.lthummus.sclmanager.servlets
 
 import com.lthummus.sclmanager.SclManagerStack
-import com.lthummus.sclmanager.database.dao.{GameDao, PlayerDao}
+import com.lthummus.sclmanager.database.dao.GameDao
 import com.lthummus.sclmanager.database.dao.GameDao._
-import com.lthummus.sclmanager.database.dao.PlayerDao._
 import org.jooq.DSLContext
 import org.json4s.ext.JodaTimeSerializers
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.Ok
 import org.scalatra.json.JacksonJsonSupport
 import org.scalatra.swagger.{Swagger, SwaggerSupport}
-import zzz.generated.tables.records.PlayerRecord
-
 import scalaz.\/-
 
 

@@ -4,7 +4,7 @@ import org.jooq.DSLContext
 import zzz.generated.Tables
 import zzz.generated.tables.records.PlayerRecord
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 import scalaz._
 import Scalaz._
@@ -12,13 +12,25 @@ import Scalaz._
 object PlayerDao {
 
   def all()(implicit dslContext: DSLContext) = {
-    dslContext.selectFrom(Tables.PLAYER).fetch().toList
+    dslContext.selectFrom(Tables.PLAYER).fetch().asScala.toList
   }
 
   def getByPlayerName(name: String)(implicit dslContext: DSLContext): Option[PlayerRecord] = {
     val res = dslContext
       .selectFrom(Tables.PLAYER)
       .where(Tables.PLAYER.NAME.eq(name))
+      .fetch()
+
+    res.size() match {
+      case 0 => None
+      case _ => Some(res.get(0))
+    }
+  }
+
+  def getBySteamPlayerName(steamName: String)(implicit dslContext: DSLContext): Option[PlayerRecord] = {
+    val res = dslContext
+      .selectFrom(Tables.PLAYER)
+      .where(Tables.PLAYER.REPLAY_NAME.eq(steamName))
       .fetch()
 
     res.size() match {

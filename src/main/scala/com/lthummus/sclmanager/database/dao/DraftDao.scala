@@ -1,13 +1,12 @@
 package com.lthummus.sclmanager.database.dao
 
-import com.lthummus.sclmanager.servlets.dto.{Draft, DraftInput, DraftPayload}
+import com.lthummus.sclmanager.servlets.dto.{DraftInput, DraftPayload}
 import org.jooq.DSLContext
-import zzz.generated.Tables
-import zzz.generated.tables.records.DraftRecord
 import org.json4s._
-import org.json4s.jackson.JsonMethods._
 import org.json4s.jackson.Serialization
 import org.json4s.jackson.Serialization._
+import zzz.generated.Tables
+import zzz.generated.tables.records.DraftRecord
 
 import scala.collection.JavaConversions._
 
@@ -19,16 +18,51 @@ object DraftDao {
     dslContext.selectFrom(Tables.DRAFT).fetch().toList
   }
 
+  private def translateSinglePlayerName(x: String)(implicit dslContext: DSLContext): String = {
+    if (x.endsWith("steam")) {
+      PlayerDao.getPlayerFromReplayName(x).getOrElse(x)
+    } else {
+      x
+    }
+  }
+
+  private def buildTranslationMap(player1: String, player2: String)(implicit dslContext: DSLContext) = {
+    val realPlayer1Name = translateSinglePlayerName(player1)
+    val realPlayer2Name = translateSinglePlayerName(player2)
+
+    Map(player1 -> realPlayer1Name, player2 -> realPlayer2Name)
+  }
+
+  private def buildPlayerList(player1: String, player2: String, translations: Map[String, String]) = {
+    Seq(translations(player1), translations(player2)).sorted
+  }
+
+  private def patchPlayload(payload: DraftPayload, translations: Map[String, String]) = {
+    if (translations.forall{ case (a, b) => a == b}) {
+      payload //no patching necessary
+    } else {
+      val newFirstSpyName = translations(payload.firstSpy)
+      val newStartPlayerName = translations(payload.startPlayer)
+      val newBannedMaps = payload.bannedMaps.map(x => x.copy(picker = translations(x.picker)))
+      val newPickedMaps = payload.pickedMaps.map(x => x.copy(picker = translations(x.picker)))
+
+      DraftPayload(newBannedMaps, newPickedMaps, newStartPlayerName, newFirstSpyName)
+    }
+  }
+
   def persist(input: DraftInput)(implicit dslContext: DSLContext) = {
-    val players = Seq(input.player1, input.player2).sorted
+    val translationMap = buildTranslationMap(input.player1, input.player2)
+    val players = buildPlayerList(input.player1, input.player2, translationMap)
     val record = dslContext.newRecord(Tables.DRAFT)
 
     record.setPlayer1(players.head.toLowerCase)
     record.setPlayer2(players(1).toLowerCase)
     record.setRoomCode(input.roomCode)
-    record.setPayload(write(input.payload))
+    record.setPayload(write(patchPlayload(input.payload, translationMap)))
 
     record.insert()
+
+
   }
 
   def getById(id: Int)(implicit dslContext: DSLContext): Option[DraftRecord] = {

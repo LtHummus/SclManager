@@ -1,14 +1,11 @@
 package com.lthummus.sclmanager.servlets.dto
 
-import com.lthummus.sclmanager.parsing.BoutTypeEnum.BoutType
 import com.lthummus.sclmanager.parsing._
 import org.joda.time.DateTime
 import org.jooq.Record
-import zzz.generated.Tables
-import zzz.generated.tables.records.{BoutRecord, DraftRecord, GameRecord, PlayerRecord}
-
 import scalaz._
-import Scalaz._
+import zzz.generated.Tables
+import zzz.generated.tables.records.{BoutRecord, GameRecord, PlayerRecord}
 
 case class Match(id: Int,
                  week: Int,

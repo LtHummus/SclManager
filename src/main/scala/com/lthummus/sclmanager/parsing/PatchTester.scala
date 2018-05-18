@@ -1,9 +1,7 @@
 package com.lthummus.sclmanager.parsing
 
-import java.io.FileOutputStream
 import java.nio.file.{Files, Paths}
 
-import org.apache.commons.io.IOUtils
 import scalaz.{-\/, \/-}
 
 object PatchTester extends App {

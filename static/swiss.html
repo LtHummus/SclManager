@@ -65,7 +65,7 @@
             var divisionName = $('#division').val();
             $.get('/api/challenger/swiss/' + divisionName, function(data) {
                 $('#whatever').val(JSON.stringify(data, null, 2));
-                $('#matches').val(data['matches'].join('\n'));
+                $('#matches').val(data['matches'].join('\n') + "\n" + data['inactive_matches'].join('\n'));
             })
         };
 

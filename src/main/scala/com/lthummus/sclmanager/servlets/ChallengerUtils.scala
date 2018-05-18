@@ -2,24 +2,22 @@ package com.lthummus.sclmanager.servlets
 
 import com.lthummus.sclmanager.SclManagerStack
 import com.lthummus.sclmanager.database.TransactionSupport
+import com.lthummus.sclmanager.database.dao.DivisionDao._
 import com.lthummus.sclmanager.database.dao.{BoutDao, DivisionDao}
+import com.lthummus.sclmanager.scaffolding.SystemConfig
+import com.lthummus.sclmanager.scaffolding.SystemConfig._
 import com.lthummus.sclmanager.servlets.dto.NewMatchesInput
+import com.typesafe.config.ConfigFactory
 import org.jooq.DSLContext
 import org.json4s.{DefaultFormats, Formats}
-import org.omg.CORBA.BAD_INV_ORDER
-import org.scalatra.{BadRequest, Ok, Unauthorized}
 import org.scalatra.json.JacksonJsonSupport
 import org.scalatra.servlet.FileUploadSupport
 import org.scalatra.swagger.{Swagger, SwaggerSupport}
-import zzz.generated.tables.records.BoutRecord
-import scalaz._
-import Scalaz._
-import com.typesafe.config.ConfigFactory
+import org.scalatra.{BadRequest, Ok, Unauthorized}
+import zzz.generated.tables.records.{BoutRecord, PlayerRecord}
 
 import scala.collection.JavaConverters._
 import scala.util.Random
-
-import com.lthummus.sclmanager.scaffolding.SystemConfig._
 
 
 class ChallengerUtils(implicit dslContext: DSLContext, val swagger: Swagger)
@@ -33,46 +31,59 @@ class ChallengerUtils(implicit dslContext: DSLContext, val swagger: Swagger)
 
   override protected implicit def jsonFormats: Formats = DefaultFormats
 
-  private val sharedSecret = ConfigFactory.load().getEncryptedString("sharedSecret")
+  private def pairToBoutRecord(names: (String, String), week: Int, division: String) = {
+    new BoutRecord(null, week, division, names._1, names._2, 0, null, null, null, 0, null, null)
+  }
+
+  private case class PlayerMatchingData(name: String, active: Boolean, wins: Int, losses: Int, draws: Int) {
+    def scoreString: String = s"$wins-$losses-$draws"
+  }
+
+  private object PlayerMatchingData {
+    def apply(x: PlayerRecord): PlayerMatchingData = {
+      PlayerMatchingData(x.getName, x.isActive, x.getWins, x.getLosses, x.getDraws)
+    }
+  }
+
+  private val sharedSecret = if (SystemConfig.isTest) {
+    "password"
+  } else {
+    //@NB: should this go through the normal config stuff???
+    ConfigFactory.load().getEncryptedString("sharedSecret")
+  }
 
   before() {
     contentType = formats("json")
   }
 
-
   post("/create") {
-    def pairToBoutRecord(names: (String, String), week: Int, division: String) = {
-      new BoutRecord(null, week, division, names._1, names._2, 0, null, null, null, 0, null, null)
-    }
-
     val data = parsedBody.extract[NewMatchesInput]
 
-    if (data.password != sharedSecret) {
-      Unauthorized(Map("error" -> "Wrong password", "detail" -> "Password is incorrect"))
+    val matchesToAdd = data.matchPairs
+    val divisionPlayers = DivisionDao.getPlayersInDivision(data.effectiveDivision).map(_.getName).toSet
+    val requestedPlayers = matchesToAdd.flatMap{case (a, b) => List(a, b)}.toSet
+
+    val unknownPlayers = requestedPlayers -- divisionPlayers
+
+    val existingMatches = BoutDao.getNormalizedMatchesByDivision(data.effectiveDivision).toSet
+    val newMatchSet = matchesToAdd.toSet
+
+    val duplicateMatches = existingMatches.intersect(newMatchSet)
+
+    if (divisionPlayers.isEmpty) {
+      BadRequest(Map("error" -> s"Unknown division", "detail" -> s"Unknown division: ${data.effectiveDivision}"))
+    } else if (unknownPlayers.nonEmpty) {
+      BadRequest(Map("error" -> "Unknown players", "detail" -> unknownPlayers.toList.sorted))
+    } else if (duplicateMatches.nonEmpty) {
+      BadRequest(Map("error" -> "Duplicate Matches", "detail" -> duplicateMatches.toList.map{ case (a, b) => s"$a/$b"}))
+    } else if (data.password != sharedSecret) {
+      Unauthorized(Map("error" -> "Shared Secret Incorrect", "detail" -> "But all matches would have been persisted properly"))
     } else {
-      val matchesToAdd = data.matchPairs
-      val divisionPlayers = DivisionDao.getPlayersInDivision(data.effectiveDivision).map(_.getName).toSet
-      val requestedPlayers = matchesToAdd.flatMap{case (a, b) => List(a, b)}.toSet
-
-      val unknownPlayers = requestedPlayers -- divisionPlayers
-
-      val existingMatches = BoutDao.getNormalizedMatchesByDivision(data.effectiveDivision).toSet
-      val newMatchSet = matchesToAdd.toSet
-
-      val duplicateMatches = existingMatches.intersect(newMatchSet)
-
-      if (divisionPlayers.isEmpty) {
-        BadRequest(Map("error" -> s"Unknown division", "detail" -> s"Unknown division: ${data.effectiveDivision}"))
-      } else if (unknownPlayers.nonEmpty) {
-        BadRequest(Map("error" -> "Unknown players", "detail" -> unknownPlayers.toList.sorted))
-      } else if (duplicateMatches.nonEmpty) {
-        BadRequest(Map("error" -> "Duplicate Matches", "detail" -> duplicateMatches.toList.map{ case (a, b) => s"$a/$b"}))
-      } else {
-        val matchRecords = matchesToAdd.map(pairToBoutRecord(_, data.week, data.effectiveDivision))
-        val recordsCreated = dslContext.batchInsert(matchRecords.asJava).execute()
-        Map("week" -> data.week, "matches" -> matchesToAdd.map{ case(a, b) => s"$a v $b"}, "division" -> data.effectiveDivision, "records_created" -> recordsCreated.size)
-      }
+      val matchRecords = matchesToAdd.map(pairToBoutRecord(_, data.week, data.effectiveDivision))
+      val recordsCreated = dslContext.batchInsert(matchRecords.asJava).execute()
+      Map("week" -> data.week, "matches" -> matchesToAdd.map{ case(a, b) => s"$a v $b"}, "division" -> data.effectiveDivision, "records_created" -> recordsCreated.size)
     }
+
   }
 
   get("/swiss/:division") {
@@ -91,18 +102,20 @@ class ChallengerUtils(implicit dslContext: DSLContext, val swagger: Swagger)
     if (division.isEmpty) {
       BadRequest(Map("error" -> "Unknown division"))
     } else {
-      val players = DivisionDao.getPlayersInDivision(division)
+      val players = DivisionDao.getParticipatingPlayersInDivision(division).map(PlayerMatchingData(_))
 
-      val playerScores = players.map{ p =>
-        val scoreString = s"${p.getWins}-${p.getLosses}-${p.getDraws}"
-        (p.getName, scoreString)
-      }
+      val inactivePlayers = players.filterNot(_.active)
+      val activePlayers = players.filter(_.active)
 
-      val playersByScore = playerScores.groupBy(_._2).mapValues(_.map(_._1))
+      val activePlayersByScore = activePlayers.groupBy(_.scoreString).mapValues(_.map(_.name))
+      val activeMatchPairs = activePlayersByScore.mapValues(generateMatches)
 
-      val allMatchPairs = playersByScore.mapValues(generateMatches)
+      val inactiveMatchPairs = generateMatches(inactivePlayers.map(_.name))
 
-      Ok(Map("pairing_scores" -> allMatchPairs, "matches" -> allMatchPairs.values.flatten))
+      Ok(Map("active_players_by_score" -> activePlayersByScore,
+        "matches" -> activeMatchPairs.values.flatten,
+        "inactive_players" -> inactivePlayers.map(_.name),
+        "inactive_matches" -> inactiveMatchPairs))
     }
   }
 }

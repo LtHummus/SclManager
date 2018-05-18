@@ -4,6 +4,7 @@
 package zzz.generated.tables
 
 
+import java.lang.Byte
 import java.lang.Class
 import java.lang.Integer
 import java.lang.String
@@ -62,7 +63,7 @@ class Player(alias : String, aliased : Table[PlayerRecord], parameters : Array[ 
   /**
    * The column <code>scl.player.replay_name</code>.
    */
-  val REPLAY_NAME : TableField[PlayerRecord, String] = createField("replay_name", org.jooq.impl.SQLDataType.VARCHAR.length(50).nullable(false), "")
+  val REPLAY_NAME : TableField[PlayerRecord, String] = createField("replay_name", org.jooq.impl.SQLDataType.VARCHAR.length(50).nullable(false).defaultValue(org.jooq.impl.DSL.inline("", org.jooq.impl.SQLDataType.VARCHAR)), "")
 
   /**
    * The column <code>scl.player.division</code>.
@@ -87,7 +88,17 @@ class Player(alias : String, aliased : Table[PlayerRecord], parameters : Array[ 
   /**
    * The column <code>scl.player.country</code>.
    */
-  val COUNTRY : TableField[PlayerRecord, String] = createField("country", org.jooq.impl.SQLDataType.CHAR.length(2).nullable(false).defaultValue(org.jooq.impl.DSL.inline("sp", org.jooq.impl.SQLDataType.CHAR)), "")
+  val COUNTRY : TableField[PlayerRecord, String] = createField("country", org.jooq.impl.SQLDataType.CHAR.length(2).defaultValue(org.jooq.impl.DSL.inline("sp", org.jooq.impl.SQLDataType.CHAR)), "")
+
+  /**
+   * The column <code>scl.player.participating</code>.
+   */
+  val PARTICIPATING : TableField[PlayerRecord, Byte] = createField("participating", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaultValue(org.jooq.impl.DSL.inline("1", org.jooq.impl.SQLDataType.TINYINT)), "")
+
+  /**
+   * The column <code>scl.player.active</code>.
+   */
+  val ACTIVE : TableField[PlayerRecord, Byte] = createField("active", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaultValue(org.jooq.impl.DSL.inline("1", org.jooq.impl.SQLDataType.TINYINT)), "")
 
   /**
    * Create a <code>scl.player</code> table reference

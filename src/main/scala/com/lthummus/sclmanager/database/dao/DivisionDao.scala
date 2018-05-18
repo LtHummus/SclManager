@@ -4,13 +4,18 @@ import org.jooq.DSLContext
 import zzz.generated.Tables
 import zzz.generated.tables.records.{DivisionRecord, PlayerRecord}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 
 object DivisionDao {
 
+  implicit class RichPlayerRecord(x: PlayerRecord) {
+    def isActive: Boolean = x.getActive != 0x00.toByte
+    def isParticipating: Boolean = x.getParticipating != 0x00.toByte
+  }
+
   def all()(implicit dslContext: DSLContext): List[DivisionRecord] = {
-    dslContext.selectFrom(Tables.DIVISION).fetch().toList
+    dslContext.selectFrom(Tables.DIVISION).fetch().asScala.toList
   }
 
   def getByName(name: String)(implicit dslContext: DSLContext): Option[DivisionRecord] = {
@@ -18,11 +23,21 @@ object DivisionDao {
 
     res.size() match {
       case 0 => None
-      case _ => Some(res(0))
+      case _ => Some(res.get(0))
     }
   }
 
   def getPlayersInDivision(name: String)(implicit dslContext: DSLContext): List[PlayerRecord] = {
-    dslContext.selectFrom(Tables.PLAYER).where(Tables.PLAYER.DIVISION.eq(name)).fetch().toList
+    dslContext.selectFrom(Tables.PLAYER).where(Tables.PLAYER.DIVISION.eq(name)).fetch().asScala.toList
+  }
+
+  def getParticipatingPlayersInDivision(name: String)(implicit dslContext: DSLContext): List[PlayerRecord] = {
+    dslContext
+      .selectFrom(Tables.PLAYER)
+      .where(Tables.PLAYER.DIVISION.eq(name))
+      .and(Tables.PLAYER.PARTICIPATING.ne(0x00.toByte))
+      .fetch()
+      .asScala
+      .toList
   }
 }
