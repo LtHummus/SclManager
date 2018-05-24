@@ -44,10 +44,10 @@
 
     <br />
     <br />
-    If winner, type winner's name:
-    <div id="winner_choice_div">
-        <input type="text" name="winner" id="winner_name" />
-    </div>
+    Select winner (ignored in double forfeit):
+    <select name="winner" id="match_winner">
+
+    </select>
 
     <br />
     <br />
@@ -62,9 +62,10 @@
 
     <input type="button" onclick="doForfeit()" value="Do Forfeit" />
     <br />
-    <div style="color: red" id="result">
+    <!-- lol embedded styles -->
+    <div style="color: green" id="success_result"></div>
+    <div style="color: red" id="error_result"></div>
 
-    </div>
 </form>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
@@ -72,29 +73,28 @@
 
 <script>
     $(document).ready(function() {
-        // $('#match_dropdown').change(() => {
-        //     let id = $('#match_dropdown').val();
-        //     let data = matchDict[id];
-        //     console.log(data);
-        //
-        //     let theDivWeCareAbout = $('#winner_choice_div');
-        //
-        //     theDivWeCareAbout.empty();
-        //
-        //     let button1 = `<input type="radio" name="winner" value="${data.player1} /> ${data.player1}`;
-        //     let button2 = `<input type="radio" name="winner" value="${data.player2} /> ${data.player2}`;
-        //     let button3 = `<input type="radio" name="winner" value="none" /> NONE`;
-        //
-        //     theDivWeCareAbout.append(button1);
-        // });
+        $('#match_dropdown').change(() => {
+            let matchData = matchDict[$('#match_dropdown').val()];
+
+            let formElement = $('#match_winner');
+            formElement.empty();
+            formElement.append(new Option('', ''));
+            formElement.append(new Option(matchData.player1, matchData.player1));
+            formElement.append(new Option(matchData.player2, matchData.player2));
+        });
     });
 
     let matchDict = {};
 
     let doForfeit = function() {
+        let errorResultDiv = $('#error_result');
+        let successResultDiv = $('#success_result');
+        errorResultDiv.empty();
+        successResultDiv.empty();
         let id = $('#match_dropdown').val();
-        let winner = $('#winner_name').val();
+        let winner = $('#match_winner').val();
         let type = $('input[name="forfeit_type"]:checked', '#forfeit_form');
+        let password = $('#password_input').val();
 
         if (type.length === 0) {
             $('#result').text('match forfeit type not selected');
@@ -103,17 +103,31 @@
 
         let matchData = matchDict[id];
 
-        if (winner !== matchData.player1 && winner !== matchData.player2) {
-            $('#result').text('invalid winner');
+        if (type !== "double" && winner !== matchData.player1 && winner !== matchData.player2) {
+            errorResultDiv.text('invalid winner');
             return;
         }
 
-        let postData = {
-            'id': id,
+        let postData = JSON.stringify({
+            'id': parseInt(id),
             'winner': winner,
-            'type': type.val()
-        };
+            'kind': type.val(),
+            'password': password
+        });
 
+        $.ajax({
+            type: 'PUT',
+            contentType: 'application/json',
+            url: '/api/match/forfeit',
+            data: postData,
+            success: res => {
+                successResultDiv.text('ok!')
+            },
+            error: res => {
+                let errorText = "Error: " + res['responseJSON']['error'];
+                errorResultDiv.text(errorText);
+            }
+        });
         console.log(postData);
 
     };
