@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body class="container">
+<div class="wrap">
+    <h2>SCL Admin Page</h2>
+</div>
+
+<p>If you're not supposed to be here, don't be here</p>
+
+<form id="forfeit_form">
+    Step 1: Select a divison and click the button to get some recommended matches.<br />
+    <label for="week_no">Week: </label><input type="text" id="week_no" name="week" />
+    <br />
+    <input type="button" onclick="getWeekMatches()" value="Get Initial Data" />
+
+    <br />
+    <br />
+    Pick a match: <select name="match" id="match_dropdown">
+
+    </select>
+
+    <br />
+    <br />
+    Forfeit type: <br />
+    <input type="radio" name="forfeit_type" value="single" id="single_button" /><label for="single_button">Single</label><br />
+    <input type="radio" name="forfeit_type" value="double" id="double_button" /><label for="double_button">Double</label><br />
+
+    <br />
+    <br />
+    If winner, type winner's name:
+    <div id="winner_choice_div">
+        <input type="text" name="winner" id="winner_name" />
+    </div>
+
+    <br />
+    <br />
+    <br />
+
+    Finally, enter the password:
+    <input type="password" name="pw" id="password_input" />
+
+    <br />
+    <br />
+    <br />
+
+    <input type="button" onclick="doForfeit()" value="Do Forfeit" />
+    <br />
+    <div style="color: red" id="result">
+
+    </div>
+</form>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script>
+    $(document).ready(function() {
+        // $('#match_dropdown').change(() => {
+        //     let id = $('#match_dropdown').val();
+        //     let data = matchDict[id];
+        //     console.log(data);
+        //
+        //     let theDivWeCareAbout = $('#winner_choice_div');
+        //
+        //     theDivWeCareAbout.empty();
+        //
+        //     let button1 = `<input type="radio" name="winner" value="${data.player1} /> ${data.player1}`;
+        //     let button2 = `<input type="radio" name="winner" value="${data.player2} /> ${data.player2}`;
+        //     let button3 = `<input type="radio" name="winner" value="none" /> NONE`;
+        //
+        //     theDivWeCareAbout.append(button1);
+        // });
+    });
+
+    let matchDict = {};
+
+    let doForfeit = function() {
+        let id = $('#match_dropdown').val();
+        let winner = $('#winner_name').val();
+        let type = $('input[name="forfeit_type"]:checked', '#forfeit_form');
+
+        if (type.length === 0) {
+            $('#result').text('match forfeit type not selected');
+            return;
+        }
+
+        let matchData = matchDict[id];
+
+        if (winner !== matchData.player1 && winner !== matchData.player2) {
+            $('#result').text('invalid winner');
+            return;
+        }
+
+        let postData = {
+            'id': id,
+            'winner': winner,
+            'type': type.val()
+        };
+
+        console.log(postData);
+
+    };
+
+    let getWeekMatches = function() {
+        let weekNumber = $('#week_no').val();
+        $.get('/api/match/week/' + weekNumber, data => {
+            data.forEach(it => {
+                let info = {
+                    'player1': it.player1.name,
+                    'player2': it.player2.name
+                };
+
+                matchDict[it.id] = info;
+                let text = `(${it.id}) - ${it.league} - ${it.player1.name} vs ${it.player2.name}`;
+                let id = it.id;
+                $('#match_dropdown').append(new Option(text, id));
+            });
+
+        });
+    };
+
+
+
+</script>
+
+</body>
+</html>
