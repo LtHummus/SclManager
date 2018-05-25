@@ -101,13 +101,6 @@
             return;
         }
 
-        let matchData = matchDict[id];
-
-        if (type !== "double" && winner !== matchData.player1 && winner !== matchData.player2) {
-            errorResultDiv.text('invalid winner');
-            return;
-        }
-
         let postData = JSON.stringify({
             'id': parseInt(id),
             'winner': winner,
