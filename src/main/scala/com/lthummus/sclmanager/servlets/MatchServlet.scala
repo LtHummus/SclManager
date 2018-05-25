@@ -36,12 +36,20 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
   protected implicit lazy val jsonFormats: Formats = DefaultFormats ++ JodaTimeSerializers.all + FieldSerializer[Game]()
 
   protected val applicationDescription = "Gets match information"
-  private val ForfeitPassword = ConfigFactory.load().getEncryptedString("forefitPassword")
+  private val ForfeitPassword = if (SystemConfig.isTest) "password" else ConfigFactory.load().getEncryptedString("sharedSecret")
 
   configureMultipartHandling(MultipartConfig(maxFileSize = Some(3 * 1024 * 1024))) // 3 megabytes
 
   before() {
     contentType = formats("json")
+  }
+
+  private def checkStatus(bout: BoutRecord) = {
+    if (bout.getStatus == 0) {
+      ().right
+    } else {
+      "Match has already been played or forfeited".left
+    }
   }
 
   private def forfeitMatch(id: Int, winner: String, text: String) = {
@@ -50,14 +58,6 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
         ().right
       else
         s"$winner is not valid for this match".left
-    }
-
-    def checkStatus(bout: BoutRecord) = {
-      if (bout.getStatus == 0) {
-        ().right
-      } else {
-        "Match has already been played or forfeited".left
-      }
     }
 
     insideTransaction { implicit dslContext =>
@@ -72,6 +72,20 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
         bout
       }
    }
+  }
+
+  private def doubleForfeit(id: Int, text: String) = {
+    insideTransaction { implicit dslContext =>
+      for {
+        bout <- BoutDao.getById(id) \/> "No bout found with id"
+        _    <- checkStatus(bout)
+        _    <- BoutDao.updateBoutDoubleForfeit(id, text)
+        _    <- PlayerDao.postResult(bout.getPlayer1, "loss")
+        _    <- PlayerDao.postResult(bout.getPlayer2, "loss")
+      } yield {
+        bout
+      }
+    }
   }
 
   private def updateScores(bout: Bout, games: List[GameRecord], url: String, draft: Option[DraftRecord]): String \/ Int = {
@@ -115,20 +129,29 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
 
   val forfeit = (apiOperation[Map[String, String]]("forfeit")
     summary "Forfeit a match given the information provided"
-    parameter pathParam[String]("id").description("id of the match")
     parameter bodyParam[MatchForfeitInput].description("information on the match to forfeit"))
 
-  put("/:id/forfeit", operation(forfeit)) {
+  put("/forfeit", operation(forfeit)) {
     val data = parsedBody.extract[MatchForfeitInput]
-    val matchId = params("id").toInt
-    if (ForfeitPassword != data.password) {
-      Forbidden(ErrorMessage("incorrect password"))
+
+    if (data.password != ForfeitPassword) {
+      Forbidden("error" -> "Invalid password")
     } else {
-      forfeitMatch(matchId, data.winnerName, data.text) match {
-        case -\/(error) => InternalServerError(ErrorMessage(error.toString))
-        case \/-(_) => Ok("message" -> "ok")
+      if (data.kind == "single") {
+        forfeitMatch(data.id, data.winner, "Admin Forfiet") match {
+          case -\/(error) => InternalServerError("error" -> error)
+          case \/-(_)     => Ok("message" -> "ok")
+        }
+      } else if (data.kind == "double") {
+        doubleForfeit(data.id, "Admin Forfeit") match {
+          case -\/(error) => InternalServerError("error" -> error)
+          case \/-(_)     => Ok("message" -> "ok")
+        }
+      } else {
+        BadRequest("error" -> "Invalid forfeit type")
       }
     }
+
   }
 
   post("/parse") {

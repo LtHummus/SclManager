@@ -129,6 +129,18 @@ object BoutDao {
     }
   }
 
+  def updateBoutDoubleForfeit(id: Int, text: String)(implicit  dslContext: DSLContext): Unit \/ Int = {
+    val bout = getById(id)
+
+    bout match {
+      case Some(b) =>
+        b.setStatus(2)
+        b.setForfeitText(text)
+        b.update().right
+      case None => ().left
+    }
+  }
+
   def updateBoutForfeitStatus(id: Int, winner: String, text: String)(implicit dslContext: DSLContext): Unit \/ Int = {
     val bout = getById(id)
     bout match {
