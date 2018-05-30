@@ -295,42 +295,13 @@ object Replay {
   }
 
   private def extractSpyName(headerData: Array[Byte], offsets: ReplayOffsets) = {
-    if (offsets.hasPotentiallyMultipleNames) {
-      val spyUsernameLength = headerData(offsets.spyNameLengthOffset)
-      val spyDisplayNameLength = headerData(offsets.spyDisplayNameLengthOffset.get)
-      val sniperUsernameLength = headerData(offsets.sniperNameLengthOffset)
-
-      if (spyDisplayNameLength != 0) {
-        //we want the spy display name
-        new String(headerData.slice(offsets.playerNamesOffset + spyUsernameLength + sniperUsernameLength, offsets.playerNamesOffset + spyUsernameLength + sniperUsernameLength + spyDisplayNameLength), "UTF-8").right
-      } else {
-        //we want the spy username
-        new String(headerData.slice(offsets.playerNamesOffset, offsets.playerNamesOffset + spyUsernameLength), "UTF-8").right
-      }
-    } else {
-      val spyNameLength = headerData(offsets.spyNameLengthOffset)
-      new String(headerData.slice(offsets.playerNamesOffset, offsets.playerNamesOffset + spyNameLength), "UTF-8").right
-    }
+    val spyNameLength = headerData(offsets.spyNameLengthOffset)
+    new String(headerData.slice(offsets.playerNamesOffset, offsets.playerNamesOffset + spyNameLength), "UTF-8").right
   }
   private def extractSniperName(headerData: Array[Byte], offsets: ReplayOffsets) = {
-    if (offsets.hasPotentiallyMultipleNames) {
-      val spyUsernameLength = headerData(offsets.spyNameLengthOffset)
-      val spyDisplayNameLength = headerData(offsets.spyDisplayNameLengthOffset.get)
-      val sniperUsernameLength = headerData(offsets.sniperNameLengthOffset)
-      val sniperDisplayNameLength = headerData(offsets.sniperDisplayNameLength.get)
-
-      if (sniperDisplayNameLength != 0) {
-        //we want the sniper display name
-        new String(headerData.slice(offsets.playerNamesOffset + spyUsernameLength + sniperUsernameLength + spyDisplayNameLength, offsets.playerNamesOffset + spyUsernameLength + spyDisplayNameLength + sniperUsernameLength + sniperDisplayNameLength), "UTF-8").right
-      } else {
-        //we want the sniper username
-        new String(headerData.slice(offsets.playerNamesOffset + spyUsernameLength, offsets.playerNamesOffset + spyUsernameLength + sniperUsernameLength), "UTF-8").right
-      }
-    } else {
-      val spyNameLength = headerData(offsets.spyNameLengthOffset)
-      val sniperNameLength = headerData(offsets.sniperNameLengthOffset)
-      new String(headerData.slice(offsets.playerNamesOffset + spyNameLength, offsets.playerNamesOffset + spyNameLength + sniperNameLength), "UTF-8").right
-    }
+    val spyNameLength = headerData(offsets.spyNameLengthOffset)
+    val sniperNameLength = headerData(offsets.sniperNameLengthOffset)
+    new String(headerData.slice(offsets.playerNamesOffset + spyNameLength, offsets.playerNamesOffset + spyNameLength + sniperNameLength), "UTF-8").right
   }
 
   private def extractLevel(headerData: Array[Byte], offsets: ReplayOffsets): String \/ Level = {
@@ -377,18 +348,18 @@ object Replay {
     }
 
     for {
-      _                <- verifyMagicNumber(headerData)
-      dataOffsets      <- getFileVersionOffsets(headerData(4))
-      gameResult       <- extractGameResult(headerData, dataOffsets)
-      startTime        <- extractStartTime(headerData, dataOffsets)
-      spy              <- extractSpyName(headerData, dataOffsets)
-      sniper           <- extractSniperName(headerData, dataOffsets)
-      gameType         <- GameType.fromInt(extractInt(headerData, dataOffsets.gameTypeOffset))
-      uuid             <- extractUuid(headerData, dataOffsets)
-      level            <- extractLevel(headerData, dataOffsets)
-      sequence         <- extractSequenceNumber(headerData, dataOffsets)
-      numGuests        <- extractNumGuests(headerData, dataOffsets)
-      startDuration    <- extractStartDuration(headerData, dataOffsets)
+      _             <- verifyMagicNumber(headerData)
+      dataOffsets   <- getFileVersionOffsets(headerData(4))
+      gameResult    <- extractGameResult(headerData, dataOffsets)
+      startTime     <- extractStartTime(headerData, dataOffsets)
+      spy           <- extractSpyName(headerData, dataOffsets)
+      sniper        <- extractSniperName(headerData, dataOffsets)
+      gameType      <- GameType.fromInt(extractInt(headerData, dataOffsets.gameTypeOffset))
+      uuid          <- extractUuid(headerData, dataOffsets)
+      level         <- extractLevel(headerData, dataOffsets)
+      sequence      <- extractSequenceNumber(headerData, dataOffsets)
+      numGuests     <- extractNumGuests(headerData, dataOffsets)
+      startDuration <- extractStartDuration(headerData, dataOffsets)
     } yield Replay(spy, sniper, startTime, gameResult, level, gameType, sequence, uuid, dataOffsets.versionNumber, numGuests, startDuration)
   }
 }

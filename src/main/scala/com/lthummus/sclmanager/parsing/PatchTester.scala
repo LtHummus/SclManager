@@ -2,23 +2,25 @@ package com.lthummus.sclmanager.parsing
 
 import java.nio.file.{Files, Paths}
 
+import org.apache.commons.io.IOUtils
 import scalaz.{-\/, \/-}
 
 object PatchTester extends App {
 
-  val oldZip = "C:\\Users\\Benjamin\\AppData\\Local\\SpyParty\\replays\\Matches\\2018-04\\lthummus vs s76561198016757660%2fsteam - 20180429-13-13-34\\test.zip"
+  val oldZip = "G:\\v5test.zip"
 
   val oldZipData = Files.readAllBytes(Paths.get(oldZip))
 
   val nameChangeMap = Map(
-    "lthummus" -> "abcdefg",
-    "s76561198016757660/steam" -> "DPWSEY"
+    "checker/thisisalongusername/test" -> "checker/thisisalongusername/test",
+    "s76561197995390971/steam" -> "foobar"
   )
 
   ZipFilePatcher.patchZipFile(oldZipData, nameChangeMap) match {
-    case -\/(error) => s"Error: $error"
+    case -\/(error) => println(s"Error: $error")
     case \/-(newData) =>
-      println("TODO: Write")
+      val replays = SpyPartyZipParser.parseZipStream(newData)
+      replays.getOrElse(throw new IllegalStateException("whoops")).foreach(println)
   }
 
 }
