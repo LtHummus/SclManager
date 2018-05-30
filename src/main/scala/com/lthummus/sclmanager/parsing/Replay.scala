@@ -160,6 +160,9 @@ object Version4ReplayOffsets extends ReplayOffsets {
   override val playerNamesOffset: Int      = 0x54
 }
 
+//this isn't the greatest
+//@TODO: what we should really do here is put the actual methods for extracting the data in these objects,
+//       so we don't have to mix logic together
 object Version5ReplayOffsets extends ReplayOffsets {
   override val versionNumber: Int = 5
   override val hasPotentiallyMultipleNames: Boolean = true
@@ -288,7 +291,6 @@ object Replay {
       val spyUsernameLength = headerData(offsets.spyNameLengthOffset)
       val spyDisplayNameLength = headerData(offsets.spyDisplayNameLengthOffset.get)
       val sniperUsernameLength = headerData(offsets.sniperNameLengthOffset)
-      val sniperDisplayNameLength = headerData(offsets.sniperDisplayNameLength.get)
 
       if (spyDisplayNameLength != 0) {
         //we want the spy display name
