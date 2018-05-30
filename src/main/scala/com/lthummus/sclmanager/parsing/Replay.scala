@@ -102,6 +102,7 @@ case class GameType(kind: GameLoadoutType, x: Int, y: Int) {
 sealed trait ReplayOffsets {
   val versionNumber: Int
   val hasPotentiallyMultipleNames: Boolean = false
+  val hasExtraData: Boolean = false
 
   val magicNumberOffset: Int
   val fileVersionOffset: Int
@@ -120,6 +121,8 @@ sealed trait ReplayOffsets {
 
   val spyDisplayNameLengthOffset: Option[Int] = None
   val sniperDisplayNameLength: Option[Int] = None
+  val startDurationOffset: Option[Int] = None
+  val numGuestsOffset: Option[Int] = None
 }
 
 object Version3ReplayOffsets extends ReplayOffsets {
@@ -166,6 +169,7 @@ object Version4ReplayOffsets extends ReplayOffsets {
 object Version5ReplayOffsets extends ReplayOffsets {
   override val versionNumber: Int = 5
   override val hasPotentiallyMultipleNames: Boolean = true
+  override val hasExtraData: Boolean = true
 
   override val magicNumberOffset: Int      = 0x00
   override val fileVersionOffset: Int      = 0x04
@@ -184,6 +188,8 @@ object Version5ReplayOffsets extends ReplayOffsets {
 
   override val spyDisplayNameLengthOffset: Option[Int] = Some(0x30)
   override val sniperDisplayNameLength: Option[Int]    = Some(0x31)
+  override val startDurationOffset: Option[Int]        = Some(0x54)
+  override val numGuestsOffset: Option[Int]            = Some(0x50)
 }
 
 case class Replay(spy: String,
@@ -194,7 +200,9 @@ case class Replay(spy: String,
                   loadoutType: GameType,
                   sequenceNumber: Int,
                   uuid: String,
-                  version: Int) extends Ordered[Replay] {
+                  version: Int,
+                  startDuration: Option[Int] = None,
+                  numGuests: Option[Int] = None) extends Ordered[Replay] {
   override def compare(that: Replay): Int = if (this.startTime.isBefore(that.startTime)) -1 else 1
 
   def isCompleted: Boolean = result != GameResultEnum.InProgress
@@ -351,6 +359,14 @@ object Replay {
       .right
   }
 
+  private def extractNumGuests(bytes: Array[Byte], offsets: ReplayOffsets) = {
+    offsets.numGuestsOffset.map(extractInt(bytes, _)).right
+  }
+
+  private def extractStartDuration(bytes: Array[Byte], offsets: ReplayOffsets) = {
+    offsets.startDurationOffset.map(extractInt(bytes, _)).right
+  }
+
   def fromInputStream(is: DataInputStream): String \/ Replay = {
     val headerData = new Array[Byte](HeaderDataSizeBytes)
 
@@ -371,6 +387,8 @@ object Replay {
       uuid             <- extractUuid(headerData, dataOffsets)
       level            <- extractLevel(headerData, dataOffsets)
       sequence         <- extractSequenceNumber(headerData, dataOffsets)
-    } yield Replay(spy, sniper, startTime, gameResult, level, gameType, sequence, uuid, dataOffsets.versionNumber)
+      numGuests        <- extractNumGuests(headerData, dataOffsets)
+      startDuration    <- extractStartDuration(headerData, dataOffsets)
+    } yield Replay(spy, sniper, startTime, gameResult, level, gameType, sequence, uuid, dataOffsets.versionNumber, numGuests, startDuration)
   }
 }
