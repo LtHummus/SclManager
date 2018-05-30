@@ -21,6 +21,10 @@ object ReplayNamePatcher {
     }
   }
 
+  //So i'm not proud of this, BUTTTTTT I've already got everyone's usernames, so we're going to just ignore display name
+  //for now, and pretend it doesn't exist. For season 5 of SCL, we should do everything with _ACTUAL_ steam names.
+  //
+  //checker, if you are reading this, i am sorry :(
   private def version5Patch(replayData: Array[Byte], headerData: Replay, nameChanges: Map[String, String]) = {
     val newReplayLength = replayData.length -
       (headerData.sniper.length + headerData.spy.length) +
