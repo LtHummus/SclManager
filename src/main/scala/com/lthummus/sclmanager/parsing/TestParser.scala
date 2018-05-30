@@ -19,11 +19,5 @@ object TestParser extends App {
     case -\/(error)   => println(s"Error parsing: $error")
     case \/-(replays) =>
       replays.foreach(println)
-      val b = Bout(replays, BoutTypeEnum.Standard)
-      println(b.isTie)
-      println(b.getGameSummary.mkString("\n"))
-      println(b.getScoreLine)
-      println(b.result("lthummus"))
-      println(b.result("aforgottentune"))
   }
 }
