@@ -2,12 +2,12 @@ package com.lthummus.sclmanager.parsing
 
 
 import java.io.{DataInputStream, InputStream}
+import java.nio.charset.Charset
 import java.nio.{ByteBuffer, ByteOrder}
 import java.util
 import java.util.{Base64, Date}
 
 import org.joda.time.DateTime
-
 import scalaz._
 import Scalaz._
 
@@ -100,6 +100,10 @@ case class GameType(kind: GameLoadoutType, x: Int, y: Int) {
 }
 
 sealed trait ReplayOffsets {
+  val versionNumber: Int
+  val hasPotentiallyMultipleNames: Boolean = false
+  val hasExtraData: Boolean = false
+
   val magicNumberOffset: Int
   val fileVersionOffset: Int
   val protocolVersionOffset: Int
@@ -114,9 +118,16 @@ sealed trait ReplayOffsets {
   val gameTypeOffset: Int
   val levelOffset: Int
   val playerNamesOffset: Int
+
+  val spyDisplayNameLengthOffset: Option[Int] = None
+  val sniperDisplayNameLength: Option[Int] = None
+  val startDurationOffset: Option[Int] = None
+  val numGuestsOffset: Option[Int] = None
 }
 
 object Version3ReplayOffsets extends ReplayOffsets {
+  override val versionNumber: Int = 3
+
   override val magicNumberOffset: Int = 0x00
   override val fileVersionOffset: Int = 0x04
   override val protocolVersionOffset: Int = 0x08
@@ -134,6 +145,8 @@ object Version3ReplayOffsets extends ReplayOffsets {
 }
 
 object Version4ReplayOffsets extends ReplayOffsets {
+  override val versionNumber: Int = 4
+
   override val magicNumberOffset: Int      = 0x00
   override val fileVersionOffset: Int      = 0x04
   override val protocolVersionOffset: Int  = 0x08
@@ -150,6 +163,35 @@ object Version4ReplayOffsets extends ReplayOffsets {
   override val playerNamesOffset: Int      = 0x54
 }
 
+//this isn't the greatest
+//@TODO: what we should really do here is put the actual methods for extracting the data in these objects,
+//       so we don't have to mix logic together
+object Version5ReplayOffsets extends ReplayOffsets {
+  override val versionNumber: Int = 5
+  override val hasPotentiallyMultipleNames: Boolean = true
+  override val hasExtraData: Boolean = true
+
+  override val magicNumberOffset: Int      = 0x00
+  override val fileVersionOffset: Int      = 0x04
+  override val protocolVersionOffset: Int  = 0x08
+  override val spyPartyVersionOffset: Int  = 0x0C
+  override val durationOffset: Int         = 0x14
+  override val uuidOffset: Int             = 0x18
+  override val timestampOffset: Int        = 0x28
+  override val sequenceNumberOffset: Int   = 0x2C
+  override val spyNameLengthOffset: Int    = 0x2E
+  override val sniperNameLengthOffset: Int = 0x2F
+  override val gameResultOffset: Int       = 0x38
+  override val gameTypeOffset: Int         = 0x3C
+  override val levelOffset: Int            = 0x40
+  override val playerNamesOffset: Int      = 0x60
+
+  override val spyDisplayNameLengthOffset: Option[Int] = Some(0x30)
+  override val sniperDisplayNameLength: Option[Int]    = Some(0x31)
+  override val startDurationOffset: Option[Int]        = Some(0x54)
+  override val numGuestsOffset: Option[Int]            = Some(0x50)
+}
+
 case class Replay(spy: String,
                   sniper: String,
                   startTime: DateTime,
@@ -157,7 +199,10 @@ case class Replay(spy: String,
                   level: Level,
                   loadoutType: GameType,
                   sequenceNumber: Int,
-                  uuid: String) extends Ordered[Replay] {
+                  uuid: String,
+                  version: Int,
+                  startDuration: Option[Int] = None,
+                  numGuests: Option[Int] = None) extends Ordered[Replay] {
   override def compare(that: Replay): Int = if (this.startTime.isBefore(that.startTime)) -1 else 1
 
   def isCompleted: Boolean = result != GameResultEnum.InProgress
@@ -174,7 +219,7 @@ case class Replay(spy: String,
 
 object Replay {
 
-  val HeaderDataSizeBytes = 144
+  val HeaderDataSizeBytes = 416
 
   private def extractInt(data: Array[Byte], index: Int) = {
     val buffer = ByteBuffer.wrap(data.slice(index, index + 4))
@@ -199,16 +244,39 @@ object Replay {
     data match {
       case 0x03 => Version3ReplayOffsets.right
       case 0x04 => Version4ReplayOffsets.right
+      case 0x05 => Version5ReplayOffsets.right
       case _    => "Unknown replay header".left
     }
   }
 
   private def extractSpyNameLength(headerData: Array[Byte], offsets: ReplayOffsets) = {
-    headerData(offsets.spyNameLengthOffset).right
+    if (offsets.hasPotentiallyMultipleNames) {
+      val usernameLength = headerData(offsets.spyNameLengthOffset)
+      val displayNameLength = headerData(offsets.spyDisplayNameLengthOffset.get)
+
+      if (displayNameLength != 0) {
+        displayNameLength.right
+      } else {
+        usernameLength.right
+      }
+    } else {
+      headerData(offsets.spyNameLengthOffset).right
+    }
   }
 
   private def extractSniperNameLength(headerData: Array[Byte], offsets: ReplayOffsets) = {
-    headerData(offsets.sniperNameLengthOffset).right
+    if (offsets.hasPotentiallyMultipleNames) {
+      val usernameLength = headerData(offsets.sniperNameLengthOffset)
+      val displayNameLength = headerData(offsets.sniperDisplayNameLength.get)
+
+      if (displayNameLength != 0) {
+        displayNameLength.right
+      } else {
+        usernameLength.right
+      }
+    } else {
+      headerData(offsets.sniperNameLengthOffset).right
+    }
   }
 
   private def extractGameResult(headerData: Array[Byte], offsets: ReplayOffsets): String \/ GameResult = {
@@ -226,11 +294,14 @@ object Replay {
     new DateTime(res * 1000).right
   }
 
-  private def extractSpyName(headerData: Array[Byte], spyNameLength: Int, offsets: ReplayOffsets) = {
-    new String(headerData.slice(offsets.playerNamesOffset, offsets.playerNamesOffset + spyNameLength)).right
+  private def extractSpyName(headerData: Array[Byte], offsets: ReplayOffsets) = {
+    val spyNameLength = headerData(offsets.spyNameLengthOffset)
+    new String(headerData.slice(offsets.playerNamesOffset, offsets.playerNamesOffset + spyNameLength), "UTF-8").right
   }
-  private def extractSniperName(headerData: Array[Byte], spyNameLength: Int, sniperNameLength: Int, offsets: ReplayOffsets) = {
-    new String(headerData.slice(offsets.playerNamesOffset + spyNameLength, offsets.playerNamesOffset + spyNameLength + sniperNameLength)).right
+  private def extractSniperName(headerData: Array[Byte], offsets: ReplayOffsets) = {
+    val spyNameLength = headerData(offsets.spyNameLengthOffset)
+    val sniperNameLength = headerData(offsets.sniperNameLengthOffset)
+    new String(headerData.slice(offsets.playerNamesOffset + spyNameLength, offsets.playerNamesOffset + spyNameLength + sniperNameLength), "UTF-8").right
   }
 
   private def extractLevel(headerData: Array[Byte], offsets: ReplayOffsets): String \/ Level = {
@@ -259,6 +330,14 @@ object Replay {
       .right
   }
 
+  private def extractNumGuests(bytes: Array[Byte], offsets: ReplayOffsets) = {
+    offsets.numGuestsOffset.map(extractInt(bytes, _)).right
+  }
+
+  private def extractStartDuration(bytes: Array[Byte], offsets: ReplayOffsets) = {
+    offsets.startDurationOffset.map(extractInt(bytes, _)).right
+  }
+
   def fromInputStream(is: DataInputStream): String \/ Replay = {
     val headerData = new Array[Byte](HeaderDataSizeBytes)
 
@@ -269,18 +348,18 @@ object Replay {
     }
 
     for {
-      _                <- verifyMagicNumber(headerData)
-      dataOffsets      <- getFileVersionOffsets(headerData(4))
-      spyNameLength    <- extractSpyNameLength(headerData, dataOffsets)
-      sniperNameLength <- extractSniperNameLength(headerData, dataOffsets)
-      gameResult       <- extractGameResult(headerData, dataOffsets)
-      startTime        <- extractStartTime(headerData, dataOffsets)
-      spy              <- extractSpyName(headerData, spyNameLength, dataOffsets)
-      sniper           <- extractSniperName(headerData, spyNameLength, sniperNameLength, dataOffsets)
-      gameType         <- GameType.fromInt(extractInt(headerData, dataOffsets.gameTypeOffset))
-      uuid             <- extractUuid(headerData, dataOffsets)
-      level            <- extractLevel(headerData, dataOffsets)
-      sequence         <- extractSequenceNumber(headerData, dataOffsets)
-    } yield Replay(spy, sniper, startTime, gameResult, level, gameType, sequence, uuid)
+      _             <- verifyMagicNumber(headerData)
+      dataOffsets   <- getFileVersionOffsets(headerData(4))
+      gameResult    <- extractGameResult(headerData, dataOffsets)
+      startTime     <- extractStartTime(headerData, dataOffsets)
+      spy           <- extractSpyName(headerData, dataOffsets)
+      sniper        <- extractSniperName(headerData, dataOffsets)
+      gameType      <- GameType.fromInt(extractInt(headerData, dataOffsets.gameTypeOffset))
+      uuid          <- extractUuid(headerData, dataOffsets)
+      level         <- extractLevel(headerData, dataOffsets)
+      sequence      <- extractSequenceNumber(headerData, dataOffsets)
+      numGuests     <- extractNumGuests(headerData, dataOffsets)
+      startDuration <- extractStartDuration(headerData, dataOffsets)
+    } yield Replay(spy, sniper, startTime, gameResult, level, gameType, sequence, uuid, dataOffsets.versionNumber, numGuests, startDuration)
   }
 }

@@ -51,7 +51,7 @@ case class Game(id: Int,
       parsedResult <- GameResultEnum.fromString(result)
       parsedLevel <- Level.getLevelByName(level)
       parsedGameType <- GameType.fromString(gameType)
-    } yield Replay(spy, sniper, timestamp, parsedResult, parsedLevel, parsedGameType, sequence, uuid)
+    } yield Replay(spy, sniper, timestamp, parsedResult, parsedLevel, parsedGameType, sequence, uuid, -1)
 
     disjointReplay match {
       case -\/(s) => println(s); ???

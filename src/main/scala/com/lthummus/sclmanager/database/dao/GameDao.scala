@@ -25,7 +25,7 @@ object GameDao {
         resultValue <- GameResultEnum.fromInt(record.getResult)
         level <- Level.getLevelByName(record.getVenue)
         decodedGameType <- GameType.fromString(record.getGametype)
-      } yield Replay(record.getSpy, record.getSniper, new DateTime(), resultValue, level, decodedGameType, record.getSequence, record.getUuid)
+      } yield Replay(record.getSpy, record.getSniper, new DateTime(), resultValue, level, decodedGameType, record.getSequence, record.getUuid, -1)
     }
   }
 
