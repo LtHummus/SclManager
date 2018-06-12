@@ -88,7 +88,7 @@ class Player(alias : String, aliased : Table[PlayerRecord], parameters : Array[ 
   /**
    * The column <code>scl.player.country</code>.
    */
-  val COUNTRY : TableField[PlayerRecord, String] = createField("country", org.jooq.impl.SQLDataType.CHAR.length(2).defaultValue(org.jooq.impl.DSL.inline("sp", org.jooq.impl.SQLDataType.CHAR)), "")
+  val COUNTRY : TableField[PlayerRecord, String] = createField("country", org.jooq.impl.SQLDataType.CHAR.length(2), "")
 
   /**
    * The column <code>scl.player.participating</code>.
