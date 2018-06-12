@@ -100,7 +100,7 @@ object Match {
 
     def calculateForfeitWinner: Option[String] = {
       (boutRecord.getStatus.toInt, Option(boutRecord.getForfeitWinner)) match {
-        case (2, None)         => Some("Double forfeit")
+        case (2, None)         => Some("Double forfeit. No one ")
         case (2, Some(winner)) => Some(winner)
         case _                 => None
       }
