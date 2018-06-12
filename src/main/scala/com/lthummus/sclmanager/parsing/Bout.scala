@@ -61,6 +61,23 @@ case class Bout(replays: List[Replay], kind: BoutType) {
         case _                    => s"$game1winner sweeps ${games.head.fullLevelName}"
       }
     }
+  }
+
+  private def getGameSummaryForManyGames(games: List[Replay]): String = {
+    if (games.size == 1) {
+      val onlyGame = games.head
+      s"\t${onlyGame.winnerName} wins as ${onlyGame.winnerRole}"
+    } else if (games.forall(_.winnerRole == "spy")) {
+      s"\tSpy wins ${games.length} games"
+    } else if (games.forall(_.winnerRole == "sniper")) {
+      s"\tSniper wins ${games.length} games"
+    } else if (games.forall(_.winnerName == player1)) {
+      s"\t$player1 wins ${games.length} games"
+    } else if (games.forall(_.winnerName == player2)) {
+      s"\t$player2 wins ${games.length} games"
+    } else {
+      games.map(x => s"\t${x.smallDescription}").mkString("<br />")
+    }
 
   }
 
@@ -87,7 +104,7 @@ case class Bout(replays: List[Replay], kind: BoutType) {
 
         //find all games that were played on this
         val ourGames = getGamesForLayout(games, currentMapConfiguration)
-        val newBuffer = buffer + currentMapConfiguration + "<br />" + ourGames.map(x => s"\t${x.smallDescription}<br />").mkString("") + "<br />"
+        val newBuffer = buffer + currentMapConfiguration + "<br />" + getGameSummaryForManyGames(ourGames) + "<br /><br />"
 
         internal(games.drop(ourGames.length), newBuffer)
       }

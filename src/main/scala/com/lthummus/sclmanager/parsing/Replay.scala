@@ -220,8 +220,8 @@ case class Replay(spy: String,
 
   def fullLevelName = s"${level.name} $loadoutType$additionalGameInfo"
 
-  def description: String = s"$winnerName won as $winnerRole on $fullLevelName"
-  def smallDescription: String = s"$winnerName won as $winnerRole"
+  def description: String = s"$winnerName wins as $winnerRole on $fullLevelName"
+  def smallDescription: String = s"$winnerName wins as ${winnerRole.capitalize}"
 }
 
 object Replay {
