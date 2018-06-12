@@ -98,6 +98,14 @@ object Match {
         |<br />
         |Download link: [url]${boutRecord.getMatchUrl}[/url]<br />""".stripMargin.lines.mkString(""))
 
+    def calculateForfeitWinner: Option[String] = {
+      (boutRecord.getStatus.toInt, Option(boutRecord.getForfeitWinner)) match {
+        case (2, None)         => Some("Double forfeit")
+        case (2, Some(winner)) => Some(winner)
+        case _                 => None
+      }
+    }
+
 
     Match(boutRecord.getId,
       boutRecord.getWeek,
@@ -113,7 +121,7 @@ object Match {
       maybeBout.map(_.getScoreLine),
       maybeBout.map(_.getGameSummary),
       forumPost,
-      Option(boutRecord.getForfeitWinner),
+      calculateForfeitWinner,
       Option(boutRecord.getForfeitText))
   }
 }
