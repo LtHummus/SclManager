@@ -108,12 +108,22 @@ class ChallengerUtils(implicit dslContext: DSLContext, val swagger: Swagger)
       val activePlayers = players.filter(_.active)
 
       val activePlayersByScore = activePlayers.groupBy(_.score).mapValues(_.map(_.name))
-      val activeMatchPairs = activePlayersByScore.mapValues(generateMatches)
+      val activeMatchPairs = activePlayers
+        .groupBy(_.score)
+        .mapValues(Random.shuffle(_))
+        .toList
+        .sortBy(_._1)
+        .reverse
+        .flatMap{ case (_, l) => l.map(_.name)}
+        .grouped(2)
+        .map(x => s"${x(0)},${if (x.length == 1) "BYE" else x(1)}")
+        .toList
 
       val inactiveMatchPairs = generateMatches(inactivePlayers.map(_.name))
 
+
       Ok(Map("active_players_by_score" -> activePlayersByScore,
-        "matches" -> activeMatchPairs.values.flatten,
+        "matches" -> activeMatchPairs,
         "inactive_players" -> inactivePlayers.map(_.name),
         "inactive_matches" -> inactiveMatchPairs))
     }

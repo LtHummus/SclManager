@@ -28,23 +28,23 @@ object Dump extends App {
   })
 
   //Match.fromDatabaseRecordWithGames(it.bout, it.games, it.playerMap, it.draft)
-  //println(write(records))
-
-  val parsedPlayers = players.map(player => {
-    val leaguePlayers = DivisionDao.getPlayersInDivision(player.getDivision)
-    val playerMap = leaguePlayers.map(it => (it.getName, it)).toMap
-    val matchRecords = BoutDao.getMatchesForPlayer(player.getName)
-    val matches = matchRecords.map(m => Match.fromDatabaseRecordWithGames(m, GameDao.getGameRecordsByBoutId(m.getId), playerMap, None))
-
-    Player.fromDatabaseRecord(player, Some(matches))
-  })
-
-  val fileString = write(parsedPlayers)
-
-  new PrintWriter("scl3_players.json") {
-    write(fileString)
-    close
-  }
+  println(write(records))
+//
+//  val parsedPlayers = players.map(player => {
+//    val leaguePlayers = DivisionDao.getPlayersInDivision(player.getDivision)
+//    val playerMap = leaguePlayers.map(it => (it.getName, it)).toMap
+//    val matchRecords = BoutDao.getMatchesForPlayer(player.getName)
+//    val matches = matchRecords.map(m => Match.fromDatabaseRecordWithGames(m, GameDao.getGameRecordsByBoutId(m.getId), playerMap, None))
+//
+//    Player.fromDatabaseRecord(player, Some(matches))
+//  })
+//
+//  val fileString = write(parsedPlayers)
+//
+//  new PrintWriter("scl3_players.json") {
+//    write(fileString)
+//    close
+//  }
 
 
 
