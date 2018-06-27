@@ -188,8 +188,8 @@ object Version5ReplayOffsets extends ReplayOffsets {
 
   override val spyDisplayNameLengthOffset: Option[Int] = Some(0x30)
   override val sniperDisplayNameLength: Option[Int]    = Some(0x31)
-  override val startDurationOffset: Option[Int]        = Some(0x54)
-  override val numGuestsOffset: Option[Int]            = Some(0x50)
+  override val startDurationOffset: Option[Int]        = Some(0x50)
+  override val numGuestsOffset: Option[Int]            = Some(0x54)
 }
 
 case class Replay(spy: String,
@@ -201,8 +201,8 @@ case class Replay(spy: String,
                   sequenceNumber: Int,
                   uuid: String,
                   version: Int,
-                  startDuration: Option[Int] = None,
-                  numGuests: Option[Int] = None) extends Ordered[Replay] {
+                  startDuration: Option[Int],
+                  numGuests: Option[Int]) extends Ordered[Replay] {
   override def compare(that: Replay): Int = if (this.startTime.isBefore(that.startTime)) -1 else 1
 
   def isCompleted: Boolean = result != GameResultEnum.InProgress
@@ -212,9 +212,16 @@ case class Replay(spy: String,
   def winnerName: String = if (spyWon) spy else sniper
   def winnerRole: String = if (spyWon) "spy" else "sniper"
 
-  def fullLevelName = s"${level.name} $loadoutType"
+  private def formatStartTime = startDuration.map(x => f"${x / 60}%d:${x % 60}%02d")
 
-  def description: String = s"$winnerName won as $winnerRole on $fullLevelName"
+  private def additionalGameInfo = if (formatStartTime.isDefined && numGuests.isDefined) {
+    s" ${formatStartTime.get} ${numGuests.get} guests"
+  } else ""
+
+  def fullLevelName = s"${level.name} $loadoutType$additionalGameInfo"
+
+  def description: String = s"$winnerName wins as $winnerRole on $fullLevelName"
+  def smallDescription: String = s"$winnerName wins as ${winnerRole.capitalize}"
 }
 
 object Replay {

@@ -35,13 +35,13 @@ class ChallengerUtils(implicit dslContext: DSLContext, val swagger: Swagger)
     new BoutRecord(null, week, division, names._1, names._2, 0, null, null, null, 0, null, null)
   }
 
-  private case class PlayerMatchingData(name: String, active: Boolean, wins: Int, losses: Int, draws: Int) {
+  private case class PlayerMatchingData(name: String, active: Boolean, wins: Int, losses: Int, draws: Int, score: Int) {
     def scoreString: String = s"$wins-$losses-$draws"
   }
 
   private object PlayerMatchingData {
     def apply(x: PlayerRecord): PlayerMatchingData = {
-      PlayerMatchingData(x.getName, x.isActive, x.getWins, x.getLosses, x.getDraws)
+      PlayerMatchingData(x.getName, x.isActive, x.getWins, x.getLosses, x.getDraws, 2 * x.getWins + x.getDraws)
     }
   }
 
@@ -107,13 +107,23 @@ class ChallengerUtils(implicit dslContext: DSLContext, val swagger: Swagger)
       val inactivePlayers = players.filterNot(_.active)
       val activePlayers = players.filter(_.active)
 
-      val activePlayersByScore = activePlayers.groupBy(_.scoreString).mapValues(_.map(_.name))
-      val activeMatchPairs = activePlayersByScore.mapValues(generateMatches)
+      val activePlayersByScore = activePlayers.groupBy(_.score).mapValues(_.map(_.name))
+      val activeMatchPairs = activePlayers
+        .groupBy(_.score)
+        .mapValues(Random.shuffle(_))
+        .toList
+        .sortBy(_._1)
+        .reverse
+        .flatMap{ case (_, l) => l.map(_.name)}
+        .grouped(2)
+        .map(x => s"${x(0)},${if (x.length == 1) "BYE" else x(1)}")
+        .toList
 
       val inactiveMatchPairs = generateMatches(inactivePlayers.map(_.name))
 
+
       Ok(Map("active_players_by_score" -> activePlayersByScore,
-        "matches" -> activeMatchPairs.values.flatten,
+        "matches" -> activeMatchPairs,
         "inactive_players" -> inactivePlayers.map(_.name),
         "inactive_matches" -> inactiveMatchPairs))
     }

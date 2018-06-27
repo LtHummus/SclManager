@@ -97,6 +97,16 @@ class Game(alias : String, aliased : Table[GameRecord], parameters : Array[ Fiel
   val GAMETYPE : TableField[GameRecord, String] = createField("gametype", org.jooq.impl.SQLDataType.CLOB.nullable(false), "")
 
   /**
+   * The column <code>scl.game.start_duration_seconds</code>.
+   */
+  val START_DURATION_SECONDS : TableField[GameRecord, Integer] = createField("start_duration_seconds", org.jooq.impl.SQLDataType.INTEGER, "")
+
+  /**
+   * The column <code>scl.game.guests</code>.
+   */
+  val GUESTS : TableField[GameRecord, Integer] = createField("guests", org.jooq.impl.SQLDataType.INTEGER, "")
+
+  /**
    * The column <code>scl.game.uuid</code>.
    */
   val UUID : TableField[GameRecord, String] = createField("uuid", org.jooq.impl.SQLDataType.VARCHAR.length(50).nullable(false), "")

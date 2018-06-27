@@ -25,23 +25,23 @@ object GameDao {
         resultValue <- GameResultEnum.fromInt(record.getResult)
         level <- Level.getLevelByName(record.getVenue)
         decodedGameType <- GameType.fromString(record.getGametype)
-      } yield Replay(record.getSpy, record.getSniper, new DateTime(), resultValue, level, decodedGameType, record.getSequence, record.getUuid, -1)
+      } yield Replay(record.getSpy, record.getSniper, new DateTime(), resultValue, level, decodedGameType, record.getSequence, record.getUuid, -1, Option(record.getStartDurationSeconds).map(_.toInt), Option(record.getGuests).map(_.toInt))
     }
   }
 
   implicit class ConvertableFromReplay(replay: Replay) {
     def toDatabase(matchId: Int): GameRecord = {
-      new GameRecord(null, replay.spy, replay.sniper, matchId, replay.result.internalId, replay.sequenceNumber, replay.level.name, replay.loadoutType.toString, replay.uuid, new Timestamp(replay.startTime.getMillis))
+      new GameRecord(null, replay.spy, replay.sniper, matchId, replay.result.internalId, replay.sequenceNumber, replay.level.name, replay.loadoutType.toString, replay.startDuration.map(new Integer(_)).orNull, replay.numGuests.map(new Integer(_)).orNull, replay.uuid, new Timestamp(replay.startTime.getMillis))
     }
   }
 
-  def all(implicit dslContext: DSLContext) = {
+  def all(implicit dslContext: DSLContext): List[GameRecord] = {
     dslContext
       .selectFrom(Tables.GAME)
       .fetch().asScala.toList
   }
 
-  def deleteBelongingToMatch(matchId: Int)(implicit dslContext: DSLContext) = {
+  def deleteBelongingToMatch(matchId: Int)(implicit dslContext: DSLContext): Int = {
     dslContext
       .deleteFrom(Tables.GAME)
       .where(Tables.GAME.BOUT.eq(matchId))

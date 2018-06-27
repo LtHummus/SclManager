@@ -34,6 +34,8 @@ case class Game(id: Int,
                 level: String,
                 gameType: String,
                 sequence: Int,
+                startDurationSeconds: Option[Int],
+                guests: Option[Int],
                 uuid: String,
                 timestamp: DateTime) {
 
@@ -51,7 +53,7 @@ case class Game(id: Int,
       parsedResult <- GameResultEnum.fromString(result)
       parsedLevel <- Level.getLevelByName(level)
       parsedGameType <- GameType.fromString(gameType)
-    } yield Replay(spy, sniper, timestamp, parsedResult, parsedLevel, parsedGameType, sequence, uuid, -1)
+    } yield Replay(spy, sniper, timestamp, parsedResult, parsedLevel, parsedGameType, sequence, uuid, -1, startDurationSeconds, guests)
 
     disjointReplay match {
       case -\/(s) => println(s); ???
@@ -91,10 +93,18 @@ object Match {
         |[results]<br />
         |${bout.getScoreLine}<br />
         |<br />
-        |${bout.getGameSummary.mkString("<br />")}<br />
+        |${bout.getForumGameSummary}<br />
         |[/results]<br />
         |<br />
         |Download link: [url]${boutRecord.getMatchUrl}[/url]<br />""".stripMargin.lines.mkString(""))
+
+    def calculateForfeitWinner: Option[String] = {
+      (boutRecord.getStatus.toInt, Option(boutRecord.getForfeitWinner)) match {
+        case (2, None)         => Some("Double forfeit. No one ")
+        case (2, Some(winner)) => Some(winner)
+        case _                 => None
+      }
+    }
 
 
     Match(boutRecord.getId,
@@ -111,7 +121,7 @@ object Match {
       maybeBout.map(_.getScoreLine),
       maybeBout.map(_.getGameSummary),
       forumPost,
-      Option(boutRecord.getForfeitWinner),
+      calculateForfeitWinner,
       Option(boutRecord.getForfeitText))
   }
 }
@@ -133,6 +143,8 @@ object Game {
       record.getVenue,
       record.getGametype,
       record.getSequence,
+      Option(record.getStartDurationSeconds).map(_.toInt),
+      Option(record.getGuests).map(_.toInt),
       record.getUuid,
       new DateTime(record.getTimestamp))
   }

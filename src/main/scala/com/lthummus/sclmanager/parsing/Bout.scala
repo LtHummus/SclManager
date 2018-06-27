@@ -2,8 +2,9 @@ package com.lthummus.sclmanager.parsing
 
 import com.lthummus.sclmanager.parsing.BoutTypeEnum.BoutType
 import com.typesafe.config.ConfigFactory
-
 import com.lthummus.sclmanager.scaffolding.SystemConfig._
+
+import scala.annotation.tailrec
 
 
 case class Bout(replays: List[Replay], kind: BoutType) {
@@ -60,15 +61,64 @@ case class Bout(replays: List[Replay], kind: BoutType) {
         case _                    => s"$game1winner sweeps ${games.head.fullLevelName}"
       }
     }
+  }
 
+  private def getGameSummaryForManyGames(games: List[Replay]): String = {
+    if (games.size == 1) {
+      val onlyGame = games.head
+      s"${onlyGame.winnerName} wins as ${onlyGame.winnerRole}"
+    } else if (games.forall(_.winnerRole == "spy")) {
+      s"Spy wins ${games.length} games"
+    } else if (games.forall(_.winnerRole == "sniper")) {
+      s"Sniper wins ${games.length} games"
+    } else if (games.forall(_.winnerName == player1)) {
+      s"$player1 wins ${games.length} games"
+    } else if (games.forall(_.winnerName == player2)) {
+      s"$player2 wins ${games.length} games"
+    } else {
+      games.map(x => s"${x.smallDescription}").mkString("<br />")
+    }
+
+  }
+
+  private def getGamesForLayout(haystack: List[Replay], layout: String): List[Replay] = {
+    @tailrec def internal(games: List[Replay], buffer: List[Replay]): List[Replay] = {
+      if (games.isEmpty) {
+        buffer
+      } else if (games.head.fullLevelName == layout) {
+        internal(games.tail, buffer :+ games.head)
+      } else {
+        buffer
+      }
+    }
+
+    internal(haystack, List())
+  }
+
+  def getForumGameSummary: String = {
+    @tailrec def internal(games: List[Replay], buffer: String): String = {
+      if (games.isEmpty) {
+        buffer
+      } else {
+        val currentMapConfiguration = games.head.fullLevelName
+
+        //find all games that were played on this
+        val ourGames = getGamesForLayout(games, currentMapConfiguration)
+        val newBuffer = buffer + "[b]" +  currentMapConfiguration + "[/b]<br />" + getGameSummaryForManyGames(ourGames) + "<br /><br />"
+
+        internal(games.drop(ourGames.length), newBuffer)
+      }
+    }
+
+    internal(orderedReplays, "")
   }
 
   def getGameSummary: List[String] = {
     if (kind.hasOvertime(player1Score, player2Score)) {
       val overtimeGames = orderedReplays.takeRight(2)
-      orderedReplays.dropRight(2).grouped(2).map(getSummaryForGroup).toList ++ overtimeGames.map(it => s"**OVERTIME** ${it.description}")
+      orderedReplays.dropRight(2).map(_.description) ++ overtimeGames.map(it => s"**OVERTIME** ${it.description}")
     } else {
-      orderedReplays.grouped(2).map(getSummaryForGroup).toList
+      orderedReplays.map(_.description)
     }
 
   }
@@ -85,9 +135,9 @@ case class Bout(replays: List[Replay], kind: BoutType) {
 }
 
 object Bout {
-  val Config = ConfigFactory.load()
+  private val Config = ConfigFactory.load()
 
-  val PointsForWin = Config.getIntWithStage("tournament.pointsPerWin")
-  val PointsForDraw = Config.getIntWithStage("tournament.pointsPerDraw")
-  val PointsForLoss = Config.getIntWithStage("tournament.pointsPerLoss")
+  val PointsForWin: Int = Config.getIntWithStage("tournament.pointsPerWin")
+  val PointsForDraw: Int = Config.getIntWithStage("tournament.pointsPerDraw")
+  val PointsForLoss: Int = Config.getIntWithStage("tournament.pointsPerLoss")
 }
