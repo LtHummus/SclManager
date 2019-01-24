@@ -8,11 +8,9 @@ import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.{Bucket, ObjectMetadata}
 import com.typesafe.config.ConfigFactory
 import org.slf4j.{Logger, LoggerFactory}
-
 import scalaz._
 import Scalaz._
-
-import com.lthummus.sclmanager.scaffolding.SystemConfig._
+import com.lthummus.sclmanager.scaffolding.SclManagerConfig
 
 
 class S3Uploader {
@@ -20,7 +18,7 @@ class S3Uploader {
 
   private val S3 = new AmazonS3Client()
 
-  private val BucketName = config.getStringWithStage("s3.bucketName")
+  private val BucketName = SclManagerConfig.s3BucketName
 
   def putReplay(name: String, input: Array[Byte]): String \/ String = {
     val metadata = new ObjectMetadata()

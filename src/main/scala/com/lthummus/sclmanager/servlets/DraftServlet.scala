@@ -2,8 +2,7 @@ package com.lthummus.sclmanager.servlets
 
 import com.lthummus.sclmanager.SclManagerStack
 import com.lthummus.sclmanager.database.dao.DraftDao
-import com.lthummus.sclmanager.scaffolding.SystemConfig
-import com.lthummus.sclmanager.scaffolding.SystemConfig._
+import com.lthummus.sclmanager.scaffolding.SclManagerConfig
 import com.lthummus.sclmanager.servlets.dto.DraftInput
 import com.typesafe.config.ConfigFactory
 import org.jooq.DSLContext
@@ -23,11 +22,7 @@ class DraftServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
 
   protected implicit lazy val jsonFormats: Formats = DefaultFormats ++ JodaTimeSerializers.all
 
-  private val sharedSecret = if (SystemConfig.isProduction) {
-    ConfigFactory.load().getEncryptedString("sharedSecret")
-  } else {
-    "password"
-  }
+  private val sharedSecret = SclManagerConfig.sharedSecret
 
   before() {
     contentType = formats("json")

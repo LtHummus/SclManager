@@ -1,7 +1,6 @@
 package com.lthummus.sclmanager.database
 
-import com.lthummus.sclmanager.scaffolding.SystemConfig._
-import com.typesafe.config.ConfigFactory
+import com.lthummus.sclmanager.scaffolding.SclManagerConfig
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import org.jooq._
 import org.jooq.impl.{DSL, SclTransactionContext}
@@ -9,11 +8,9 @@ import org.jooq.impl.{DSL, SclTransactionContext}
 object DatabaseConfigurator {
 
   def getDslContext: DSLContext = {
-    val config = ConfigFactory.load()
-
-    val jdbcUrl = config.getStringWithStage("database.url")
-    val username = config.getEncryptedString("database.username")
-    val password = config.getEncryptedString("database.password")
+    val jdbcUrl = SclManagerConfig.databaseUrl
+    val username = SclManagerConfig.databaseUsername
+    val password = SclManagerConfig.databasePassword
 
     val hikariConfig = new HikariConfig()
     hikariConfig.setJdbcUrl(jdbcUrl)

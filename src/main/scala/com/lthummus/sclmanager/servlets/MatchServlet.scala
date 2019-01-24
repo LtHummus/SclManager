@@ -6,8 +6,7 @@ import com.lthummus.sclmanager.database.TransactionSupport
 import com.lthummus.sclmanager.database.dao.GameDao._
 import com.lthummus.sclmanager.database.dao.{BoutDao, DraftDao, GameDao, PlayerDao}
 import com.lthummus.sclmanager.parsing._
-import com.lthummus.sclmanager.scaffolding.SystemConfig
-import com.lthummus.sclmanager.scaffolding.SystemConfig._
+import com.lthummus.sclmanager.scaffolding.SclManagerConfig
 import com.lthummus.sclmanager.servlets.dto._
 import com.lthummus.sclmanager.util.S3Uploader
 import com.typesafe.config.ConfigFactory
@@ -36,7 +35,7 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
   protected implicit lazy val jsonFormats: Formats = DefaultFormats ++ JodaTimeSerializers.all + FieldSerializer[Game]()
 
   protected val applicationDescription = "Gets match information"
-  private val ForfeitPassword = if (SystemConfig.isTest) "password" else ConfigFactory.load().getEncryptedString("sharedSecret")
+  private val ForfeitPassword = SclManagerConfig.forfeitPassword
 
   configureMultipartHandling(MultipartConfig(maxFileSize = Some(3 * 1024 * 1024))) // 3 megabytes
 
@@ -184,7 +183,7 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
   }
 
 
-  if (SystemConfig.isTest) {
+  if (SclManagerConfig.debugMode) {
     val resetById = (apiOperation[Match]("resetById")
       summary "Reset matches to their default state"
       notes "THIS IS FOR TESTING ONLY -- DELETES ALL DATA ASSOCIATED WITH A MATCH"

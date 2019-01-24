@@ -4,8 +4,7 @@ import com.lthummus.sclmanager.SclManagerStack
 import com.lthummus.sclmanager.database.TransactionSupport
 import com.lthummus.sclmanager.database.dao.DivisionDao._
 import com.lthummus.sclmanager.database.dao.{BoutDao, DivisionDao}
-import com.lthummus.sclmanager.scaffolding.SystemConfig
-import com.lthummus.sclmanager.scaffolding.SystemConfig._
+import com.lthummus.sclmanager.scaffolding.SclManagerConfig
 import com.lthummus.sclmanager.servlets.dto.NewMatchesInput
 import com.typesafe.config.ConfigFactory
 import org.jooq.DSLContext
@@ -45,12 +44,7 @@ class ChallengerUtils(implicit dslContext: DSLContext, val swagger: Swagger)
     }
   }
 
-  private val sharedSecret = if (SystemConfig.isTest) {
-    "password"
-  } else {
-    //@NB: should this go through the normal config stuff???
-    ConfigFactory.load().getEncryptedString("sharedSecret")
-  }
+  private val sharedSecret = SclManagerConfig.sharedSecret
 
   before() {
     contentType = formats("json")

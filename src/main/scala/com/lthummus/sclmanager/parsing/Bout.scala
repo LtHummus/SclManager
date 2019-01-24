@@ -1,8 +1,7 @@
 package com.lthummus.sclmanager.parsing
 
 import com.lthummus.sclmanager.parsing.BoutTypeEnum.BoutType
-import com.typesafe.config.ConfigFactory
-import com.lthummus.sclmanager.scaffolding.SystemConfig._
+import com.lthummus.sclmanager.scaffolding.SclManagerConfig
 
 import scala.annotation.tailrec
 
@@ -28,9 +27,9 @@ case class Bout(replays: List[Replay], kind: BoutType) {
     val theirScore = if (player1 == playerName) player2Score else player1Score
 
     (ourScore, theirScore) match {
-      case (x, y) if x == y => Bout.PointsForDraw
-      case (x, y) if x > y => Bout.PointsForWin
-      case _ => Bout.PointsForLoss
+      case (x, y) if x == y => SclManagerConfig.pointsForDraw
+      case (x, y) if x > y  => SclManagerConfig.pointsForWin
+      case _                => SclManagerConfig.pointsForLoss
     }
   }
 
@@ -134,10 +133,3 @@ case class Bout(replays: List[Replay], kind: BoutType) {
   }
 }
 
-object Bout {
-  private val Config = ConfigFactory.load()
-
-  val PointsForWin: Int = Config.getIntWithStage("tournament.pointsPerWin")
-  val PointsForDraw: Int = Config.getIntWithStage("tournament.pointsPerDraw")
-  val PointsForLoss: Int = Config.getIntWithStage("tournament.pointsPerLoss")
-}
