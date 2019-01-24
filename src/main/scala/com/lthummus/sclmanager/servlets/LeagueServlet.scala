@@ -51,4 +51,12 @@ class LeagueServlet(implicit dslContext: DSLContext, val swagger: Swagger) exten
       case Some(it) => Ok(League.fromDatabaseRecord(it, players))
     }
   }
+
+  get("/:name/matches") {
+    val name = params("name")
+
+    val players = DivisionDao.getPlayersInDivision(name)
+
+
+  }
 }

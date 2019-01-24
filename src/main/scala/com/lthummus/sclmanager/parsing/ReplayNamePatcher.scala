@@ -11,13 +11,12 @@ object ReplayNamePatcher {
   private def doActualPatch(replayData: Array[Byte], headerData: Replay, nameChanges: Map[String, String]): String \/ Array[Byte] = {
     if (nameChanges.forall { case (a, b) => a == b }) {
       replayData.right
-    } else if (replayData(4) == 0x04) {
-      version4Patch(replayData, headerData, nameChanges)
-    } else if (replayData(4) == 0x05) {
-      version5Patch(replayData, headerData, nameChanges)
     } else {
-      val versionNumber = replayData(4)
-      s"I don't know how to patch version $versionNumber replays".left
+      replayData(4) match {
+        case 0x04    => version4Patch(replayData, headerData, nameChanges)
+        case 0x05    => version5Patch(replayData, headerData, nameChanges)
+        case x: Byte => s"I don't know how to patch version $x replay files".left
+      }
     }
   }
 
@@ -92,7 +91,7 @@ object ReplayNamePatcher {
     val newIS = new DataInputStream(new ByteArrayInputStream(replayBytes))
 
     Replay.fromInputStream(newIS) match {
-      case -\/(error) => error.left
+      case -\/(error)  => error.left
       case \/-(replay) => doActualPatch(replayBytes, replay, nameChanges)
     }
 

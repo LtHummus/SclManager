@@ -1,7 +1,6 @@
 import com.lthummus.sclmanager._
 import org.scalatra._
 import javax.servlet.ServletContext
-
 import com.lthummus.sclmanager.database.DatabaseConfigurator
 import com.lthummus.sclmanager.servlets._
 import org.jooq.DSLContext

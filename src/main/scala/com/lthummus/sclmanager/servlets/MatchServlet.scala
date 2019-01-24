@@ -63,11 +63,11 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
     insideTransaction { implicit dslContext =>
       for {
         bout <- BoutDao.getById(id) \/> "There is no match with that id"
-        _ <- winnerIsValid(winner, bout.getPlayer1, bout.getPlayer2)
-        _ <- checkStatus(bout)
-        _ <- BoutDao.updateBoutForfeitStatus(id, winner, text)
-        _ <- PlayerDao.postResult(bout.getPlayer1, if (bout.getPlayer1 == winner) "win" else "loss")
-        _ <- PlayerDao.postResult(bout.getPlayer2, if (bout.getPlayer2 == winner) "win" else "loss")
+        _    <- winnerIsValid(winner, bout.getPlayer1, bout.getPlayer2)
+        _    <- checkStatus(bout)
+        _    <- BoutDao.updateBoutForfeitStatus(id, winner, text)
+        _    <- PlayerDao.postResult(bout.getPlayer1, if (bout.getPlayer1 == winner) "win" else "loss")
+        _    <- PlayerDao.postResult(bout.getPlayer2, if (bout.getPlayer2 == winner) "win" else "loss")
       } yield {
         bout
       }
@@ -103,10 +103,10 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
   private def persistBout(bout: Bout, url: String) = {
     insideTransaction{ implicit dslContext =>
       for {
-        player1 <- PlayerDao.getByPlayerName(bout.player1) \/> s"No player found with name ${bout.player1}"
-        player2 <- PlayerDao.getByPlayerName(bout.player2) \/> s"No player found with name ${bout.player2}"
-        boutObj <- BoutDao.getNextToBePlayedByPlayers(player1.getName, player2.getName) \/> s"No match found between these players"
-        draft = DraftDao.getLatestUnusedDraftForPlayer(Seq(player1.getName, player2.getName))
+        player1   <- PlayerDao.getByPlayerName(bout.player1) \/> s"No player found with name ${bout.player1}"
+        player2   <- PlayerDao.getByPlayerName(bout.player2) \/> s"No player found with name ${bout.player2}"
+        boutObj   <- BoutDao.getNextToBePlayedByPlayers(player1.getName, player2.getName) \/> s"No match found between these players"
+        draft     =  DraftDao.getLatestUnusedDraftForPlayer(Seq(player1.getName, player2.getName))
         updateRes <- updateScores(bout, bout.orderedReplays.map(_.toDatabase(boutObj.getId)), url, draft)
       } yield updateRes
     }
@@ -259,7 +259,7 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
 
     bout match {
       case -\/(error) => BadRequest(ErrorMessage(error))
-      case \/-(it) => Ok(Match.fromDatabaseRecordWithGames(it.bout, it.games, it.playerMap, it.draft))
+      case \/-(it)    => Ok(Match.fromDatabaseRecordWithGames(it.bout, it.games, it.playerMap, it.draft))
     }
   }
 
