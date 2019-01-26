@@ -5,7 +5,7 @@ import org.joda.time.DateTime
 import org.jooq.Record
 import scalaz._
 import zzz.generated.Tables
-import zzz.generated.tables.records.{BoutRecord, GameRecord, PlayerRecord}
+import zzz.generated.tables.records.{BoutRecord, DivisionRecord, GameRecord, PlayerRecord}
 
 case class Match(id: Int,
                  week: Int,
@@ -67,6 +67,7 @@ case class MatchList(matches: Seq[Match])
 object Match {
   def fromDatabaseRecordWithGames(record: Record, games: List[GameRecord], playerMap: Map[String, Player], draft: Option[Draft]): Match = {
     val boutRecord: BoutRecord = record.into(Tables.BOUT)
+    val divisionRecord: DivisionRecord = record.into(Tables.DIVISION)
     val gameList = games.map(Game.fromDatabaseRecord)
     val packagedMatchUrl = Option(boutRecord.getMatchUrl)
 
@@ -99,23 +100,44 @@ object Match {
     }
 
 
-    Match(boutRecord.getId,
-      boutRecord.getWeek,
-      boutRecord.getDivision,
-      playerMap(boutRecord.getPlayer1).asSimplePlayer,
-      playerMap(boutRecord.getPlayer2).asSimplePlayer,
-      boutRecord.getStatus,
-      BoutTypeEnum.fromInt(boutRecord.getBoutType).toString,
-      Some(gameList),
-      packagedMatchUrl,
-      draft,
-      draftSummary,
-      maybeBout.map(_.getScoreLine),
-      maybeBout.map(_.getGameSummary),
-      forumPost,
-      calculateForfeitWinner,
-      Option(boutRecord.getForfeitText))
-  }
+    if (divisionRecord.getSecret) {
+      Match(boutRecord.getId,
+        boutRecord.getWeek,
+        boutRecord.getDivision,
+        playerMap(boutRecord.getPlayer1).asSimplePlayer,
+        playerMap(boutRecord.getPlayer2).asSimplePlayer,
+        boutRecord.getStatus,
+        BoutTypeEnum.fromInt(boutRecord.getBoutType).toString,
+        None,
+        packagedMatchUrl,
+        draft,
+        draftSummary,
+        None,
+        None,
+        None,
+        calculateForfeitWinner,
+        Option(boutRecord.getForfeitText)
+      )
+    } else {
+      Match(boutRecord.getId,
+        boutRecord.getWeek,
+        boutRecord.getDivision,
+        playerMap(boutRecord.getPlayer1).asSimplePlayer,
+        playerMap(boutRecord.getPlayer2).asSimplePlayer,
+        boutRecord.getStatus,
+        BoutTypeEnum.fromInt(boutRecord.getBoutType).toString,
+        Some(gameList),
+        packagedMatchUrl,
+        draft,
+        draftSummary,
+        maybeBout.map(_.getScoreLine),
+        maybeBout.map(_.getGameSummary),
+        forumPost,
+        calculateForfeitWinner,
+        Option(boutRecord.getForfeitText))
+      }
+    }
+
 }
 
 object Game {

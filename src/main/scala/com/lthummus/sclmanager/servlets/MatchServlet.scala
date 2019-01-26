@@ -20,6 +20,7 @@ import org.scalatra.servlet.{FileUploadSupport, MultipartConfig}
 import org.scalatra.swagger.{Swagger, SwaggerSupport}
 import scalaz.Scalaz._
 import scalaz._
+import zzz.generated.Tables
 import zzz.generated.tables.records.{BoutRecord, DraftRecord, GameRecord}
 
 import scala.util.Try
@@ -200,20 +201,19 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
         case \/-(_) => Ok("result" -> "ok")
       }
     }
+
+    get("/bulk") {
+      val players = PlayerDao.all()
+      val everything = BoutDao.getAll().map(Match.fromDatabaseRecordWithGames(_, List(), players.map(it => (it.name, it)).toMap, None))
+      val ids = everything.map(_.id)
+
+      Ok(ids.map(curr => {
+        val res = BoutDao.getFullBoutRecords(curr)
+        val thing = res.getOrElse(throw new IllegalArgumentException())
+        thing
+      }))
+    }
   }
-
-  get("/bulk") {
-    val players = PlayerDao.all()
-    val everything = BoutDao.getAll().map(Match.fromDatabaseRecordWithGames(_, List(), players.map(it => (it.name, it)).toMap, None))
-    val ids = everything.map(_.id)
-
-    Ok(ids.map(curr => {
-      val res = BoutDao.getFullBoutRecords(curr)
-      val thing = res.getOrElse(throw new IllegalArgumentException())
-      thing
-    }))
-  }
-
 
   private val getByWeek = (apiOperation[Match]("getById")
     summary "Get matches by their week"
@@ -222,7 +222,9 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
   get("/week/:week", operation(getByWeek)) {
     val week = Math.min(params("week").toInt, 10)
     val players = PlayerDao.all()
-    Ok(BoutDao.getByWeek(week).map(m => Match.fromDatabaseRecordWithGames(m, GameDao.getGameRecordsByBoutId(m.getId), players.map(it => (it.name, it)).toMap, None)))
+    Ok(BoutDao.getByWeek(week).map(m => {
+      Match.fromDatabaseRecordWithGames(m, GameDao.getGameRecordsByBoutId(m.into(Tables.BOUT).getId), players.map(it => (it.name, it)).toMap, None)
+    }))
   }
 
   get("/next/:player1/:player2") {

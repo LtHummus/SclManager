@@ -27,9 +27,21 @@ class LeagueServlet(implicit dslContext: DSLContext, val swagger: Swagger) exten
 
   get("/", operation(getAll)) {
     val leagueDatabaseRecords = DivisionDao.all()
-    val playerDatabaseRecords = PlayerDao.all()
+    val playerDatabaseRecords = PlayerDao.all().groupBy(_.divisionName)
 
-    val leagues = leagueDatabaseRecords.map(l => League.fromDatabaseRecord(l, playerDatabaseRecords.filter(_.divisionName == l.getName))).sorted
+    val leagues = leagueDatabaseRecords.map(
+      l => {
+        val games = if (l.getSecret) {
+          playerDatabaseRecords(l.getName).map(_.sanitize)
+        } else {
+          playerDatabaseRecords(l.getName)
+        }
+        League.fromDatabaseRecord(l, games)
+      }
+
+    ).sorted
+
+
 
     Ok(LeagueOverview(LeagueList(leagues)))
   }
@@ -48,15 +60,12 @@ class LeagueServlet(implicit dslContext: DSLContext, val swagger: Swagger) exten
 
     league match {
       case None => NotFound(ErrorMessage(s"No league with id $name found"))
-      case Some(it) => Ok(League.fromDatabaseRecord(it, players))
+      case Some(it) =>
+        if (it.getSecret) {
+          Ok(League.fromDatabaseRecord(it, players.map(_.sanitize)))
+        } else {
+          Ok(League.fromDatabaseRecord(it, players))
+        }
     }
-  }
-
-  get("/:name/matches") {
-    val name = params("name")
-
-    val players = PlayerDao.getPlayersInDivision(name)
-
-
   }
 }

@@ -22,17 +22,6 @@ case class Bout(replays: List[Replay], kind: BoutType) {
     throw new Exception("This doesn't look like a complete SCL match.  Are all the replays included?")
   }
 
-  def pointsForPlayer(playerName: String): Int = {
-    val ourScore = if (player1 == playerName) player1Score else player2Score
-    val theirScore = if (player1 == playerName) player2Score else player1Score
-
-    (ourScore, theirScore) match {
-      case (x, y) if x == y => SclManagerConfig.pointsForDraw
-      case (x, y) if x > y  => SclManagerConfig.pointsForWin
-      case _                => SclManagerConfig.pointsForLoss
-    }
-  }
-
   def result(playerName: String): String = {
     val ourScore = if (player1 == playerName) player1Score else player2Score
     val theirScore = if (player1 == playerName) player2Score else player1Score

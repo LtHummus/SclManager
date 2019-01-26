@@ -5,6 +5,7 @@ import com.lthummus.sclmanager.database.dao.{BoutDao, DivisionDao, GameDao, Play
 import com.lthummus.sclmanager.servlets.dto.Match
 import org.joda.time.DateTime
 import org.jooq.DSLContext
+import zzz.generated.Tables
 
 
 object MatchPrinter extends App {
@@ -26,7 +27,7 @@ object MatchPrinter extends App {
   val playerMap = players.map(it => (it.name, it)).toMap
   val divisions = DivisionDao.all().sortBy(_.getPrecedence)
   for (week <- 1 to 10) {
-    val bouts = BoutDao.getByWeek(week).map(m => Match.fromDatabaseRecordWithGames(m, GameDao.getGameRecordsByBoutId(m.getId), players.map(it => (it.name, it)).toMap, None))
+    val bouts = BoutDao.getByWeek(week).map(m => Match.fromDatabaseRecordWithGames(m, GameDao.getGameRecordsByBoutId(m.into(Tables.BOUT).getId), players.map(it => (it.name, it)).toMap, None))
 
     val boutsWithDivision = bouts.groupBy(it => playerMap(it.player1.name).divisionName)
 
