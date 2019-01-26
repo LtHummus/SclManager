@@ -13,8 +13,6 @@ object JettyLauncher {
   def main(args: Array[String]) {
     Logger.info("Hello world!")
 
-    Thread.sleep(60)
-
     val port = SclManagerConfig.port
 
     val server = new Server(port)

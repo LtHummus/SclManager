@@ -16,6 +16,7 @@ object DatabaseConfigurator {
     hikariConfig.setJdbcUrl(jdbcUrl)
     hikariConfig.setUsername(username)
     hikariConfig.setPassword(password)
+    hikariConfig.setInitializationFailFast(false)
 
     val hikariDataSource = new HikariDataSource(hikariConfig)
 
