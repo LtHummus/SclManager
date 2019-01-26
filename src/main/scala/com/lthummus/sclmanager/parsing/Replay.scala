@@ -192,6 +192,32 @@ object Version5ReplayOffsets extends ReplayOffsets {
   override val numGuestsOffset: Option[Int]            = Some(0x54)
 }
 
+object Version6ReplayOffsets extends ReplayOffsets {
+  override val versionNumber: Int = 6
+  override val hasPotentiallyMultipleNames: Boolean = true
+  override val hasExtraData: Boolean = true
+
+  override val magicNumberOffset: Int      = 0x00
+  override val fileVersionOffset: Int      = 0x04
+  override val protocolVersionOffset: Int  = 0x08
+  override val spyPartyVersionOffset: Int  = 0x0C
+  override val durationOffset: Int         = 0x14
+  override val uuidOffset: Int             = 0x18
+  override val timestampOffset: Int        = 0x28
+  override val sequenceNumberOffset: Int   = 0x2C
+  override val spyNameLengthOffset: Int    = 0x2E
+  override val sniperNameLengthOffset: Int = 0x2F
+  override val gameResultOffset: Int       = 0x38
+  override val gameTypeOffset: Int         = 0x3C
+  override val levelOffset: Int            = 0x40
+  override val playerNamesOffset: Int      = 0x64
+
+  override val spyDisplayNameLengthOffset: Option[Int] = Some(0x30)
+  override val sniperDisplayNameLength: Option[Int]    = Some(0x31)
+  override val startDurationOffset: Option[Int]        = Some(0x54)
+  override val numGuestsOffset: Option[Int]            = Some(0x58)
+}
+
 case class Replay(spy: String,
                   sniper: String,
                   startTime: DateTime,
@@ -252,6 +278,7 @@ object Replay {
       case 0x03 => Version3ReplayOffsets.right
       case 0x04 => Version4ReplayOffsets.right
       case 0x05 => Version5ReplayOffsets.right
+      case 0x06 => Version6ReplayOffsets.right
       case _    => "Unknown replay header".left
     }
   }

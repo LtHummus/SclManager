@@ -15,6 +15,7 @@ object ReplayNamePatcher {
       replayData(4) match {
         case 0x04    => version4Patch(replayData, headerData, nameChanges)
         case 0x05    => version5Patch(replayData, headerData, nameChanges)
+        case 0x06    => version6Patch(replayData, headerData, nameChanges)
         case x: Byte => s"I don't know how to patch version $x replay files".left
       }
     }
@@ -50,6 +51,37 @@ object ReplayNamePatcher {
     val payloadAfterNames = replayData.length - (headerData.spy.length + headerData.sniper.length + 0x60)
 
     System.arraycopy(replayData, 0x60 + headerData.spy.length + headerData.sniper.length, newReplayBytes, 0x60 + newSpyName.length + newSniperName.length, payloadAfterNames)
+
+    newReplayBytes.right
+
+  }
+
+  private def version6Patch(replayData: Array[Byte], headerData: Replay, nameChanges: Map[String, String]) = {
+    val newReplayLength = replayData.length -
+      (headerData.sniper.length + headerData.spy.length) +
+      (nameChanges(headerData.spy).length + nameChanges(headerData.sniper).length)
+
+    val newReplayBytes = Array.fill[Byte](newReplayLength)(0x00)
+
+    //copy everything up until name lengths to the new array
+    System.arraycopy(replayData, 0, newReplayBytes, 0, 0x2E)
+
+    val newSpyName = nameChanges.getOrElse(headerData.spy, headerData.spy)
+    val newSniperName = nameChanges.getOrElse(headerData.sniper, headerData.sniper)
+
+    newReplayBytes(0x2E) = newSpyName.length.toByte
+    newReplayBytes(0x2F) = newSniperName.length.toByte
+
+    //now, copy over the next stuff, until the names
+    System.arraycopy(replayData, 0x30, newReplayBytes, 0x30, 0x30)
+
+    //write the new names
+    System.arraycopy(newSpyName.getBytes, 0, newReplayBytes, 0x64, newSpyName.length)
+    System.arraycopy(newSniperName.getBytes, 0, newReplayBytes, 0x64 + newSpyName.length, newSniperName.length)
+
+    val payloadAfterNames = replayData.length - (headerData.spy.length + headerData.sniper.length + 0x64)
+
+    System.arraycopy(replayData, 0x64 + headerData.spy.length + headerData.sniper.length, newReplayBytes, 0x64 + newSpyName.length + newSniperName.length, payloadAfterNames)
 
     newReplayBytes.right
 
