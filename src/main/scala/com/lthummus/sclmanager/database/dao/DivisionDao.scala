@@ -1,5 +1,6 @@
 package com.lthummus.sclmanager.database.dao
 
+import com.lthummus.sclmanager.servlets.dto.Player
 import org.jooq.DSLContext
 import zzz.generated.Tables
 import zzz.generated.tables.records.{DivisionRecord, PlayerRecord}
@@ -25,10 +26,6 @@ object DivisionDao {
       case 0 => None
       case _ => Some(res.get(0))
     }
-  }
-
-  def getPlayersInDivision(name: String)(implicit dslContext: DSLContext): List[PlayerRecord] = {
-    dslContext.selectFrom(Tables.PLAYER).where(Tables.PLAYER.DIVISION.eq(name)).fetch().asScala.toList
   }
 
   def getParticipatingPlayersInDivision(name: String)(implicit dslContext: DSLContext): List[PlayerRecord] = {

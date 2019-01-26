@@ -1,30 +1,42 @@
 package com.lthummus.sclmanager.database.dao
 
-import org.jooq.DSLContext
+import org.jooq.{DSLContext, Record}
 import zzz.generated.Tables
 import zzz.generated.tables.records.PlayerRecord
 
 import scala.collection.JavaConverters._
-
 import scalaz._
 import Scalaz._
+import com.lthummus.sclmanager.servlets.dto.Player
 
 object PlayerDao {
 
-  def all()(implicit dslContext: DSLContext) = {
-    dslContext.selectFrom(Tables.PLAYER).fetch().asScala.toList
+  private def toPlayer(x: Record): Player = {
+    val playerRecord = x.into(Tables.PLAYER)
+    val divisionRecord = x.into(Tables.DIVISION)
+
+    Player.fromDatabaseRecord(playerRecord, divisionRecord, None)
   }
 
-  def getByPlayerName(name: String)(implicit dslContext: DSLContext): Option[PlayerRecord] = {
-    val res = dslContext
-      .selectFrom(Tables.PLAYER)
-      .where(Tables.PLAYER.NAME.eq(name))
+  def all()(implicit dslContext: DSLContext): List[Player] = {
+    dslContext
+      .selectFrom(Tables.PLAYER.join(Tables.DIVISION).on(Tables.PLAYER.DIVISION.eq(Tables.DIVISION.NAME)))
       .fetch()
+      .asScala
+      .map(toPlayer)
+      .toList
+  }
 
-    res.size() match {
-      case 0 => None
-      case _ => Some(res.get(0))
-    }
+  def getPlayersInDivision(name: String)(implicit dslContext: DSLContext): List[Player] = {
+    dslContext.selectFrom(Tables.PLAYER).where(Tables.PLAYER.DIVISION.eq(name)).fetch().asScala.toList.map(toPlayer)
+  }
+
+  def getByPlayerName(name: String)(implicit dslContext: DSLContext): Option[Player] = {
+    Some(dslContext
+      .selectFrom(Tables.PLAYER.join(Tables.DIVISION).on(Tables.PLAYER.DIVISION.eq(Tables.DIVISION.NAME)))
+      .where(Tables.PLAYER.NAME.eq(name))
+      .fetchOne())
+      .map(toPlayer)
   }
 
   def getBySteamPlayerName(steamName: String)(implicit dslContext: DSLContext): Option[PlayerRecord] = {
@@ -57,9 +69,11 @@ object PlayerDao {
   }
 
   def postResult(name: String, result: String)(implicit dslContext: DSLContext): String \/ PlayerRecord = {
-    val player = getByPlayerName(name)
+    val player = Some(dslContext
+      .selectFrom(Tables.PLAYER)
+      .where(Tables.PLAYER.NAME.eq(name))
+      .fetchOne())
 
-    //TODO: update this from config
     if (player.isEmpty) {
       s"No player found with name $name".left
     } else {

@@ -89,7 +89,7 @@ class Bout(alias : String, aliased : Table[BoutRecord], parameters : Array[ Fiel
   /**
    * The column <code>scl.bout.forfeit_winner</code>.
    */
-  val FORFEIT_WINNER : TableField[BoutRecord, String] = createField("forfeit_winner", org.jooq.impl.SQLDataType.VARCHAR.length(50).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.VARCHAR)), "")
+  val FORFEIT_WINNER : TableField[BoutRecord, String] = createField("forfeit_winner", org.jooq.impl.SQLDataType.VARCHAR.length(50), "")
 
   /**
    * The column <code>scl.bout.match_url</code>.
@@ -114,7 +114,7 @@ class Bout(alias : String, aliased : Table[BoutRecord], parameters : Array[ Fiel
   /**
    * The column <code>scl.bout.forfeit_text</code>.
    */
-  val FORFEIT_TEXT : TableField[BoutRecord, String] = createField("forfeit_text", org.jooq.impl.SQLDataType.VARCHAR.length(200).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.VARCHAR)), "")
+  val FORFEIT_TEXT : TableField[BoutRecord, String] = createField("forfeit_text", org.jooq.impl.SQLDataType.VARCHAR.length(200), "")
 
   /**
    * Create a <code>scl.bout</code> table reference

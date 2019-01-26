@@ -1,7 +1,7 @@
 package com.lthummus.sclmanager.database.dao
 
 import com.lthummus.sclmanager.parsing.{Bout, BoutTypeEnum}
-import com.lthummus.sclmanager.servlets.dto.Draft
+import com.lthummus.sclmanager.servlets.dto.{Draft, Player}
 import org.jooq.{DSLContext, Record}
 import zzz.generated.Tables
 import zzz.generated.tables.records.{BoutRecord, DraftRecord, GameRecord, PlayerRecord}
@@ -11,7 +11,7 @@ import scalaz._
 import Scalaz._
 
 
-case class FullBoutRecord(bout: BoutRecord, games: List[GameRecord], playerMap: Map[String, PlayerRecord], draft: Option[Draft])
+case class FullBoutRecord(bout: BoutRecord, games: List[GameRecord], playerMap: Map[String, Player], draft: Option[Draft])
 
 object BoutDao {
 
@@ -107,7 +107,7 @@ object BoutDao {
       player2 <- PlayerDao.getByPlayerName(matchData.getPlayer2) \/> s"No player found with id ${matchData.getPlayer2}"
       gameList = GameDao.getGameRecordsByBoutId(boutId)
       draft = Draft.fromDatabaseRecord(matchRes.into(Tables.DRAFT))
-    } yield FullBoutRecord(matchData, gameList, Map(player1.getName -> player1, player2.getName -> player2), draft)
+    } yield FullBoutRecord(matchData, gameList, Map(player1.name -> player1, player2.name -> player2), draft)
   }
 
   def getBoutData(boutId: Int)(implicit dslContext: DSLContext): String \/ Bout = {

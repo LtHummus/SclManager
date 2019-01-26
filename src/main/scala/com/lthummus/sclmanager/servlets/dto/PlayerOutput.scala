@@ -1,7 +1,14 @@
 package com.lthummus.sclmanager.servlets.dto
 
-import zzz.generated.tables.records.PlayerRecord
+import zzz.generated.tables.records.{DivisionRecord, PlayerRecord}
 
+case class SimplePlayer(name: String, country: String)
+
+object SimplePlayer {
+  def fromPlayer(record: Player): SimplePlayer = {
+    SimplePlayer(record.name, record.country)
+  }
+}
 
 case class Player(divisionName: String, name: String, country: String, wins: Int, draws: Int, losses: Int, matchesPlayed: Int, score: Int, matches: Option[List[Match]]) extends Ordered[Player] {
   override def compare(that: Player): Int = {
@@ -17,26 +24,33 @@ case class Player(divisionName: String, name: String, country: String, wins: Int
       this.name.compare(that.name)
     }
   }
+
+  def asSimplePlayer: SimplePlayer = SimplePlayer(name, country)
+  def withMatches(matches: Option[List[Match]]): Player = copy(matches = matches)
 }
 
 
 
 object Player {
-  implicit class RichPlayer(player: PlayerRecord) {
-    def getScore = 2 * player.getWins + player.getDraws
-    def matchesPlayed = player.getWins + player.getDraws + player.getLosses
+
+  def fromDatabaseRecord(playerRecord: PlayerRecord, divisionRecord: DivisionRecord, matches: Option[List[Match]] = None): Player = {
+    val matchesPlayed = playerRecord.getWins + playerRecord.getLosses + playerRecord.getDraws
+    val score = playerRecord.getWins * divisionRecord.getWinPoints +
+      playerRecord.getDraws * divisionRecord.getDrawPoints +
+      playerRecord.getLosses * divisionRecord.getLossPoints
+
+    Player(playerRecord.getDivision,
+      playerRecord.getName,
+      playerRecord.getCountry,
+      playerRecord.getWins,
+      playerRecord.getDraws,
+      playerRecord.getLosses,
+      matchesPlayed,
+      score,
+      matches)
   }
 
-  def fromDatabaseRecord(record: PlayerRecord, matches: Option[List[Match]] = None) =
-    Player(record.getDivision,
-      record.getName,
-      record.getCountry,
-      record.getWins,
-      record.getDraws,
-      record.getLosses,
-      record.matchesPlayed,
-      record.getScore,
-      matches)
+
 
   def sortByScore(p1: Player, p2: Player): Boolean = p1.score > p2.score
 

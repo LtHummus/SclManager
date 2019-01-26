@@ -29,7 +29,7 @@ class PlayerServlet(implicit dslContext: DSLContext, val swagger: Swagger) exten
 
     PlayerDao.getByPlayerName(name) match {
       case None => NotFound(ErrorMessage(s"No player with name $name found"))
-      case Some(player) => Ok(Player.fromDatabaseRecord(player))
+      case Some(player) => Ok(player)
     }
   }
 
@@ -46,11 +46,11 @@ class PlayerServlet(implicit dslContext: DSLContext, val swagger: Swagger) exten
 
     val decoded = for {
       player <- playerRes
-      leaguePlayers = DivisionDao.getPlayersInDivision(player.getDivision)
-      playerMap = leaguePlayers.map(it => (it.getName, it)).toMap
-      matchRecords = BoutDao.getMatchesForPlayer(player.getName)
+      leaguePlayers = PlayerDao.getPlayersInDivision(player.divisionName)
+      playerMap = leaguePlayers.map(it => (it.name, it)).toMap
+      matchRecords = BoutDao.getMatchesForPlayer(player.name)
       matches = matchRecords.map(m => Match.fromDatabaseRecordWithGames(m, GameDao.getGameRecordsByBoutId(m.getId), playerMap, None))
-    } yield Player.fromDatabaseRecord(player, Some(matches))
+    } yield player.withMatches(Some(matches))
 
     decoded match {
       case None => NotFound(ErrorMessage(s"No player with id $name found"))

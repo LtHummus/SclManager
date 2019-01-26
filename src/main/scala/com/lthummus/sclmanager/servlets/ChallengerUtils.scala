@@ -3,7 +3,7 @@ package com.lthummus.sclmanager.servlets
 import com.lthummus.sclmanager.SclManagerStack
 import com.lthummus.sclmanager.database.TransactionSupport
 import com.lthummus.sclmanager.database.dao.DivisionDao._
-import com.lthummus.sclmanager.database.dao.{BoutDao, DivisionDao}
+import com.lthummus.sclmanager.database.dao.{BoutDao, DivisionDao, PlayerDao}
 import com.lthummus.sclmanager.scaffolding.SclManagerConfig
 import com.lthummus.sclmanager.servlets.dto.NewMatchesInput
 import com.typesafe.config.ConfigFactory
@@ -54,7 +54,7 @@ class ChallengerUtils(implicit dslContext: DSLContext, val swagger: Swagger)
     val data = parsedBody.extract[NewMatchesInput]
 
     val matchesToAdd = data.matchPairs
-    val divisionPlayers = DivisionDao.getPlayersInDivision(data.effectiveDivision).map(_.getName).toSet
+    val divisionPlayers = PlayerDao.getPlayersInDivision(data.effectiveDivision).map(_.name).toSet
     val requestedPlayers = matchesToAdd.flatMap{case (a, b) => List(a, b)}.toSet
 
     val unknownPlayers = requestedPlayers -- divisionPlayers

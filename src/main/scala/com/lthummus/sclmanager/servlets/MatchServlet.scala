@@ -104,8 +104,8 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
       for {
         player1   <- PlayerDao.getByPlayerName(bout.player1) \/> s"No player found with name ${bout.player1}"
         player2   <- PlayerDao.getByPlayerName(bout.player2) \/> s"No player found with name ${bout.player2}"
-        boutObj   <- BoutDao.getNextToBePlayedByPlayers(player1.getName, player2.getName) \/> s"No match found between these players"
-        draft     =  DraftDao.getLatestUnusedDraftForPlayer(Seq(player1.getName, player2.getName))
+        boutObj   <- BoutDao.getNextToBePlayedByPlayers(player1.name, player2.name) \/> s"No match found between these players"
+        draft     =  DraftDao.getLatestUnusedDraftForPlayer(Seq(player1.name, player2.name))
         updateRes <- updateScores(bout, bout.orderedReplays.map(_.toDatabase(boutObj.getId)), url, draft)
       } yield updateRes
     }
@@ -204,7 +204,7 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
 
   get("/bulk") {
     val players = PlayerDao.all()
-    val everything = BoutDao.getAll().map(Match.fromDatabaseRecordWithGames(_, List(), players.map(it => (it.getName, it)).toMap, None))
+    val everything = BoutDao.getAll().map(Match.fromDatabaseRecordWithGames(_, List(), players.map(it => (it.name, it)).toMap, None))
     val ids = everything.map(_.id)
 
     Ok(ids.map(curr => {
@@ -222,7 +222,7 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
   get("/week/:week", operation(getByWeek)) {
     val week = Math.min(params("week").toInt, 10)
     val players = PlayerDao.all()
-    Ok(BoutDao.getByWeek(week).map(m => Match.fromDatabaseRecordWithGames(m, GameDao.getGameRecordsByBoutId(m.getId), players.map(it => (it.getName, it)).toMap, None)))
+    Ok(BoutDao.getByWeek(week).map(m => Match.fromDatabaseRecordWithGames(m, GameDao.getGameRecordsByBoutId(m.getId), players.map(it => (it.name, it)).toMap, None)))
   }
 
   get("/next/:player1/:player2") {
@@ -235,7 +235,7 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
     val result = for {
       player1Obj <- player1Res
       player2Obj <- player2Res
-      matchObj <- BoutDao.getNextToBePlayedByPlayers(player1Obj.getName, player2Obj.getName)
+      matchObj <- BoutDao.getNextToBePlayedByPlayers(player1Obj.name, player2Obj.name)
     } yield (matchObj, player1Obj, player2Obj)
 
     result match {
@@ -244,7 +244,7 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
         val m = it._1
         val p1 = it._2
         val p2 = it._3
-        val playerMap = Map(p1.getName -> p1, p2.getName -> p2)
+        val playerMap = Map(p1.name -> p1, p2.name -> p2)
         Ok(Match.fromDatabaseRecordWithGames(m, List(), playerMap, None))
     }
   }
@@ -274,7 +274,7 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
 
   get("/all", operation(getAll)) {
     val players = PlayerDao.all()
-    Ok(BoutDao.getAll().map(Match.fromDatabaseRecordWithGames(_, List(), players.map(it => (it.getName, it)).toMap, None)))
+    Ok(BoutDao.getAll().map(Match.fromDatabaseRecordWithGames(_, List(), players.map(it => (it.name, it)).toMap, None)))
   }
 
 

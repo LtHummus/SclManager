@@ -132,7 +132,7 @@ private object LeagueGenerator extends App {
   private def persistLeagueData(league: League, matches: Seq[List[(Player, Player)]]) = {
     //step 1: create the league
 
-    val leagueRecord = new DivisionRecord(league.name, league.order)
+    val leagueRecord = new DivisionRecord(league.name, league.order, false, 0.toByte, 0.toByte, 0.toByte)
     Db.executeInsert(leagueRecord)
 
     //step 2: insert the players

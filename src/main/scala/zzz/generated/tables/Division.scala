@@ -4,6 +4,7 @@
 package zzz.generated.tables
 
 
+import java.lang.Boolean
 import java.lang.Class
 import java.lang.Integer
 import java.lang.String
@@ -62,6 +63,26 @@ class Division(alias : String, aliased : Table[DivisionRecord], parameters : Arr
    * The column <code>scl.division.precedence</code>.
    */
   val PRECEDENCE : TableField[DivisionRecord, Integer] = createField("precedence", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), "")
+
+  /**
+   * The column <code>scl.division.secret</code>.
+   */
+  val SECRET : TableField[DivisionRecord, Boolean] = createField("secret", org.jooq.impl.SQLDataType.BIT.nullable(false).defaultValue(org.jooq.impl.DSL.inline("b'0'", org.jooq.impl.SQLDataType.BIT)), "")
+
+  /**
+   * The column <code>scl.division.win_points</code>.
+   */
+  val WIN_POINTS : TableField[DivisionRecord, Integer] = createField("win_points", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.inline("2", org.jooq.impl.SQLDataType.INTEGER)), "")
+
+  /**
+   * The column <code>scl.division.draw_points</code>.
+   */
+  val DRAW_POINTS : TableField[DivisionRecord, Integer] = createField("draw_points", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.inline("1", org.jooq.impl.SQLDataType.INTEGER)), "")
+
+  /**
+   * The column <code>scl.division.loss_points</code>.
+   */
+  val LOSS_POINTS : TableField[DivisionRecord, Integer] = createField("loss_points", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), "")
 
   /**
    * Create a <code>scl.division</code> table reference

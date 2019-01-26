@@ -62,20 +62,12 @@ case class Game(id: Int,
   }
 }
 
-case class SimplePlayer(name: String, country: String)
-
-object SimplePlayer {
-  def fromDatabaseRecord(record: PlayerRecord): SimplePlayer = {
-    SimplePlayer(record.getName, record.getCountry)
-  }
-}
-
 case class MatchList(matches: Seq[Match])
 
 object Match {
-  def fromDatabaseRecordWithGames(record: Record, games: List[GameRecord], playerMap: Map[String, PlayerRecord], draft: Option[Draft]): Match = {
+  def fromDatabaseRecordWithGames(record: Record, games: List[GameRecord], playerMap: Map[String, Player], draft: Option[Draft]): Match = {
     val boutRecord: BoutRecord = record.into(Tables.BOUT)
-    val gameList = games.map(Game.fromDatabaseRecord(_, playerMap))
+    val gameList = games.map(Game.fromDatabaseRecord)
     val packagedMatchUrl = Option(boutRecord.getMatchUrl)
 
     val maybeBout = gameList.size match {
@@ -110,8 +102,8 @@ object Match {
     Match(boutRecord.getId,
       boutRecord.getWeek,
       boutRecord.getDivision,
-      SimplePlayer.fromDatabaseRecord(playerMap(boutRecord.getPlayer1)),
-      SimplePlayer.fromDatabaseRecord(playerMap(boutRecord.getPlayer2)),
+      playerMap(boutRecord.getPlayer1).asSimplePlayer,
+      playerMap(boutRecord.getPlayer2).asSimplePlayer,
       boutRecord.getStatus,
       BoutTypeEnum.fromInt(boutRecord.getBoutType).toString,
       Some(gameList),
@@ -127,7 +119,7 @@ object Match {
 }
 
 object Game {
-  def fromDatabaseRecord(record: GameRecord, playerMap: Map[String, PlayerRecord]): Game = {
+  def fromDatabaseRecord(record: GameRecord): Game = {
     val gameResult = GameResultEnum.fromInt(record.getResult) match {
       case -\/(error) => error
       case \/-(res) => res.toString

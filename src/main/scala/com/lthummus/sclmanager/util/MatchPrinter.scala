@@ -23,12 +23,12 @@ object MatchPrinter extends App {
   val endDayWeekOne = new DateTime(2017, 5, 19, 12, 0)
 
   val players = PlayerDao.all()
-  val playerMap = players.map(it => (it.getName, it)).toMap
+  val playerMap = players.map(it => (it.name, it)).toMap
   val divisions = DivisionDao.all().sortBy(_.getPrecedence)
   for (week <- 1 to 10) {
-    val bouts = BoutDao.getByWeek(week).map(m => Match.fromDatabaseRecordWithGames(m, GameDao.getGameRecordsByBoutId(m.getId), players.map(it => (it.getName, it)).toMap, None))
+    val bouts = BoutDao.getByWeek(week).map(m => Match.fromDatabaseRecordWithGames(m, GameDao.getGameRecordsByBoutId(m.getId), players.map(it => (it.name, it)).toMap, None))
 
-    val boutsWithDivision = bouts.groupBy(it => playerMap(it.player1.name).getDivision)
+    val boutsWithDivision = bouts.groupBy(it => playerMap(it.player1.name).divisionName)
 
     println(s"[center][b][color=#0000FF][size=150]Week $week[/size][/color][/b][/center]")
     println(s"[center][b][color=#0000FF]${formatWeek(firstDayWeekOne.plusWeeks(week - 1), endDayWeekOne.plusWeeks(week - 1))}[/color][/b][/center]")

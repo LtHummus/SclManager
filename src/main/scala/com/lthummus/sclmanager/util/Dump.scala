@@ -18,7 +18,7 @@ object Dump extends App {
   implicit val dslContext: DSLContext = DatabaseConfigurator.getDslContext
 
   val players = PlayerDao.all()
-  val everything = BoutDao.getAll().map(Match.fromDatabaseRecordWithGames(_, List(), players.map(it => (it.getName, it)).toMap, None))
+  val everything = BoutDao.getAll().map(Match.fromDatabaseRecordWithGames(_, List(), players.map(it => (it.name, it)).toMap, None))
   val ids = everything.map(_.id)
 
   val records = ids.map(curr => {
