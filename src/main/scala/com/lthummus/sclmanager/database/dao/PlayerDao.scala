@@ -28,7 +28,13 @@ object PlayerDao {
   }
 
   def getPlayersInDivision(name: String)(implicit dslContext: DSLContext): List[Player] = {
-    dslContext.selectFrom(Tables.PLAYER).where(Tables.PLAYER.DIVISION.eq(name)).fetch().asScala.toList.map(toPlayer)
+    dslContext
+      .selectFrom(Tables.PLAYER.join(Tables.DIVISION).on(Tables.DIVISION.NAME.eq(Tables.PLAYER.DIVISION)))
+      .where(Tables.PLAYER.DIVISION.eq(name))
+      .fetch()
+      .asScala
+      .toList
+      .map(toPlayer)
   }
 
   def getByPlayerName(name: String)(implicit dslContext: DSLContext): Option[Player] = {

@@ -19,8 +19,4 @@ object SclManagerConfig {
 
   def debugMode: Boolean = sys.env.get("SCL_DEBUG").exists(_.toBoolean)
 
-  def pointsForWin: Int = Config.getInt("tournament.pointsPerWin")
-  def pointsForLoss: Int = Config.getInt("tournament.pointsPerLoss")
-  def pointsForDraw: Int = Config.getInt("tournament.pointsPerDraw")
-
 }
