@@ -15,7 +15,7 @@ case class FullBoutRecord(bout: Record, games: List[GameRecord], playerMap: Map[
 
 object BoutDao {
 
-  def getAll()(implicit dslContext: DSLContext) = dslContext.selectFrom(Tables.BOUT).fetch().toList
+  def getAll()(implicit dslContext: DSLContext): List[BoutRecord] = dslContext.selectFrom(Tables.BOUT).fetch().toList
 
   def getNormalizedMatchesByDivision(division: String)(implicit dslContext: DSLContext): List[(String, String)] = {
     val rawBoutRecords = dslContext
@@ -77,7 +77,7 @@ object BoutDao {
   }
 
 
-  def getNextToBePlayedByPlayers(player1: String, player2: String)(implicit dslContext: DSLContext) = {
+  def getNextToBePlayedByPlayers(player1: String, player2: String)(implicit dslContext: DSLContext): Option[BoutRecord] = {
     val res1 = dslContext
       .selectFrom(Tables.BOUT)
       .where(Tables.BOUT.PLAYER1.eq(player1))
