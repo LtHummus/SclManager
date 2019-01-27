@@ -1,7 +1,7 @@
 version: '3'
 services:
   sclmanager:
-    build: .
+    image: sclmanager
     environment:
       - "PORT=8082"
       - "DATABASE_URL=jdbc:mysql://db:3306/scl?useSSL=false"
@@ -14,6 +14,8 @@ services:
       - "SCL_DEBUG=true"
     ports:
       - 8082:8082
+    volumes:
+      - ./static:/static
     depends_on:
       - db
 
