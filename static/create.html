@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body class="container">
+<div class="wrap">
+    <h2>New Match Creation</h2>
+</div>
+
+<p>Don't look at this if you don't have permissions</p>
+
+<form id="swiss_form">
+    <br />Division: <select name="division" id="division"></select><br /><br />
+    Week number: <input type="text" name="week" id="week" />
+    Match data (put each match on one line, comma separate the players):
+    <textarea name="matches" id="matches" cols="80" rows="24"></textarea><br />
+    Password: <input type="password" id="pass" />
+    <br /><br /><br />
+    <p id="error-text" style="color: red"></p>
+    <p id="success-text" style="color: darkgreen"></p>
+    When you're happy with the results: smash this button. <input type="button" value="Create matches" onclick="submitMatches()"/>
+</form>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script>
+    $(document).ready(function() {
+        $.get('/api/league', function(data) {
+            var divisionNames = data['list']['leagues'].map(function(x) { return x.name; }).reverse();
+            divisionNames.forEach(function(x) {
+                $('#division').append('<option value="' + x + '">' + x + '</option');
+            });
+        });
+    });
+
+    var initialFillIn = function() {
+        var divisionName = $('#division').val();
+        $.get('/api/challenger/swiss/' + divisionName, function(data) {
+            $('#whatever').val(JSON.stringify(data, null, 2));
+            $('#matches').val(data['matches'].join('\n') + "\n" + data['inactive_matches'].join('\n'));
+        })
+    };
+
+    var submitMatches = function() {
+        $('#success-text').text('');
+        $('#error-text').text('');
+
+        var divisionName = $('#division').val();
+        var week = $('#week').val();
+        var matchData = $('#matches').val();
+
+        if (week === '' || week == undefined) {
+            $('#error-text').text("No week specified");
+            return;
+        }
+
+        if (matchData === '' || matchData == undefined) {
+            $('#error-text').text("No matches specified");
+            return;
+        }
+
+        var data = {
+            'division': divisionName,
+            'week': parseInt(week),
+            'matches': matchData,
+            'password': $('#pass').val()
+        };
+
+        console.log(data);
+
+        $.ajax({
+            type: 'POST',
+            url: '/api/challenger/create',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function(res) {
+                console.log(res);
+                var numCreated = res['records_created'];
+                $('#success-text').text('Success! Created ' + numCreated + ' matches');
+            },
+            error: function(res) {
+                console.log(res);
+                var responseText = res['responseJSON'];
+                var errorText = "Error: " + responseText['error'] + ": " + responseText['detail'];
+                $('#error-text').text(errorText);
+            }
+        })
+    };
+</script>
+
+</body>
+</html>
