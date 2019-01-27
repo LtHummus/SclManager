@@ -56,11 +56,8 @@ object SclManagerBuild extends Build {
         "mysql" % "mysql-connector-java" % "5.1.46",
         "com.zaxxer" % "HikariCP" % "2.4.6",
 
-        // configuration
-        "com.typesafe" % "config" % "1.3.0",
-
         //aws
-        "com.amazonaws" % "aws-java-sdk" % "1.11.39",
+        "com.amazonaws" % "aws-java-sdk-s3" % "1.11.490",
 
         //dates are garbage
         "com.github.nscala-time" %% "nscala-time" % "2.16.0"

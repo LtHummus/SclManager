@@ -3,8 +3,6 @@ package com.lthummus.sclmanager.util
 import com.lthummus.sclmanager.database.DatabaseConfigurator
 import com.lthummus.sclmanager.database.dao.{DraftDao, GameDao}
 import com.lthummus.sclmanager.parsing.GameResultEnum
-import com.lthummus.sclmanager.servlets.dto.Game
-import com.typesafe.config.ConfigFactory
 import org.jooq.DSLContext
 import org.json4s._
 import org.json4s.jackson.Serialization.read

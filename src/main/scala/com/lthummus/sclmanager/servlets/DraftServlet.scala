@@ -4,7 +4,6 @@ import com.lthummus.sclmanager.SclManagerStack
 import com.lthummus.sclmanager.database.dao.DraftDao
 import com.lthummus.sclmanager.scaffolding.SclManagerConfig
 import com.lthummus.sclmanager.servlets.dto.DraftInput
-import com.typesafe.config.ConfigFactory
 import org.jooq.DSLContext
 import org.json4s.ext.JodaTimeSerializers
 import org.json4s.{DefaultFormats, Formats}

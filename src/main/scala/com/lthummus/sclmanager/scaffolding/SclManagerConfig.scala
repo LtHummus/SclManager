@@ -1,10 +1,6 @@
 package com.lthummus.sclmanager.scaffolding
 
-import com.typesafe.config.ConfigFactory
-
 object SclManagerConfig {
-
-  private val Config = ConfigFactory.load()
 
   def databaseUrl: String = sys.env("DATABASE_URL")
   def databaseUsername: String = sys.env("DATABASE_USER")

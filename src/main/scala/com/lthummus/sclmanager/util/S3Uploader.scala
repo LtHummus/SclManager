@@ -1,12 +1,9 @@
 package com.lthummus.sclmanager.util
 
 import java.io.ByteArrayInputStream
-import java.net.URLEncoder
 
-import com.amazonaws.auth.{AWSCredentials, AWSCredentialsProvider}
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.{Bucket, ObjectMetadata}
-import com.typesafe.config.ConfigFactory
 import org.slf4j.{Logger, LoggerFactory}
 import scalaz._
 import Scalaz._
@@ -14,8 +11,6 @@ import com.lthummus.sclmanager.scaffolding.SclManagerConfig
 
 
 class S3Uploader {
-  private val config = ConfigFactory.load()
-
   private val S3 = new AmazonS3Client()
 
   private val BucketName = SclManagerConfig.s3BucketName

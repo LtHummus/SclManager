@@ -9,7 +9,6 @@ import com.lthummus.sclmanager.parsing._
 import com.lthummus.sclmanager.scaffolding.SclManagerConfig
 import com.lthummus.sclmanager.servlets.dto._
 import com.lthummus.sclmanager.util.S3Uploader
-import com.typesafe.config.ConfigFactory
 import org.apache.commons.io.FilenameUtils
 import org.jooq.DSLContext
 import org.json4s.ext.JodaTimeSerializers

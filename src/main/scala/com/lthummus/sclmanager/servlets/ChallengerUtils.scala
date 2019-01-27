@@ -6,7 +6,6 @@ import com.lthummus.sclmanager.database.dao.DivisionDao._
 import com.lthummus.sclmanager.database.dao.{BoutDao, DivisionDao, PlayerDao}
 import com.lthummus.sclmanager.scaffolding.SclManagerConfig
 import com.lthummus.sclmanager.servlets.dto.NewMatchesInput
-import com.typesafe.config.ConfigFactory
 import org.jooq.DSLContext
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.json.JacksonJsonSupport
