@@ -1,7 +1,7 @@
 version: '3'
 services:
   sclmanager:
-    image: sclmanager
+    image: lthummus/sclmanager:latest
     environment:
       - "PORT=8082"
       - "DATABASE_URL=jdbc:mysql://db:3306/scl?useSSL=false"
