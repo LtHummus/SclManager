@@ -112,7 +112,7 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
   }
 
   private def generateFilename(originalName: String, bout: Bout, record: BoutRecord) = {
-    f"SCL Season 4 - Week ${record.getWeek.toInt}%02d - ${record.getDivision} - ${bout.player1} vs ${bout.player2}.${FilenameUtils.getExtension(originalName)}"
+    f"SCL Season ${SclManagerConfig.sclSeasonNumber} - Week ${record.getWeek.toInt}%02d - ${record.getDivision} - ${bout.player1} vs ${bout.player2}.${FilenameUtils.getExtension(originalName)}"
   }
 
   private def patchIfNecessary(zipBytes: Array[Byte], nameChanges: Map[String, String], oldReplays: List[Replay]): String \/ List[Replay] = {
