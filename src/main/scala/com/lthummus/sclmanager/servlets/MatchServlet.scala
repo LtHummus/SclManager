@@ -219,7 +219,7 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
     parameter pathParam[String]("week").description("the week number to get"))
 
   get("/week/:week", operation(getByWeek)) {
-    val week = Math.min(params("week").toInt, 10)
+    val week = Math.min(params("week").toInt, 13)
     val players = PlayerDao.all()
     Ok(BoutDao.getByWeek(week).map(m => {
       Match.fromDatabaseRecordWithGames(m, GameDao.getGameRecordsByBoutId(m.into(Tables.BOUT).getId), players.map(it => (it.name, it)).toMap, None)
