@@ -13,6 +13,9 @@ object SclManagerConfig {
   def port: Int = sys.env("PORT").toInt
   def webroot: String = sys.env("WEBROOT")
 
+  def s3AccessKey: String = sys.env("AWS_ACCESS_KEY_ID")
+  def s3SecretKey: String = sys.env("AWS_SECRET_ACCESS_KEY")
+
   def debugMode: Boolean = sys.env.get("SCL_DEBUG").exists(_.toBoolean)
 
 }
