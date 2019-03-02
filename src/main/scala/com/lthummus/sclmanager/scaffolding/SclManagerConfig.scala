@@ -17,6 +17,7 @@ object SclManagerConfig {
   def s3SecretKey: String = sys.env("AWS_SECRET_ACCESS_KEY")
 
   def sclSeasonNumber: Int = sys.env("SCL_SEASON_NUMBER").toInt
+  def seasonLength: Int = sys.env("SCL_SEASON_LENGTH").toInt
 
   def debugMode: Boolean = sys.env.get("SCL_DEBUG").exists(_.toBoolean)
 
