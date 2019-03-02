@@ -32,16 +32,14 @@ class LeagueServlet(implicit dslContext: DSLContext, val swagger: Swagger) exten
     val leagues = leagueDatabaseRecords.map(
       l => {
         val games = if (l.getSecret) {
-          playerDatabaseRecords(l.getName).map(_.sanitize)
+          playerDatabaseRecords.getOrElse(l.getName, List()).map(_.sanitize)
         } else {
-          playerDatabaseRecords(l.getName)
+          playerDatabaseRecords.getOrElse(l.getName, List())
         }
         League.fromDatabaseRecord(l, games)
       }
 
     ).sorted
-
-
 
     Ok(LeagueOverview(LeagueList(leagues)))
   }
