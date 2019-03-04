@@ -8,7 +8,7 @@ import com.lthummus.sclmanager.database.dao.{BoutDao, DraftDao, GameDao, PlayerD
 import com.lthummus.sclmanager.parsing._
 import com.lthummus.sclmanager.scaffolding.SclManagerConfig
 import com.lthummus.sclmanager.servlets.dto._
-import com.lthummus.sclmanager.util.S3Uploader
+import com.lthummus.sclmanager.util.{DiscordPoster, S3Uploader}
 import org.apache.commons.io.FilenameUtils
 import org.jooq.DSLContext
 import org.json4s.ext.JodaTimeSerializers
@@ -177,7 +177,10 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
       case \/-(boutId) =>
         BoutDao.getFullBoutRecords(boutId) match {
           case -\/(error) => InternalServerError(ErrorMessage(error))
-          case \/-(it)    => Ok(Match.fromDatabaseRecordWithGames(it.bout, it.games, it.playerMap, it.draft))
+          case \/-(it)    =>
+            val fullData = Match.fromDatabaseRecordWithGames(it.bout, it.games, it.playerMap, it.draft)
+            DiscordPoster.post(fullData)
+            Ok(fullData)
         }
     }
   }
@@ -260,6 +263,17 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
     bout match {
       case -\/(error) => BadRequest(ErrorMessage(error))
       case \/-(it)    => Ok(Match.fromDatabaseRecordWithGames(it.bout, it.games, it.playerMap, it.draft))
+    }
+  }
+
+  get("/:id/discord") {
+    val bout = BoutDao.getFullBoutRecords(params("id").toInt)
+
+    bout match {
+      case -\/(error) => BadRequest(ErrorMessage(error))
+      case \/-(it)    =>
+        val fullData = Match.fromDatabaseRecordWithGames(it.bout, it.games, it.playerMap, it.draft)
+        Ok(fullData.discordPost)
     }
   }
 

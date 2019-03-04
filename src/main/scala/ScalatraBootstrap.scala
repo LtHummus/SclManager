@@ -13,6 +13,7 @@ class ScalatraBootstrap extends LifeCycle {
 
   override def init(context: ServletContext) {
 //    context.mount(new SclManagerServlet, "/*")
+    context.mount(new DownloadServlet, "/download")
     context.mount(new LeagueServlet, "/api/league/*", "league")
     context.mount(new MatchServlet, "/api/match/*")
     context.mount(new PlayerServlet, "/api/player/*")

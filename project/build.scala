@@ -60,7 +60,10 @@ object SclManagerBuild extends Build {
         "com.amazonaws" % "aws-java-sdk-s3" % "1.11.490",
 
         //dates are garbage
-        "com.github.nscala-time" %% "nscala-time" % "2.16.0"
+        "com.github.nscala-time" %% "nscala-time" % "2.16.0",
+
+        //for discord postin'
+        "org.scalaj" %% "scalaj-http" % "2.4.1"
       )
     )
   ).enablePlugins(JettyPlugin)

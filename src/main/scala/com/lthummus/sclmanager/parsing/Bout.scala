@@ -83,6 +83,24 @@ case class Bout(replays: List[Replay], kind: BoutType) {
     internal(haystack, List())
   }
 
+  def getDiscordGameSummary: String = {
+    @tailrec def internal(games: List[Replay], buffer: String): String = {
+      if (games.isEmpty) {
+        buffer
+      } else {
+        val currentMapConfiguration = games.head.fullLevelName
+
+        //find all games that were played on this
+        val ourGames = getGamesForLayout(games, currentMapConfiguration)
+        val newBuffer = buffer + "**" +  currentMapConfiguration + "**\n" + getGameSummaryForManyGames(ourGames).replaceAll("<br />", "\n") + "\n\n"
+
+        internal(games.drop(ourGames.length), newBuffer)
+      }
+    }
+
+    internal(orderedReplays, "")
+  }
+
   def getForumGameSummary: String = {
     @tailrec def internal(games: List[Replay], buffer: String): String = {
       if (games.isEmpty) {

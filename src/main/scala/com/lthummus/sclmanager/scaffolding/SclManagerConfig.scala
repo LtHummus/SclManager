@@ -2,23 +2,27 @@ package com.lthummus.sclmanager.scaffolding
 
 object SclManagerConfig {
 
-  def databaseUrl: String = sys.env("DATABASE_URL")
-  def databaseUsername: String = sys.env("DATABASE_USER")
-  def databasePassword: String = sys.env("DATABASE_PASSWORD")
+  val databaseUrl: String = sys.env("DATABASE_URL")
+  val databaseUsername: String = sys.env("DATABASE_USER")
+  val databasePassword: String = sys.env("DATABASE_PASSWORD")
 
-  def s3BucketName: String = sys.env("S3_BUCKET")
-  def sharedSecret: String = sys.env("SHARED_SECRET")
-  def forfeitPassword: String = sys.env("FORFEIT_PASSWORD")
+  val s3BucketName: String = sys.env("S3_BUCKET")
+  val sharedSecret: String = sys.env("SHARED_SECRET")
+  val forfeitPassword: String = sys.env("FORFEIT_PASSWORD")
 
-  def port: Int = sys.env("PORT").toInt
-  def webroot: String = sys.env("WEBROOT")
+  val port: Int = sys.env("PORT").toInt
+  val webroot: String = sys.env("WEBROOT")
 
-  def s3AccessKey: String = sys.env("AWS_ACCESS_KEY_ID")
-  def s3SecretKey: String = sys.env("AWS_SECRET_ACCESS_KEY")
+  val s3AccessKey: String = sys.env("AWS_ACCESS_KEY_ID")
+  val s3SecretKey: String = sys.env("AWS_SECRET_ACCESS_KEY")
 
-  def sclSeasonNumber: Int = sys.env("SCL_SEASON_NUMBER").toInt
-  def seasonLength: Int = sys.env("SCL_SEASON_LENGTH").toInt
+  val sclSeasonNumber: Int = sys.env("SCL_SEASON_NUMBER").toInt
+  val seasonLength: Int = sys.env("SCL_SEASON_LENGTH").toInt
 
-  def debugMode: Boolean = sys.env.get("SCL_DEBUG").exists(_.toBoolean)
+  val discordResultsWebhook: String = sys.env("DISCORD_RESULTS_WEBHOOK")
+
+  val serverHost: String = sys.env("SERVER_HOST")
+
+  val debugMode: Boolean = sys.env.get("SCL_DEBUG").exists(_.toBoolean)
 
 }
