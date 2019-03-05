@@ -120,7 +120,7 @@ object Match {
     }
 
     val discordPost = maybeBout.map(bout =>
-      s"""**Results for $player1FlagEmoji${bout.player1} v. $player2FlagEmoji${bout.player2} (Week ${boutRecord.getWeek} - $emojiId)**
+      s"""**Results for $player1FlagEmoji${boutRecord.getPlayer1} v. $player2FlagEmoji${boutRecord.getPlayer2} (Week ${boutRecord.getWeek} - $emojiId)**
          |${draft.map(_.asDiscordPost).getOrElse("Draft Data Unavailable :sweat:")}
          |||${bout.getScoreLine}
          |
