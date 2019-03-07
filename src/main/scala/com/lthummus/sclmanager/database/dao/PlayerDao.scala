@@ -38,7 +38,7 @@ object PlayerDao {
   }
 
   def getByPlayerName(name: String)(implicit dslContext: DSLContext): Option[Player] = {
-    Some(dslContext
+    Option(dslContext
       .selectFrom(Tables.PLAYER.join(Tables.DIVISION).on(Tables.PLAYER.DIVISION.eq(Tables.DIVISION.NAME)))
       .where(Tables.PLAYER.NAME.eq(name))
       .fetchOne())

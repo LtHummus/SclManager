@@ -19,7 +19,9 @@ object DraftDao {
   }
 
   private def translateSinglePlayerName(x: String)(implicit dslContext: DSLContext): String = {
-    if (x.endsWith("steam")) {
+    if (x.endsWith("/steam") && PlayerDao.getByPlayerName(x.dropRight(6)).isDefined) {
+      x.dropRight(6)
+    } else if (x.endsWith("steam")) {
       PlayerDao.getPlayerFromReplayName(x).getOrElse(x)
     } else {
       x
