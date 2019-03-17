@@ -43,10 +43,10 @@ object DraftDao {
     if (translations.forall{ case (a, b) => a == b}) {
       payload //no patching necessary
     } else {
-      val newFirstSpyName = translations(payload.firstSpy)
-      val newStartPlayerName = translations(payload.startPlayer)
-      val newBannedMaps = payload.bannedMaps.map(x => x.copy(picker = translations(x.picker)))
-      val newPickedMaps = payload.pickedMaps.map(x => x.copy(picker = translations(x.picker)))
+      val newFirstSpyName = translations(payload.firstSpy.toLowerCase)
+      val newStartPlayerName = translations(payload.startPlayer.toLowerCase)
+      val newBannedMaps = payload.bannedMaps.map(x => x.copy(picker = translations(x.picker.toLowerCase)))
+      val newPickedMaps = payload.pickedMaps.map(x => x.copy(picker = translations(x.picker.toLowerCase)))
 
       DraftPayload(newBannedMaps, newPickedMaps, newStartPlayerName, newFirstSpyName)
     }
