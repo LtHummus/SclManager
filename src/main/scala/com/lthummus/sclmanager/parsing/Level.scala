@@ -47,7 +47,8 @@ object Level {
     Level("Gallery", 1903409343),
     Level("Terrace", -1875718622),
     Level("Moderne", 775418203),
-    Level("Teien", 2044698831)
+    Level("Teien", 2044698831),
+    Level("Aquarium", -1729864295)
   )
 
   def getLevelByName(name: String): String \/ Level = {

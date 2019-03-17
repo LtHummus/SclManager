@@ -36,6 +36,7 @@ object BoutTypeEnum {
 
     override def hasOvertime(player1Score: Int, player2Score: Int): Boolean = false
   }
+
   case object Promotion extends BoutType("Promotion", 1) {
     override def isComplete(player1Score: Int, player2Score: Int): Boolean = {
       sortedScores(player1Score, player2Score) match {
@@ -74,6 +75,19 @@ object BoutTypeEnum {
 
   case object LeagueChampionship extends BoutType("League Championship", 3) {
     override def isComplete(player1Score: Int, player2Score: Int): Boolean = true
+
+    override def hasOvertime(player1Score: Int, player2Score: Int): Boolean = false
+  }
+
+  case object Shortened extends BoutType("Shortened", 4) {
+    //this exists because one match, a player surrendered down 6-0
+    override def isComplete(player1Score: Int, player2Score: Int): Boolean = {
+      sortedScores(player1Score, player2Score) match {
+        case _ :: winner :: _ if winner == 6                   => true
+        case loser :: winner :: _ if winner == 5 && loser == 5 => true
+        case _ => false
+      }
+    }
 
     override def hasOvertime(player1Score: Int, player2Score: Int): Boolean = false
   }
