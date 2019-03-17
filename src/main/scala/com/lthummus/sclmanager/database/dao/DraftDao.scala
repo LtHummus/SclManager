@@ -73,7 +73,7 @@ object DraftDao {
     res.size() match {
       case 0 => None
       case 1 => Some(res(0))
-      case _ => ???
+      case _ => throw new Exception(s"More than one draft for id $id")
     }
   }
 

@@ -58,7 +58,7 @@ case class Game(id: Int,
     } yield Replay(spy, sniper, timestamp, parsedResult, parsedLevel, parsedGameType, sequence, uuid, -1, startDurationSeconds, guests)
 
     disjointReplay match {
-      case -\/(s) => println(s); ???
+      case -\/(s) => throw new Exception(s"Unable to parse match: $s")
       case \/-(replay) => replay
     }
   }

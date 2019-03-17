@@ -21,7 +21,8 @@ object BoutTypeEnum {
       case 1 => Promotion
       case 2 => Relegation
       case 3 => LeagueChampionship
-      case _ => ???
+      case 4 => Shortened
+      case _ => throw new Exception(s"Unknown BoutType $x")
     }
   }
 
