@@ -17,6 +17,7 @@ import org.scalatra._
 import org.scalatra.json.JacksonJsonSupport
 import org.scalatra.servlet.{FileUploadSupport, MultipartConfig}
 import org.scalatra.swagger.{Swagger, SwaggerSupport}
+import org.slf4j.LoggerFactory
 import scalaz.Scalaz._
 import scalaz._
 import zzz.generated.Tables
@@ -25,7 +26,8 @@ import zzz.generated.tables.records.{BoutRecord, DraftRecord, GameRecord}
 import scala.util.Try
 
 object MatchServlet {
-  val Uploader = new S3Uploader()
+  private val Uploader = new S3Uploader()
+  private val Logger = LoggerFactory.getLogger("MatchServlet")
 }
 
 class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extends SclManagerStack with JacksonJsonSupport
@@ -129,7 +131,9 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
     } yield result
 
     result match {
-      case -\/(error) => BadRequest(ErrorMessage(error))
+      case -\/(error) =>
+        MatchServlet.Logger.warn("Error persisting bout. Got error {}", error)
+        BadRequest(ErrorMessage(error))
       case \/-(boutId) =>
         BoutDao.getFullBoutRecords(boutId) match {
           case -\/(error) => InternalServerError(ErrorMessage(error))
@@ -137,6 +141,7 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
             val fullData = Match.fromDatabaseRecordWithGames(it.bout, it.games, it.playerMap, it.draft)
             DiscordPoster.post(fullData)
             if (SclManagerConfig.enableSpypartyFans) SpypartyFansWebhook.postToWebhook(fullData)
+            MatchServlet.Logger.info("Successfully persisted bout {}", fullData.id)
             Ok(fullData)
         }
     }

@@ -4,7 +4,6 @@ import java.io.{BufferedInputStream, ByteArrayInputStream, DataInputStream, Inpu
 import java.util.zip.{ZipEntry, ZipInputStream}
 
 import com.lthummus.sclmanager.parsing.BoutTypeEnum.BoutType
-
 import scalaz._
 import Scalaz._
 import scala.util.Try
