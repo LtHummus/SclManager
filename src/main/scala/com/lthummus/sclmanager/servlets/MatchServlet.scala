@@ -84,6 +84,28 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
     }
   }
 
+  post("/:id/forceSpf") {
+    request.header("Authentication") match {
+      case Some(x) if x == SclManagerConfig.forfeitPassword => //nop
+      case _                                                => MatchServlet.Logger.warn("Invalid password. Stopping."); halt(Forbidden("No"))
+    }
+
+    val matchId = params("id").toInt
+
+    val fullData = for {
+      boutRecord <- BoutDao.getFullBoutRecords(matchId)
+    } yield {
+      Match.fromDatabaseRecordWithGames(boutRecord.bout, boutRecord.games, boutRecord.playerMap, boutRecord.draft)
+    }
+
+    fullData match {
+      case -\/(error) => BadRequest(s"Couldn't get that match. Error: $error")
+      case \/-(boutData) =>
+        SpypartyFansWebhook.postToWebhook(boutData)
+        Ok("result" -> "ok")
+    }
+  }
+
   val forfeit = (apiOperation[Map[String, String]]("forfeit")
     summary "Forfeit a match given the information provided"
     parameter bodyParam[MatchForfeitInput].description("information on the match to forfeit"))
