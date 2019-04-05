@@ -27,7 +27,9 @@ case class Player(divisionName: String, name: String, country: String, wins: Int
 
   def asSimplePlayer: SimplePlayer = SimplePlayer(name, country)
   def withMatches(matches: Option[List[Match]]): Player = copy(matches = matches)
-  def sanitize: Player = copy(wins = 0, losses = 0, draws = 0, score = 0, matches = None)
+
+  //we always define the list here...I don't _think_ that will break anything
+  def sanitize: Player = copy(wins = 0, losses = 0, draws = 0, score = 0, matches = Some(List()))
 }
 
 
