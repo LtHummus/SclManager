@@ -25,4 +25,7 @@ object SclManagerConfig {
 
   val debugMode: Boolean = sys.env.get("SCL_DEBUG").exists(_.toBoolean)
 
+  val enableSpypartyFans: Boolean = sys.env.get("ENABLE_SPYPARTY_FANS_HOOK").exists(_.toBoolean)
+  val spypartyFansHookUrl: String = sys.env("SPYPARTY_FANS_HOOK_URL")
+
 }
