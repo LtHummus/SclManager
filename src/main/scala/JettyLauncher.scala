@@ -12,7 +12,6 @@ object JettyLauncher {
 
   def main(args: Array[String]) {
     Logger.info("Hello world!")
-    Logger.info("Using log format {}", SclManagerConfig.logFormat)
 
     val port = SclManagerConfig.port
 
@@ -25,10 +24,16 @@ object JettyLauncher {
     server.setHandler(context)
 
 
-    val log = new Slf4jRequestLogWriter()
-    log.setLoggerName("Jetty")
+    if (SclManagerConfig.logEnable) {
+      Logger.info("Enabling request logging with log format {}", SclManagerConfig.logFormat)
+      val log = new Slf4jRequestLogWriter()
+      log.setLoggerName("Jetty")
+      server.setRequestLog(new CustomRequestLog(log, SclManagerConfig.logFormat))
+    } else {
+      Logger.info("Request logging disabled")
+    }
 
-    server.setRequestLog(new CustomRequestLog(log, SclManagerConfig.logFormat))
+
     server.start()
     server.join()
   }

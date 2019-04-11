@@ -31,5 +31,6 @@ object SclManagerConfig {
   val spypartyFansHookUrl: String = sys.env("SPYPARTY_FANS_HOOK_URL")
 
   val logFormat: String = sys.env.getOrElse("JETTY_LOG_FORMAT", CustomRequestLog.EXTENDED_NCSA_FORMAT)
+  val logEnable: Boolean = sys.env.get("JETTY_LOG_ENABLE").exists(_.toBoolean)
 
 }
