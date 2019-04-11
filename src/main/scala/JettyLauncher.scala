@@ -1,5 +1,6 @@
 import com.lthummus.sclmanager.scaffolding.SclManagerConfig
-import org.eclipse.jetty.server.Server
+import org.eclipse.jetty.server.handler.RequestLogHandler
+import org.eclipse.jetty.server.{CustomRequestLog, Server, Slf4jRequestLogWriter}
 import org.eclipse.jetty.servlet.DefaultServlet
 import org.eclipse.jetty.webapp.WebAppContext
 import org.scalatra.servlet.ScalatraListener
@@ -20,10 +21,13 @@ object JettyLauncher {
     context.setResourceBase(SclManagerConfig.webroot)
     context.addEventListener(new ScalatraListener)
     context.addServlet(classOf[DefaultServlet], "/")
-
     server.setHandler(context)
 
 
+    val log = new Slf4jRequestLogWriter()
+    log.setLoggerName("Jetty")
+
+    server.setRequestLog(new CustomRequestLog(log, CustomRequestLog.EXTENDED_NCSA_FORMAT))
     server.start()
     server.join()
   }

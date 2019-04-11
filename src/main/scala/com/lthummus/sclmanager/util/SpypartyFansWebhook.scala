@@ -29,7 +29,7 @@ object SpypartyFansWebhook {
       val res = req.asString
 
       if (!res.is2xx) {
-        Logger.warn("Got HTTP status code {} from SPF", res.code)
+        Logger.warn("Got HTTP status code {} from SPF. Body: {}", res.code, res.body)
       } else {
         Logger.info("Match {} uploaded to SpyParty Fans properly", bout.id)
       }

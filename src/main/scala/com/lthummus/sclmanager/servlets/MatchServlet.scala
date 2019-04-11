@@ -34,6 +34,8 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
                                                                             with FileUploadSupport
                                                                             with SwaggerSupport
                                                                             with TransactionSupport {
+  import MatchServlet._
+
   protected implicit lazy val jsonFormats: Formats = DefaultFormats ++ JodaTimeSerializers.all + FieldSerializer[Game]()
 
   protected val applicationDescription = "Gets match information"
@@ -58,6 +60,8 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
   }
 
   private def persistBout(bout: Bout, url: String) = {
+    Logger.info("Persisting bout between {} ({}) and {} ({})", bout.player1, bout.player1Score: Integer, bout.player2, bout.player2Score: Integer)
+
     insideTransaction{ implicit dslContext =>
       for {
         player1   <- PlayerDao.getByPlayerName(bout.player1) \/> s"No player found with name ${bout.player1}"
@@ -77,6 +81,8 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
     if (nameChanges.forall{ case (a, b) => a == b}) {
       oldReplays.right
     } else {
+      Logger.info("Patching replays: {}", nameChanges.toString)
+
       for {
         patched <- ZipFilePatcher.patchZipFile(zipBytes, nameChanges)
         replays <- SpyPartyZipParser.parseZipStream(patched)
@@ -87,7 +93,7 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
   post("/:id/forceSpf") {
     request.header("Authentication") match {
       case Some(x) if x == SclManagerConfig.forfeitPassword => //nop
-      case _                                                => MatchServlet.Logger.warn("Invalid password. Stopping."); halt(Forbidden("No"))
+      case _                                                => Logger.warn("Invalid password. Stopping."); halt(Forbidden("No"))
     }
 
     val matchId = params("id").toInt
@@ -114,6 +120,7 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
     val data = parsedBody.extract[MatchForfeitInput]
 
     if (data.password != ForfeitPassword) {
+      Logger.warn("Attempted to forfeit with incorrect password")
       Forbidden("error" -> "Invalid password")
     } else {
       if (data.kind == "single") {
@@ -154,16 +161,17 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
 
     result match {
       case -\/(error) =>
-        MatchServlet.Logger.warn("Error persisting bout. Got error {}", error)
+        Logger.warn("Error persisting bout. Got error {}", error)
         BadRequest(ErrorMessage(error))
+
       case \/-(boutId) =>
         BoutDao.getFullBoutRecords(boutId) match {
-          case -\/(error) => InternalServerError(ErrorMessage(error))
+          case -\/(error) => Logger.warn("Error getting bout information post persist: {}", error); InternalServerError(ErrorMessage(error))
           case \/-(it)    =>
             val fullData = Match.fromDatabaseRecordWithGames(it.bout, it.games, it.playerMap, it.draft)
             DiscordPoster.post(fullData)
             if (SclManagerConfig.enableSpypartyFans) SpypartyFansWebhook.postToWebhook(fullData)
-            MatchServlet.Logger.info("Successfully persisted bout {}", fullData.id)
+            Logger.info("Successfully persisted bout {}", fullData.id)
             Ok(fullData)
         }
     }

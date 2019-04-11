@@ -6,12 +6,17 @@ import scalaz._
 import Scalaz._
 import com.lthummus.sclmanager.database.TransactionSupport
 import org.jooq.DSLContext
+import org.slf4j.LoggerFactory
 
 object MatchForfeits extends TransactionSupport {
+  private val Logger = LoggerFactory.getLogger("MatchForfeits")
+
   private def checkStatus(bout: BoutRecord) = {
     if (bout.getStatus == 0) {
       ().right
     } else {
+      Logger.warn("Attempting to forfeit played/forfeited match {}", bout.getId)
+      
       "Match has already been played or forfeited".left
     }
   }
@@ -33,6 +38,7 @@ object MatchForfeits extends TransactionSupport {
         _    <- PlayerDao.postResult(bout.getPlayer1, if (bout.getPlayer1 == winner) "win" else "loss")
         _    <- PlayerDao.postResult(bout.getPlayer2, if (bout.getPlayer2 == winner) "win" else "loss")
       } yield {
+        Logger.info("Successfully forfeited match {}", id)
         bout
       }
     }
@@ -47,6 +53,8 @@ object MatchForfeits extends TransactionSupport {
         _    <- PlayerDao.postResult(bout.getPlayer1, "loss")
         _    <- PlayerDao.postResult(bout.getPlayer2, "loss")
       } yield {
+        Logger.info("Successfully double forfeited match {}", id)
+
         bout
       }
     }

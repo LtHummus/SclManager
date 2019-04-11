@@ -76,7 +76,7 @@ object GameDao {
     try {
       dslContext.batchInsert(records.asJava).execute().right
     } catch {
-      case e: DataAccessException if e.getCause.getCause.isInstanceOf[MySQLIntegrityConstraintViolationException] =>
+      case e: DataAccessException if e.getCause().getCause.isInstanceOf[MySQLIntegrityConstraintViolationException] =>
         Logger.warn("Potential duplicate records", e)
         "It looks like I already have at least one of these replays.  Are you uploading the right file?".left
 

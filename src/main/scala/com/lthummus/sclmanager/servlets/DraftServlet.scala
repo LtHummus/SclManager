@@ -10,12 +10,17 @@ import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.json.JacksonJsonSupport
 import org.scalatra.swagger.{Swagger, SwaggerSupport}
 import org.scalatra.{Forbidden, NotFound, Ok}
+import org.slf4j.LoggerFactory
 
+object DraftServlet {
+  private val Logger = LoggerFactory.getLogger("DraftServlet")
+}
 
 class DraftServlet(implicit dslContext: DSLContext, val swagger: Swagger) extends SclManagerStack
   with JacksonJsonSupport
   with SwaggerSupport {
 
+  import DraftServlet._
 
   protected val applicationDescription = "Gets draft information"
 
@@ -33,9 +38,12 @@ class DraftServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
       case Some(x) if x == sharedSecret =>
         val input = parsedBody.camelizeKeys.extract[DraftInput]
         DraftDao.persist(input)
+
+        Logger.info("Persisted draft from room {} successfully", input.roomCode)
+
         Ok(Map("error" -> "none"))
 
-      case _ => Forbidden(Map("error" -> "Nope"))
+      case _ => Logger.warn("Invalid password for draft report"); Forbidden(Map("error" -> "Nope"))
     }
   }
 
