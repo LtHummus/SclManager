@@ -28,4 +28,6 @@ object SclManagerConfig {
   val enableSpypartyFans: Boolean = sys.env.get("ENABLE_SPYPARTY_FANS_HOOK").exists(_.toBoolean)
   val spypartyFansHookUrl: String = sys.env("SPYPARTY_FANS_HOOK_URL")
 
+  val logFormat: String = sys.env.getOrElse("JETTY_LOG_FORMAT", "%{client}a - %u %t \"%r\" %s %O \"%{Referer}i\" \"%{User-Agent}i\"")
+
 }

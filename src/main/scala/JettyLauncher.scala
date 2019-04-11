@@ -9,9 +9,10 @@ import org.slf4j.LoggerFactory
 object JettyLauncher {
 
   private val Logger = LoggerFactory.getLogger("JettyLauncher")
-
+  
   def main(args: Array[String]) {
     Logger.info("Hello world!")
+    Logger.info("Using log format {}", SclManagerConfig.logFormat)
 
     val port = SclManagerConfig.port
 
@@ -27,7 +28,7 @@ object JettyLauncher {
     val log = new Slf4jRequestLogWriter()
     log.setLoggerName("Jetty")
 
-    server.setRequestLog(new CustomRequestLog(log, CustomRequestLog.EXTENDED_NCSA_FORMAT))
+    server.setRequestLog(new CustomRequestLog(log, SclManagerConfig.logFormat))
     server.start()
     server.join()
   }
