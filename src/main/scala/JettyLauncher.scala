@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory
 object JettyLauncher {
 
   private val Logger = LoggerFactory.getLogger("JettyLauncher")
-  
+
   def main(args: Array[String]) {
     Logger.info("Hello world!")
     Logger.info("Using log format {}", SclManagerConfig.logFormat)
