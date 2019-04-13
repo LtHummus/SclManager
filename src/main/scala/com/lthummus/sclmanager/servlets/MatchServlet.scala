@@ -51,6 +51,11 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
     val player1Res = bout.result(bout.player1)
     val player2Res = bout.result(bout.player2)
 
+    draft match {
+      case None    => Logger.warn("Could not find appropriate draft for bout {}", games.head.getBout)
+      case Some(d) => Logger.info("Matched draft id {} with room code {} to bout {}", d.getId, d.getRoomCode, games.head.getBout)
+    }
+
     for {
       _ <- GameDao.persistBatchRecords(games)
       _ <- BoutDao.markBoutAsPlayed(games.head.getBout, url, draft)
