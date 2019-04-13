@@ -2,15 +2,15 @@ package com.lthummus.sclmanager.servlets.dto
 
 import zzz.generated.tables.records.{DivisionRecord, PlayerRecord}
 
-case class SimplePlayer(name: String, country: String)
+case class SimplePlayer(name: String, replayName: String, country: String)
 
 object SimplePlayer {
   def fromPlayer(record: Player): SimplePlayer = {
-    SimplePlayer(record.name, record.country)
+    SimplePlayer(record.name, record.replayName, record.country)
   }
 }
 
-case class Player(divisionName: String, name: String, country: String, wins: Int, draws: Int, losses: Int, matchesPlayed: Int, score: Int, matches: Option[List[Match]]) extends Ordered[Player] {
+case class Player(divisionName: String, name: String, replayName: String, country: String, wins: Int, draws: Int, losses: Int, matchesPlayed: Int, score: Int, matches: Option[List[Match]]) extends Ordered[Player] {
   override def compare(that: Player): Int = {
     if (this.score > that.score) {
       -1
@@ -25,7 +25,7 @@ case class Player(divisionName: String, name: String, country: String, wins: Int
     }
   }
 
-  def asSimplePlayer: SimplePlayer = SimplePlayer(name, country)
+  def asSimplePlayer: SimplePlayer = SimplePlayer(name, replayName, country)
   def withMatches(matches: Option[List[Match]]): Player = copy(matches = matches)
 
   //we always define the list here...I don't _think_ that will break anything
@@ -44,6 +44,7 @@ object Player {
 
     Player(playerRecord.getDivision,
       playerRecord.getName,
+      playerRecord.getReplayName,
       playerRecord.getCountry,
       playerRecord.getWins,
       playerRecord.getDraws,
