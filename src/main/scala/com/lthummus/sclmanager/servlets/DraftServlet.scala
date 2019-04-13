@@ -39,7 +39,7 @@ class DraftServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
         val input = parsedBody.camelizeKeys.extract[DraftInput]
         DraftDao.persist(input)
 
-        Logger.info("Persisted draft from room {} successfully", input.roomCode)
+        Logger.info("Persisted draft from room {} between {} and {} successfully", input.roomCode, input.player1, input.player2)
 
         Ok(Map("error" -> "none"))
 
