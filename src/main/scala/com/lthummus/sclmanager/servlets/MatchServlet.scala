@@ -174,8 +174,10 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
           case -\/(error) => Logger.warn("Error getting bout information post persist: {}", error); InternalServerError(ErrorMessage(error))
           case \/-(it)    =>
             val fullData = Match.fromDatabaseRecordWithGames(it.bout, it.games, it.playerMap, it.draft)
-            if (fullData.league != "Challenger") DiscordPoster.post(fullData)
-            if (SclManagerConfig.enableSpypartyFans) SpypartyFansWebhook.postToWebhook(fullData)
+            if (fullData.league != "Challenger") {
+              DiscordPoster.post(fullData)
+              if (SclManagerConfig.enableSpypartyFans) SpypartyFansWebhook.postToWebhook(fullData)
+            }
             Logger.info("Successfully persisted bout {}", fullData.id)
             Ok(fullData)
         }

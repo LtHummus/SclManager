@@ -33,7 +33,7 @@ object BoutDao {
   def getLastUploaded()(implicit dslContext: DSLContext): BoutRecord = {
     dslContext
       .selectFrom(Tables.BOUT)
-      .where(Tables.BOUT.STATUS.eq(1))
+      .where(Tables.BOUT.STATUS.eq(1)).and(Tables.BOUT.DIVISION.ne("Challenger"))
       .orderBy(Tables.BOUT.TIMESTAMP.desc())
       .limit(1)
       .fetchOne()
