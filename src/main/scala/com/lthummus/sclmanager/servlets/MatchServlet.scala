@@ -4,7 +4,7 @@ import com.amazonaws.util.IOUtils
 import com.lthummus.sclmanager.SclManagerStack
 import com.lthummus.sclmanager.database.TransactionSupport
 import com.lthummus.sclmanager.database.dao.GameDao._
-import com.lthummus.sclmanager.database.dao.{BoutDao, DraftDao, GameDao, PlayerDao}
+import com.lthummus.sclmanager.database.dao.{BoutDao, DivisionDao, DraftDao, GameDao, PlayerDao}
 import com.lthummus.sclmanager.parsing._
 import com.lthummus.sclmanager.scaffolding.SclManagerConfig
 import com.lthummus.sclmanager.servlets.dto._
@@ -174,7 +174,11 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
           case -\/(error) => Logger.warn("Error getting bout information post persist: {}", error); InternalServerError(ErrorMessage(error))
           case \/-(it)    =>
             val fullData = Match.fromDatabaseRecordWithGames(it.bout, it.games, it.playerMap, it.draft)
-            if (fullData.league != "Challenger") {
+            val divisionInfo = DivisionDao.getByName(fullData.league)
+            if (divisionInfo.exists(_.getSecret)) {
+              Logger.info("Bout is in a secret division. Not sending to discord/SPF")
+            } else {
+              Logger.info("Bout is public. Sending data to sources")
               DiscordPoster.post(fullData)
               if (SclManagerConfig.enableSpypartyFans) SpypartyFansWebhook.postToWebhook(fullData)
             }
