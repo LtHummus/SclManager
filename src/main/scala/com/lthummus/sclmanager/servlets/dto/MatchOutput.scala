@@ -105,7 +105,7 @@ object Match {
       case "Copper"     => "<:scl_badge_copper:545019911081295891>"
       case "Bronze"     => "<:scl_badge_bronze:545019772161622031>"
       case "Bamboo"     => "<:scl_badge_bamboo:545017748288176129>"
-      case "Challenger" => "<:scl_badge_challenger:545019926021144578>"
+      case "Challenger" => "<:scl_badge_challenger:563338499374448690>"
       case _            => boutRecord.getDivision
     }
 
