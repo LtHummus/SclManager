@@ -163,7 +163,7 @@ object Match {
         playerMap(boutRecord.getPlayer2).asSimplePlayer,
         boutRecord.getStatus,
         BoutTypeEnum.fromInt(boutRecord.getBoutType).toString,
-        Some(gameList),
+        if (boutRecord.getStatus != 2) Some(gameList) else Some(List()),
         packagedMatchUrl,
         draft,
         draftSummary,
