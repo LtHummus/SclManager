@@ -101,12 +101,6 @@ class PlayerServlet(implicit dslContext: DSLContext, val swagger: Swagger) exten
       halt(NotFound(s"player $name not found"))
     }
 
-    if (matches.exists(_.getStatus == 1)) {
-      //there are some played matches, deal with them manually
-      PlayerServlet.Logger.warn("Found some matches that were played. Stopping")
-      halt(BadRequest(s"Player $name has some played matches. You must unset them first"))
-    }
-
     val forfeitWorklist = matches.map{ curr =>
       //figure out who the winner is....
       val winner = if (curr.getPlayer1 == name) {

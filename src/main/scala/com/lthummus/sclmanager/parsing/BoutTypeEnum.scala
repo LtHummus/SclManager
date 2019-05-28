@@ -26,6 +26,17 @@ object BoutTypeEnum {
     }
   }
 
+  def fromString(x: String): BoutType = {
+    x match {
+      case "Standard"           => Standard
+      case "Promotion"          => Promotion
+      case "Relegation"         => Relegation
+      case "LeagueChampionship" => LeagueChampionship
+      case "Shortened"          => Shortened
+      case _                    => throw new Exception(s"Unknown BoutType $x")
+    }
+  }
+
   case object Standard extends BoutType("Standard", 0) {
     override def isComplete(player1Score: Int, player2Score: Int): Boolean = {
       sortedScores(player1Score, player2Score) match {

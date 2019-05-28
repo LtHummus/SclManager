@@ -74,6 +74,27 @@ object PlayerDao {
     Option(result).map(_.getName)
   }
 
+  def removeResult(name: String, result: String)(implicit dslContext: DSLContext): String \/ PlayerRecord = {
+    val player = Some(dslContext
+      .selectFrom(Tables.PLAYER)
+      .where(Tables.PLAYER.NAME.eq(name))
+      .fetchOne())
+
+    if (player.isEmpty) {
+      s"No player found with name $name".left
+    } else {
+      val unwrappedPlayer = player.get
+      result match {
+        case "win" => unwrappedPlayer.setWins(unwrappedPlayer.getWins - 1)
+        case "draw" => unwrappedPlayer.setDraws(unwrappedPlayer.getDraws - 1)
+        case "loss" => unwrappedPlayer.setLosses(unwrappedPlayer.getLosses - 1)
+      }
+
+      unwrappedPlayer.store()
+      unwrappedPlayer.right
+    }
+  }
+
   def postResult(name: String, result: String)(implicit dslContext: DSLContext): String \/ PlayerRecord = {
     val player = Some(dslContext
       .selectFrom(Tables.PLAYER)
