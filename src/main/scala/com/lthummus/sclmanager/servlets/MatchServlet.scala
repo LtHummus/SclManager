@@ -41,7 +41,7 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
   protected val applicationDescription = "Gets match information"
   private val ForfeitPassword = SclManagerConfig.forfeitPassword
 
-  configureMultipartHandling(MultipartConfig(maxFileSize = Some(3 * 1024 * 1024))) // 3 megabytes
+  configureMultipartHandling(MultipartConfig(maxFileSize = Some(6 * 1024 * 1024))) // 6 megabytes
 
   before() {
     contentType = formats("json")
