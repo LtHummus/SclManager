@@ -13,14 +13,12 @@ case class Bout(replays: List[Replay], kind: BoutType) {
   val player1: String = orderedReplays.head.spy
   val player2: String = orderedReplays.head.sniper
 
-  val player1Score: Int = orderedReplays.count(_.winnerName == player1)
-  val player2Score: Int = orderedReplays.count(_.winnerName == player2)
+  val (player1Score, player2Score) = kind.handleReplays(orderedReplays, player1, player2) match {
+    case Incomplete(reason) => throw new Exception(reason)
+    case CompletedBout(player1Score, player2Score) => (player1Score, player2Score)
+  }
 
   val isTie: Boolean = player1Score == player2Score
-
-  if (!kind.isComplete(player1Score, player2Score)) {
-    throw new Exception("This doesn't look like a complete SCL match.  Are all the replays included?")
-  }
 
   def result(playerName: String): String = {
     val ourScore = if (player1 == playerName) player1Score else player2Score
@@ -120,13 +118,7 @@ case class Bout(replays: List[Replay], kind: BoutType) {
   }
 
   def getGameSummary: List[String] = {
-    if (kind.hasOvertime(player1Score, player2Score)) {
-      val overtimeGames = orderedReplays.takeRight(2)
-      orderedReplays.dropRight(2).map(_.description) ++ overtimeGames.map(it => s"**OVERTIME** ${it.description}")
-    } else {
       orderedReplays.map(_.description)
-    }
-
   }
 
   def getScoreLine: String = {
