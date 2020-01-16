@@ -254,6 +254,11 @@ case class Replay(spy: String,
 
   def description: String = s"$winnerName wins as $winnerRole on $fullLevelName"
   def smallDescription: String = s"$winnerName wins as ${winnerRole.capitalize}"
+  def overtimeDescription: String = if (result == CivilianShot) {
+    s"$sniper shot a civilian netting $spy $tiebreakerPoints points"
+  } else {
+    s"$spy earned $tiebreakerPoints points"
+  }
 
   def tiebreakerPoints: Int = {
     if (result == CivilianShot) {
