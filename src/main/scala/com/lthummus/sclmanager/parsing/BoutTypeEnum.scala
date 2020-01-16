@@ -1,5 +1,7 @@
 package com.lthummus.sclmanager.parsing
 
+import scala.annotation.tailrec
+
 sealed trait BoutResult
 case class CompletedBout(player1Score: Int, player2Score: Int) extends BoutResult
 case class Incomplete(reason: String) extends BoutResult
@@ -7,8 +9,59 @@ case class Incomplete(reason: String) extends BoutResult
 object BoutTypeEnum {
   sealed abstract class BoutType(name: String, internalId: Int) {
     def handleReplays(replays: Iterable[Replay], player1: String, player2: String): BoutResult
+    def summarizeGames(replays: Iterable[Replay], player1: String, player2: String): String = summarizeMainGames(replays, player1, player2)
     protected def sortedScores(score1: Int, score2: Int): Seq[Int] = Seq(score1, score2).sorted
     override def toString: String = name
+
+    protected def summarizeMainGames(replays: Iterable[Replay], player1: String, player2: String): String = {
+      @tailrec def internal(games: List[Replay], buffer: String): String = {
+        if (games.isEmpty) {
+          buffer
+        } else {
+          val currentMapConfiguration = games.head.fullLevelName
+
+          //find all games that were played on this
+          val ourGames = getGamesForLayout(games, currentMapConfiguration)
+          val newBuffer = buffer + "**" +  currentMapConfiguration + "**\n" + getGameSummaryForManyGames(ourGames, player1, player2).replaceAll("<br />", "\n") + "\n\n"
+
+          internal(games.drop(ourGames.length), newBuffer)
+        }
+      }
+
+      internal(replays.toList, "")
+    }
+
+    protected def getGameSummaryForManyGames(games: List[Replay], player1: String, player2: String): String = {
+      if (games.size == 1) {
+        val onlyGame = games.head
+        s"${onlyGame.winnerName} wins as ${onlyGame.winnerRole}"
+      } else if (games.forall(_.winnerRole == "spy")) {
+        s"Spy wins ${games.length} games"
+      } else if (games.forall(_.winnerRole == "sniper")) {
+        s"Sniper wins ${games.length} games"
+      } else if (games.forall(_.winnerName == player1)) {
+        s"$player1 wins ${games.length} games"
+      } else if (games.forall(_.winnerName == player2)) {
+        s"$player2 wins ${games.length} games"
+      } else {
+        games.map(x => s"${x.smallDescription}").mkString("<br />")
+      }
+
+    }
+
+    protected def getGamesForLayout(haystack: List[Replay], layout: String): List[Replay] = {
+      @tailrec def internal(games: List[Replay], buffer: List[Replay]): List[Replay] = {
+        if (games.isEmpty) {
+          buffer
+        } else if (games.head.fullLevelName == layout) {
+          internal(games.tail, buffer :+ games.head)
+        } else {
+          buffer
+        }
+      }
+
+      internal(haystack, List())
+    }
   }
 
   def fromInt(x: Int): BoutType = {
@@ -50,6 +103,7 @@ object BoutTypeEnum {
         CompletedBout(player1Score, player2Score)
       }
     }
+
   }
 
   case object Playoff extends BoutType("Promotion", 1) {
@@ -71,7 +125,7 @@ object BoutTypeEnum {
       if (mainWinnerResolved) {
         CompletedBout(player1Score, player2Score)
       } else {
-        val overtimeRounds = overtimeReplays.grouped(2).toSeq.takeRight(2).flatten
+        val overtimeRounds = overtimeReplays.grouped(2).toSeq.flatten
         val overtimeScores = overtimeRounds.groupBy(_.spy).mapValues { replays =>
           replays.map(_.tiebreakerPoints).sum
         }
@@ -89,6 +143,18 @@ object BoutTypeEnum {
 
     }
 
+    override def summarizeGames(replays: Iterable[Replay], player1: String, player2: String): String = {
+      val mainReplays = replays.take((NumToWin * 2) - 1)
+      val overtimeReplays = replays.drop((NumToWin * 2) - 1)
+
+      val mainGameSummary = summarizeMainGames(mainReplays, player1, player2)
+      val overtimeRounds = overtimeReplays.grouped(2).toSeq.flatten
+      val overtimeScores = overtimeRounds.groupBy(_.spy).mapValues { replays =>
+        replays.map(_.tiebreakerPoints).sum
+      }
+
+      mainGameSummary + "\n\n\n" + s"$player1 got ${overtimeScores(player1)} points in overtime. \n$player2 got ${overtimeScores(player2)} points in overtime."
+    }
   }
 
   case object LeagueChampionship extends BoutType("League Championship", 3) {
@@ -98,6 +164,7 @@ object BoutTypeEnum {
 
       CompletedBout(player1Score, player2Score)
     }
+
   }
 
   case object Shortened extends BoutType("Shortened", 4) {
@@ -107,6 +174,7 @@ object BoutTypeEnum {
 
       CompletedBout(player1Score, player2Score)
     }
+
   }
 
 }
