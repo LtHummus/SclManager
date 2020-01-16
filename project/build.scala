@@ -17,6 +17,8 @@ object SclManagerBuild extends Build {
     mainClass in Dist := Some("JettyLauncher")
   )
 
+
+
   lazy val project = Project (
     "scl-manager",
     file("."),
@@ -27,8 +29,12 @@ object SclManagerBuild extends Build {
       version := Version,
       scalaVersion := ScalaVersion,
       resolvers += Classpaths.typesafeReleases,
+      resolvers += Resolver.sonatypeRepo("snapshots"),
       resolvers += "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases",
       resolvers += "spray repo" at "http://repo.typesafe.com/typesafe/releases/",
+
+
+        resolvers += "jda" at "https://dl.bintray.com/dv8fromtheworld/maven/",
       javaOptions ++= Seq("-Xdebug",
         "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"),
       libraryDependencies ++= Seq(
@@ -39,6 +45,9 @@ object SclManagerBuild extends Build {
         "ch.qos.logback" % "logback-classic" % "1.1.11" % "runtime",
         "org.eclipse.jetty" % "jetty-webapp" % "9.4.15.v20190215" % "container;compile",
         "javax.servlet" % "javax.servlet-api" % "3.1.0" % "provided",
+
+        "net.dv8tion" % "JDA" % "4.0.0_62" exclude("club.minnced", "opus-java"),
+
 
         // json support
         "org.scalatra" %% "scalatra-json" % ScalatraVersion,

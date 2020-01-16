@@ -39,7 +39,8 @@ case class Game(id: Int,
                 startDurationSeconds: Option[Int],
                 guests: Option[Int],
                 uuid: String,
-                timestamp: DateTime) {
+                timestamp: DateTime,
+                missionsCompleted: Int) {
 
   def isCompleted: Boolean = result != GameResultEnum.InProgress.niceName
   def spyWon: Boolean = result == GameResultEnum.CivilianShot.niceName || result == GameResultEnum.MissionWin.niceName
@@ -55,7 +56,7 @@ case class Game(id: Int,
       parsedResult <- GameResultEnum.fromString(result)
       parsedLevel <- Level.getLevelByName(level)
       parsedGameType <- GameType.fromString(gameType)
-    } yield Replay(spy, sniper, timestamp, parsedResult, parsedLevel, parsedGameType, sequence, uuid, -1, startDurationSeconds, guests)
+    } yield Replay(spy, sniper, timestamp, parsedResult, parsedLevel, parsedGameType, sequence, uuid, -1, startDurationSeconds, guests, missionsCompleted)
 
     disjointReplay match {
       case -\/(s) => throw new Exception(s"Unable to parse match: $s")
@@ -198,6 +199,7 @@ object Game {
       Option(record.getStartDurationSeconds).map(_.toInt),
       Option(record.getGuests).map(_.toInt),
       record.getUuid,
-      new DateTime(record.getTimestamp))
+      new DateTime(record.getTimestamp),
+      record.getMissionsCompleted)
   }
 }

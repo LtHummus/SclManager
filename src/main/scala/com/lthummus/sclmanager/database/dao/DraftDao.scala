@@ -47,8 +47,9 @@ object DraftDao {
       val newStartPlayerName = translations(payload.startPlayer.toLowerCase)
       val newBannedMaps = payload.bannedMaps.map(x => x.copy(picker = translations(x.picker.toLowerCase)))
       val newPickedMaps = payload.pickedMaps.map(x => x.copy(picker = translations(x.picker.toLowerCase)))
+      val newRestrictedMaps = payload.restrictedMaps.map(x => x.copy(picker = translations(x.picker.toLowerCase)))
 
-      DraftPayload(newBannedMaps, newPickedMaps, newStartPlayerName, newFirstSpyName)
+      DraftPayload(newBannedMaps, newPickedMaps, newRestrictedMaps, newStartPlayerName, newFirstSpyName)
     }
   }
 

@@ -21,7 +21,10 @@ object DiscordPoster {
       Logger.info("Posting bout {} results to Discord", bout.id)
 
       val payload = compact(render("content" -> bout.discordPost))
-      val req = Http(HookUrl).postData(payload)
+      val req = Http(HookUrl)
+        .postData(payload)
+        .header("content-type", "application/json")
+
       req.asString
     }
   }

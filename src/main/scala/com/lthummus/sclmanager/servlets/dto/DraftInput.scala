@@ -23,7 +23,11 @@ case class DraftInput(roomCode: String, player1: String, player2: String, payloa
             'draft_type': self.draft_type.name
  */
 
-case class DraftPayload(bannedMaps: List[Selection], pickedMaps: List[Selection], startPlayer: String, firstSpy: String)
+case class DraftPayload(bannedMaps: List[Selection],
+                        pickedMaps: List[Selection],
+                        restrictedMaps: List[Selection],
+                        startPlayer: String,
+                        firstSpy: String)
 
 object DraftPayload {
   implicit val formats = DefaultFormats

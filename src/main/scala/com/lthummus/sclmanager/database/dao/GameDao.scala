@@ -25,13 +25,36 @@ object GameDao {
         resultValue <- GameResultEnum.fromInt(record.getResult)
         level <- Level.getLevelByName(record.getVenue)
         decodedGameType <- GameType.fromString(record.getGametype)
-      } yield Replay(record.getSpy, record.getSniper, new DateTime(), resultValue, level, decodedGameType, record.getSequence, record.getUuid, -1, Option(record.getStartDurationSeconds).map(_.toInt), Option(record.getGuests).map(_.toInt))
+      } yield Replay(record.getSpy,
+        record.getSniper,
+        new DateTime(),
+        resultValue,
+        level,
+        decodedGameType,
+        record.getSequence,
+        record.getUuid,
+        -1,
+        Option(record.getStartDurationSeconds).map(_.toInt),
+        Option(record.getGuests).map(_.toInt),
+        record.getMissionsCompleted)
     }
   }
 
   implicit class ConvertableFromReplay(replay: Replay) {
     def toDatabase(matchId: Int): GameRecord = {
-      new GameRecord(null, replay.spy, replay.sniper, matchId, replay.result.internalId, replay.sequenceNumber, replay.level.name, replay.loadoutType.toString, replay.startDuration.map(new Integer(_)).orNull, replay.numGuests.map(new Integer(_)).orNull, replay.uuid, new Timestamp(replay.startTime.getMillis))
+      new GameRecord(null,
+        replay.spy,
+        replay.sniper,
+        matchId,
+        replay.result.internalId,
+        replay.sequenceNumber,
+        replay.level.name,
+        replay.loadoutType.toString,
+        replay.startDuration.map(new Integer(_)).orNull,
+        replay.numGuests.map(new Integer(_)).orNull,
+        replay.uuid,
+        new Timestamp(replay.startTime.getMillis),
+        replay.missionsCompleted)
     }
   }
 
