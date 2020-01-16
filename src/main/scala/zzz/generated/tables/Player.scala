@@ -110,7 +110,7 @@ extends TableImpl[PlayerRecord](
   /**
    * The column <code>scl.player.country</code>.
    */
-  val COUNTRY : TableField[PlayerRecord, String] = createField("country", org.jooq.impl.SQLDataType.CHAR(6), "")
+  val COUNTRY : TableField[PlayerRecord, String] = createField("country", org.jooq.impl.SQLDataType.CHAR(2), "")
 
   /**
    * The column <code>scl.player.participating</code>.

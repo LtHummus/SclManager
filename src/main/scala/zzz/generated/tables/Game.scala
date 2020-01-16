@@ -139,6 +139,11 @@ extends TableImpl[GameRecord](
   val TIMESTAMP : TableField[GameRecord, Timestamp] = createField("timestamp", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), "")
 
   /**
+   * The column <code>scl.game.missions_completed</code>.
+   */
+  val MISSIONS_COMPLETED : TableField[GameRecord, Integer] = createField("missions_completed", org.jooq.impl.SQLDataType.INTEGER, "")
+
+  /**
    * Create a <code>scl.game</code> table reference
    */
   def this() = {

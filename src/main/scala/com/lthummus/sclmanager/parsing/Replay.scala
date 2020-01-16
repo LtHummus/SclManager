@@ -118,6 +118,7 @@ sealed trait ReplayOffsets {
   val gameTypeOffset: Int
   val levelOffset: Int
   val playerNamesOffset: Int
+  val missionsCompletedOffset: Int
 
   val spyDisplayNameLengthOffset: Option[Int] = None
   val sniperDisplayNameLength: Option[Int] = None
@@ -128,39 +129,41 @@ sealed trait ReplayOffsets {
 object Version3ReplayOffsets extends ReplayOffsets {
   override val versionNumber: Int = 3
 
-  override val magicNumberOffset: Int = 0x00
-  override val fileVersionOffset: Int = 0x04
-  override val protocolVersionOffset: Int = 0x08
-  override val spyPartyVersionOffset: Int = 0x0C
-  override val durationOffset: Int = 0x14
-  override val uuidOffset: Int = 0x18
-  override val timestampOffset: Int = 0x28
-  override val sequenceNumberOffset: Int = 0x2C
-  override val spyNameLengthOffset: Int = 0x2E
-  override val sniperNameLengthOffset: Int = 0x2F
-  override val gameResultOffset: Int = 0x30
-  override val gameTypeOffset: Int = 0x34
-  override val levelOffset: Int = 0x38
-  override val playerNamesOffset: Int = 0x50
+  override val magicNumberOffset: Int       = 0x00
+  override val fileVersionOffset: Int       = 0x04
+  override val protocolVersionOffset: Int   = 0x08
+  override val spyPartyVersionOffset: Int   = 0x0C
+  override val durationOffset: Int          = 0x14
+  override val uuidOffset: Int              = 0x18
+  override val timestampOffset: Int         = 0x28
+  override val sequenceNumberOffset: Int    = 0x2C
+  override val spyNameLengthOffset: Int     = 0x2E
+  override val sniperNameLengthOffset: Int  = 0x2F
+  override val gameResultOffset: Int        = 0x30
+  override val gameTypeOffset: Int          = 0x34
+  override val levelOffset: Int             = 0x38
+  override val missionsCompletedOffset: Int = 0x44
+  override val playerNamesOffset: Int       = 0x50
 }
 
 object Version4ReplayOffsets extends ReplayOffsets {
   override val versionNumber: Int = 4
 
-  override val magicNumberOffset: Int      = 0x00
-  override val fileVersionOffset: Int      = 0x04
-  override val protocolVersionOffset: Int  = 0x08
-  override val spyPartyVersionOffset: Int  = 0x0C
-  override val durationOffset: Int         = 0x14
-  override val uuidOffset: Int             = 0x18
-  override val timestampOffset: Int        = 0x28
-  override val sequenceNumberOffset: Int   = 0x2C
-  override val spyNameLengthOffset: Int    = 0x2E
-  override val sniperNameLengthOffset: Int = 0x2F
-  override val gameResultOffset: Int       = 0x34
-  override val gameTypeOffset: Int         = 0x38
-  override val levelOffset: Int            = 0x3C
-  override val playerNamesOffset: Int      = 0x54
+  override val magicNumberOffset: Int       = 0x00
+  override val fileVersionOffset: Int       = 0x04
+  override val protocolVersionOffset: Int   = 0x08
+  override val spyPartyVersionOffset: Int   = 0x0C
+  override val durationOffset: Int          = 0x14
+  override val uuidOffset: Int              = 0x18
+  override val timestampOffset: Int         = 0x28
+  override val sequenceNumberOffset: Int    = 0x2C
+  override val spyNameLengthOffset: Int     = 0x2E
+  override val sniperNameLengthOffset: Int  = 0x2F
+  override val gameResultOffset: Int        = 0x34
+  override val gameTypeOffset: Int          = 0x38
+  override val levelOffset: Int             = 0x3C
+  override val missionsCompletedOffset: Int = 0x48
+  override val playerNamesOffset: Int       = 0x54
 }
 
 //this isn't the greatest
@@ -171,20 +174,21 @@ object Version5ReplayOffsets extends ReplayOffsets {
   override val hasPotentiallyMultipleNames: Boolean = true
   override val hasExtraData: Boolean = true
 
-  override val magicNumberOffset: Int      = 0x00
-  override val fileVersionOffset: Int      = 0x04
-  override val protocolVersionOffset: Int  = 0x08
-  override val spyPartyVersionOffset: Int  = 0x0C
-  override val durationOffset: Int         = 0x14
-  override val uuidOffset: Int             = 0x18
-  override val timestampOffset: Int        = 0x28
-  override val sequenceNumberOffset: Int   = 0x2C
-  override val spyNameLengthOffset: Int    = 0x2E
-  override val sniperNameLengthOffset: Int = 0x2F
-  override val gameResultOffset: Int       = 0x38
-  override val gameTypeOffset: Int         = 0x3C
-  override val levelOffset: Int            = 0x40
-  override val playerNamesOffset: Int      = 0x60
+  override val magicNumberOffset: Int       = 0x00
+  override val fileVersionOffset: Int       = 0x04
+  override val protocolVersionOffset: Int   = 0x08
+  override val spyPartyVersionOffset: Int   = 0x0C
+  override val durationOffset: Int          = 0x14
+  override val uuidOffset: Int              = 0x18
+  override val timestampOffset: Int         = 0x28
+  override val sequenceNumberOffset: Int    = 0x2C
+  override val spyNameLengthOffset: Int     = 0x2E
+  override val sniperNameLengthOffset: Int  = 0x2F
+  override val gameResultOffset: Int        = 0x38
+  override val gameTypeOffset: Int          = 0x3C
+  override val levelOffset: Int             = 0x40
+  override val missionsCompletedOffset: Int = 0x4C
+  override val playerNamesOffset: Int       = 0x60
 
   override val spyDisplayNameLengthOffset: Option[Int] = Some(0x30)
   override val sniperDisplayNameLength: Option[Int]    = Some(0x31)
@@ -197,20 +201,21 @@ object Version6ReplayOffsets extends ReplayOffsets {
   override val hasPotentiallyMultipleNames: Boolean = true
   override val hasExtraData: Boolean = true
 
-  override val magicNumberOffset: Int      = 0x00
-  override val fileVersionOffset: Int      = 0x04
-  override val protocolVersionOffset: Int  = 0x08
-  override val spyPartyVersionOffset: Int  = 0x0C
-  override val durationOffset: Int         = 0x14
-  override val uuidOffset: Int             = 0x18
-  override val timestampOffset: Int        = 0x28
-  override val sequenceNumberOffset: Int   = 0x2C
-  override val spyNameLengthOffset: Int    = 0x2E
-  override val sniperNameLengthOffset: Int = 0x2F
-  override val gameResultOffset: Int       = 0x38
-  override val gameTypeOffset: Int         = 0x3C
-  override val levelOffset: Int            = 0x40
-  override val playerNamesOffset: Int      = 0x64
+  override val magicNumberOffset: Int       = 0x00
+  override val fileVersionOffset: Int       = 0x04
+  override val protocolVersionOffset: Int   = 0x08
+  override val spyPartyVersionOffset: Int   = 0x0C
+  override val durationOffset: Int          = 0x14
+  override val uuidOffset: Int              = 0x18
+  override val timestampOffset: Int         = 0x28
+  override val sequenceNumberOffset: Int    = 0x2C
+  override val spyNameLengthOffset: Int     = 0x2E
+  override val sniperNameLengthOffset: Int  = 0x2F
+  override val gameResultOffset: Int        = 0x38
+  override val gameTypeOffset: Int          = 0x3C
+  override val levelOffset: Int             = 0x40
+  override val missionsCompletedOffset: Int = 0x50
+  override val playerNamesOffset: Int       = 0x64
 
   override val spyDisplayNameLengthOffset: Option[Int] = Some(0x30)
   override val sniperDisplayNameLength: Option[Int]    = Some(0x31)
@@ -228,7 +233,8 @@ case class Replay(spy: String,
                   uuid: String,
                   version: Int,
                   startDuration: Option[Int],
-                  numGuests: Option[Int]) extends Ordered[Replay] {
+                  numGuests: Option[Int],
+                  missionsCompleted: Int) extends Ordered[Replay] {
   override def compare(that: Replay): Int = if (this.startTime.isBefore(that.startTime)) -1 else 1
 
   def isCompleted: Boolean = result != GameResultEnum.InProgress
@@ -248,6 +254,14 @@ case class Replay(spy: String,
 
   def description: String = s"$winnerName wins as $winnerRole on $fullLevelName"
   def smallDescription: String = s"$winnerName wins as ${winnerRole.capitalize}"
+
+  def tiebreakerPoints: Int = {
+    if (result == CivilianShot) {
+      loadoutType.x
+    } else {
+      missionsCompleted
+    }
+  }
 }
 
 object Replay {
@@ -372,6 +386,11 @@ object Replay {
     offsets.startDurationOffset.map(extractInt(bytes, _)).right
   }
 
+  private def extractNumberMissionsCompleted(bytes: Array[Byte], offsets: ReplayOffsets) = {
+    val missionCompletedBytes = extractInt(bytes, offsets.missionsCompletedOffset)
+    Integer.bitCount(missionCompletedBytes).right
+  }
+
   def fromInputStream(is: DataInputStream): String \/ Replay = {
     val headerData = new Array[Byte](HeaderDataSizeBytes)
 
@@ -382,18 +401,19 @@ object Replay {
     }
 
     for {
-      _             <- verifyMagicNumber(headerData)
-      dataOffsets   <- getFileVersionOffsets(headerData(4))
-      gameResult    <- extractGameResult(headerData, dataOffsets)
-      startTime     <- extractStartTime(headerData, dataOffsets)
-      spy           <- extractSpyName(headerData, dataOffsets)
-      sniper        <- extractSniperName(headerData, dataOffsets)
-      gameType      <- GameType.fromInt(extractInt(headerData, dataOffsets.gameTypeOffset))
-      uuid          <- extractUuid(headerData, dataOffsets)
-      level         <- extractLevel(headerData, dataOffsets)
-      sequence      <- extractSequenceNumber(headerData, dataOffsets)
-      numGuests     <- extractNumGuests(headerData, dataOffsets)
-      startDuration <- extractStartDuration(headerData, dataOffsets)
-    } yield Replay(spy, sniper, startTime, gameResult, level, gameType, sequence, uuid, dataOffsets.versionNumber, numGuests, startDuration)
+      _                 <- verifyMagicNumber(headerData)
+      dataOffsets       <- getFileVersionOffsets(headerData(4))
+      gameResult        <- extractGameResult(headerData, dataOffsets)
+      startTime         <- extractStartTime(headerData, dataOffsets)
+      spy               <- extractSpyName(headerData, dataOffsets)
+      sniper            <- extractSniperName(headerData, dataOffsets)
+      gameType          <- GameType.fromInt(extractInt(headerData, dataOffsets.gameTypeOffset))
+      uuid              <- extractUuid(headerData, dataOffsets)
+      level             <- extractLevel(headerData, dataOffsets)
+      sequence          <- extractSequenceNumber(headerData, dataOffsets)
+      numGuests         <- extractNumGuests(headerData, dataOffsets)
+      startDuration     <- extractStartDuration(headerData, dataOffsets)
+      missionsCompleted <- extractNumberMissionsCompleted(headerData, dataOffsets)
+    } yield Replay(spy, sniper, startTime, gameResult, level, gameType, sequence, uuid, dataOffsets.versionNumber, numGuests, startDuration, missionsCompleted)
   }
 }

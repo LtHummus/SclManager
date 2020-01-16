@@ -21,7 +21,7 @@ object SpyPartyZipParser {
       if (!entry.isDirectory) {
         val parsed = Replay.fromInputStream(new DataInputStream(zis))
         parsed match {
-          case -\/(msg) => return ("Could not parse replay: " + msg).left
+          case -\/(msg)    => return ("Could not parse replay: " + msg).left
           case \/-(replay) => replays += replay
         }
       }
