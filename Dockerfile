@@ -1,6 +1,6 @@
 # STAGE 1: build JAR file
 
-FROM hseeberger/scala-sbt
+FROM hseeberger/scala-sbt:8u242_1.3.9_2.12.10
 
 COPY project/ project/
 COPY src/ src/
