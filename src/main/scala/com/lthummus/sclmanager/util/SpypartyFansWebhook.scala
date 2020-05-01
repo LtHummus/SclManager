@@ -22,6 +22,7 @@ object SpypartyFansWebhook {
 
   def postToWebhook(bout: Match): Unit = {
     Future {
+      Logger.info("Attempting to upload bout {} to spy party fans", bout.id)
       val payload = write(bout)
       val req = Http(HookUrl)
         .header("Content-Type", "application/json")
