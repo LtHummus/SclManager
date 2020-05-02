@@ -27,7 +27,7 @@ case class Draft(id: Int, roomCode: String, player1: String, player2: String, ti
        |**BANS**:
        |$banString
        |
-       |**RESTRICTIONS**
+       |**RESTRICTIONS**:
        |$restrictionsString
        |
        |**PICKS**:
