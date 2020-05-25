@@ -1,15 +1,65 @@
 package com.lthummus.sclmanager.parsing
 
 import scala.annotation.tailrec
+import scala.util.Random
 
 sealed trait BoutResult
 case class CompletedBout(player1Score: Int, player2Score: Int) extends BoutResult
 case class Incomplete(reason: String) extends BoutResult
 
 object BoutTypeEnum {
+  private val Rand = new Random()
+
   sealed abstract class BoutType(name: String, internalId: Int) {
     def handleReplays(replays: Iterable[Replay], player1: String, player2: String): BoutResult
-    def summarizeGames(replays: Iterable[Replay], player1: String, player2: String): String = summarizeMainGames(replays, player1, player2)
+
+    private def appendFakeGames(buffer: String, mapsDone: Int, player1: String, player2: String): String = {
+      @tailrec def internal(buffer: String, remaining: Int): String = {
+        if (remaining <= 0) {
+          buffer
+        } else {
+          val fakeGame = new StringBuilder()
+          val mapNameLength = Rand.nextInt(4) + 23
+          val mapNameTitle = ("\\_" * mapNameLength) + "\n"
+
+          val lineSuffixLength = if (Rand.nextBoolean()) 12 else 15
+          val summaryLine = Rand.nextInt(4) match {
+            case 0 => "\\_" * (player1.length + lineSuffixLength)
+            case 1 => "\\_" * (player2.length + lineSuffixLength)
+            case 2 => "\\_" * 16
+            case 3 => "\\_" * 19
+          }
+
+          internal(buffer + mapNameTitle + summaryLine + "\n\n", remaining - 1)
+        }
+      }
+
+      internal(buffer, Math.max(0, 4 - mapsDone))
+
+    }
+
+    def summarizeGames(replays: Iterable[Replay], player1: String, player2: String): String = {
+      //summarizeMainGames(replays, player1, player2)
+      @tailrec def internal(games: List[Replay], buffer: String, mapsDone: Int): String = {
+        if (games.isEmpty) {
+          if (mapsDone < 2) {
+            buffer
+          } else {
+            appendFakeGames(buffer, mapsDone, player1, player2)
+          }
+        } else {
+          val currentMapConfiguration = games.head.fullLevelName
+
+          //find all games that were played on this
+          val ourGames = getGamesForLayout(games, currentMapConfiguration)
+          val newBuffer = buffer + "**" +  currentMapConfiguration + "**\n" + getGameSummaryForManyGames(ourGames, player1, player2).replaceAll("<br />", "\n") + "\n\n"
+
+          internal(games.drop(ourGames.length), newBuffer, mapsDone + 1)
+        }
+      }
+
+      internal(replays.toList, "", 0)
+    }
     protected def sortedScores(score1: Int, score2: Int): Seq[Int] = Seq(score1, score2).sorted
     override def toString: String = name
 

@@ -81,7 +81,9 @@ case class Bout(replays: List[Replay], kind: BoutType) {
     internal(haystack, List())
   }
 
-  def getDiscordGameSummary: String = kind.summarizeGames(orderedReplays, player1, player2)
+  def getDiscordGameSummary: String = {
+    kind.summarizeGames(orderedReplays, player1, player2)
+  }
 
   def getForumGameSummary: String = {
     @tailrec def internal(games: List[Replay], buffer: String): String = {
