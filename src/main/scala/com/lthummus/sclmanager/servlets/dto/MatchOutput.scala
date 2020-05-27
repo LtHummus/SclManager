@@ -123,7 +123,7 @@ object Match {
     val discordPost = maybeBout.map(bout =>
       s"""**Results for $player1FlagEmoji${boutRecord.getPlayer1} v. $player2FlagEmoji${boutRecord.getPlayer2} (Week ${boutRecord.getWeek} - $emojiId)**
          |${draft.map(_.asDiscordPost).getOrElse("Draft Data Unavailable :sweat:")}
-         |||${bout.getScoreLine}
+         |||${bout.getDiscordScoreLine}
          |
          |${bout.getDiscordGameSummary}|||Download link: ${SclManagerConfig.serverHost}/download/${boutRecord.getId}""".stripMargin.lines.mkString("\n")
     )
