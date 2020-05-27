@@ -125,5 +125,6 @@ case class Bout(replays: List[Replay], kind: BoutType) {
     } else {
       s"TieParty $player1Score-$player2Score"
     }
+  }
 }
 
