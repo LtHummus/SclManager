@@ -109,11 +109,11 @@ case class Bout(replays: List[Replay], kind: BoutType) {
 
   def getScoreLine: String = {
     if (player1Score > player2Score) {
-      s"$player1 wins $player1Score-$player2Score"
+      s"$player1 defeats $player2 $player1Score-$player2Score"
     } else if (player2Score > player1Score) {
-      s"$player2 wins $player2Score-$player1Score"
+      s"$player2 defeats $player1 $player2Score-$player1Score"
     } else {
-      s"TieParty $player1Score-$player2Score"
+      s"$player1 and $player2 TieParty $player1Score-$player2Score"
     }
   }
 }
