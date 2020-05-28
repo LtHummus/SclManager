@@ -1,5 +1,7 @@
 package com.lthummus.sclmanager.util
 
+import java.util.Scanner
+
 import com.lthummus.sclmanager.database.DatabaseConfigurator
 import org.jooq.DSLContext
 import org.slf4j.LoggerFactory
@@ -109,7 +111,7 @@ private object League6Generator extends App {
       Player("theforgot3n1", Some("s76561198046058276/steam"), None),
       Player("pipesuper24", None, None),
       Player("corvusmellori", Some("s76561198037680966/steam"), None),
-      Player("xeynoxys", Some("s76561198055372649/steam"), None),
+      Player("xeynoxys", Some("s76561198055372649/steam"), Nsone),
       Player("scout", None, None),
       Player("monsterracer", Some("s76561198317639601/steam"), None),
       Player("altinsider", Some("s76561198000520176/steam"), None),
@@ -123,7 +125,12 @@ private object League6Generator extends App {
       Player("tonewyork", Some("s76561198798955853/steam"), None),
       Player("testierjamaj", Some("s76561198057426878/steam"), None),
       Player("atia", Some("s76561198047142068/steam"), None),
-      Player("maxstermind", None, None)
+      Player("maxstermind", None, None),
+      Player("cptbasch", None, None),
+      Player("smashblade", None, None),
+      Player("armageddon", Some("s76561199052506574/steam"), None),
+      Player("ibutra", None, None),
+      Player("igod", None, None)
     ))
   )
 
@@ -140,21 +147,69 @@ private object League6Generator extends App {
 
   private val ByeText = "bye"
 
-  private def generateWeeklySchedule(players: Seq[Player]) = {
+  private def betweenPlayers(p1: String, p2: String)(bout: (Player, Player)): Boolean = {
+    p1 == bout._1.name && p2 == bout._2.name || p1 == bout._2.name && p2 == bout._1.name
+  }
+
+  private def generateWeeklySchedule(players: Seq[Player]): IndexedSeq[List[(Player, Player)]] = {
+    var ret: IndexedSeq[List[(Player, Player)]] = IndexedSeq()
+    var ok = false
     val playersWithByeIfNeeded = players.size % 2 match {
       case 0 => players
       case 1 => players ++ Seq(Player(ByeText, None, None))
     }
 
-    val shuffledPlayers = scala.util.Random.shuffle(playersWithByeIfNeeded)
+    val start = System.currentTimeMillis()
+    var total = 0
+    playersWithByeIfNeeded.permutations.foreach{ shuffledPlayers =>
+      val shuffledPlayers = scala.util.Random.shuffle(playersWithByeIfNeeded)
 
-    val anchor = Seq(shuffledPlayers.head)
-    val everyoneElse = shuffledPlayers.tail
+      val anchor = Seq(shuffledPlayers.head)
+      val everyoneElse = shuffledPlayers.tail
 
-    val pairs = for (x <- 0 until shuffledPlayers.length - 1) yield
-      generatePairs(anchor ++ rotate(everyoneElse, x))
+      val pairs = for (x <- 0 until shuffledPlayers.length - 1) yield
+        generatePairs(anchor ++ rotate(everyoneElse, x))
 
-    pairs.map(it => it.filterNot(containsBye))
+      ret = pairs.map(it => it.filterNot(containsBye))
+
+      val match1Ok = ret.head.exists{betweenPlayers("tonewyork", "testierjamaj")}
+      val match2Ok = ret.head.exists{betweenPlayers("cptbasch", "phillammon")}
+      val match3Ok = ret.head.exists{betweenPlayers("maxstermind", "atia")}
+      val match4Ok = ret.head.exists{betweenPlayers("armageddon", "smashblade")}
+      if (match1Ok && match2Ok && match3Ok && match4Ok) {
+        total += 1
+      }
+    }
+
+    val duration = System.currentTimeMillis() - start
+
+    println(s"${duration}ms")
+    println(total)
+
+    //for (shuffledPlayers <- playersWithByeIfNeeded.permutations) {
+    while (!ok) {
+      val shuffledPlayers = scala.util.Random.shuffle(playersWithByeIfNeeded)
+
+      val anchor = Seq(shuffledPlayers.head)
+      val everyoneElse = shuffledPlayers.tail
+
+      val pairs = for (x <- 0 until shuffledPlayers.length - 1) yield
+        generatePairs(anchor ++ rotate(everyoneElse, x))
+
+      ret = pairs.map(it => it.filterNot(containsBye))
+
+      val match1Ok = ret.head.exists{betweenPlayers("tonewyork", "testierjamaj")}
+      val match2Ok = ret.head.exists{betweenPlayers("cptbasch", "phillammon")}
+      val match3Ok = ret.head.exists{betweenPlayers("maxstermind", "atia")}
+      val match4Ok = ret.head.exists{betweenPlayers("armageddon", "smashblade")}
+      ok = match1Ok && match2Ok && match3Ok && match4Ok
+//      if (ok) {
+//        println("done")
+//      }
+    }
+
+    println("finished")
+    ret
 
   }
 
@@ -188,7 +243,7 @@ private object League6Generator extends App {
     //step 1: create the league
 
     val leagueRecord = new DivisionRecord(league.name, league.order, false, 0.toByte, 0.toByte, 0.toByte)
-    Db.executeInsert(leagueRecord)
+    //Db.executeInsert(leagueRecord)
 
     //step 2: insert the players
     val playerRecords = league.players.map(p => new PlayerRecord(p.name.toLowerCase, p.replayName.getOrElse(p.name.toLowerCase), league.name, 0, 0, 0, p.country.orNull, 0x01.toByte, 0x01.toByte))
@@ -213,10 +268,14 @@ private object League6Generator extends App {
     }
   }
 
-  private val allLeaguesXMatches = generateMatches(Leagues)
+  private val allLeaguesXMatches = generateMatches(Leagues.filter(_.name == "Oak"))
 
   for {(league, matches) <- allLeaguesXMatches} {
     printLeagueAndMatches(league, matches)
+    val scan = new Scanner(System.in)
+    println("go?")
+    scan.nextLine()
+    println("going")
     persistLeagueData(league, matches)
   }
 }

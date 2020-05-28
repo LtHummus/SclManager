@@ -62,7 +62,7 @@ object SclManagerBuild extends Build {
         // database bullshit
         "org.jooq" % "jooq" % "3.11.11",
         "org.jooq" % "jooq-codegen" % "3.11.11",
-        "mysql" % "mysql-connector-java" % "5.1.40",
+        "mysql" % "mysql-connector-java" % "5.1.49",
         "com.zaxxer" % "HikariCP" % "3.3.1",
 
         //aws
