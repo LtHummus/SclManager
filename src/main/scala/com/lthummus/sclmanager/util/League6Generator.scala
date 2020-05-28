@@ -111,7 +111,7 @@ private object League6Generator extends App {
       Player("theforgot3n1", Some("s76561198046058276/steam"), None),
       Player("pipesuper24", None, None),
       Player("corvusmellori", Some("s76561198037680966/steam"), None),
-      Player("xeynoxys", Some("s76561198055372649/steam"), Nsone),
+      Player("xeynoxys", Some("s76561198055372649/steam"), None),
       Player("scout", None, None),
       Player("monsterracer", Some("s76561198317639601/steam"), None),
       Player("altinsider", Some("s76561198000520176/steam"), None),
