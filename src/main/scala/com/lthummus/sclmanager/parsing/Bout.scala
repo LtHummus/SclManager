@@ -113,7 +113,8 @@ case class Bout(replays: List[Replay], kind: BoutType) {
     } else if (player2Score > player1Score) {
       s"$player2 defeats $player1 $player2Score-$player1Score"
     } else {
-      s"TieParty $player1Score-$player2Score \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_"
+      val underscoresNeeded = player1.length + player2.length - 1
+      s"TieParty $player1Score-$player2Score " + ("\\_" * underscoresNeeded)
     }
   }
 
