@@ -16,9 +16,9 @@ case class Player(divisionName: String, name: String, replayName: String, countr
       -1
     } else if (this.score < that.score) {
       1
-    } else if (this.matchesPlayed > that.matchesPlayed) {
-      -1
     } else if (this.matchesPlayed < that.matchesPlayed) {
+      -1
+    } else if (this.matchesPlayed > that.matchesPlayed) {
       1
     } else {
       this.name.compare(that.name)
