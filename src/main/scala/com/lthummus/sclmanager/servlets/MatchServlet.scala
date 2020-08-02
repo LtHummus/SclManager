@@ -23,6 +23,9 @@ import scalaz._
 import zzz.generated.Tables
 import zzz.generated.tables.records.{BoutRecord, DraftRecord, GameRecord}
 
+import scala.collection.JavaConverters._
+
+
 import scala.util.Try
 
 object MatchServlet {
@@ -92,6 +95,30 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
         patched <- ZipFilePatcher.patchZipFile(zipBytes, nameChanges)
         replays <- SpyPartyZipParser.parseZipStream(patched)
       } yield replays
+    }
+  }
+
+  private def pairToBoutRecord(names: (String, String), week: Int, division: String) = {
+    new BoutRecord(null, week, division, names._1, names._2, 0, null, null, null, 0, null, null)
+  }
+
+  post("/create") {
+    val data = parsedBody.extract[NewMatchesInput]
+
+    val matchesToAdd = data.matchPairs
+    val allPlayers = PlayerDao.all().map(_.name).toSet
+    val requestedPlayers = matchesToAdd.flatMap{case (a, b) => List(a, b)}.toSet
+
+    val unknownPlayers = requestedPlayers -- allPlayers
+
+    if (unknownPlayers.nonEmpty) {
+      BadRequest(Map("error" -> "Unknown players", "detail" -> unknownPlayers.toList.sorted))
+    } else if (data.password != SclManagerConfig.sharedSecret) {
+      Unauthorized(Map("error" -> "Shared Secret Incorrect", "detail" -> "But all matches would have been persisted properly"))
+    } else {
+      val matchRecords = matchesToAdd.map(pairToBoutRecord(_, data.week, data.effectiveDivision))
+      val recordsCreated = dslContext.batchInsert(matchRecords.asJava).execute()
+      Map("message" -> s"created ${recordsCreated.length} matches")
     }
   }
 
