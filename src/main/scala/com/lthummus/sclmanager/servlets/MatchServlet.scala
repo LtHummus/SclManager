@@ -99,7 +99,7 @@ class MatchServlet(implicit dslContext: DSLContext, val swagger: Swagger) extend
   }
 
   private def pairToBoutRecord(names: (String, String), week: Int, division: String) = {
-    new BoutRecord(null, week, division, names._1, names._2, 0, null, null, null, 0, null, null)
+    new BoutRecord(null, week, division, names._1, names._2, 0, null, null, null, 1, null, null)
   }
 
   post("/create") {
